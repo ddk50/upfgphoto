@@ -1,2 +1,48 @@
-<h1>Photo#index</h1>
-<p>Find me in app/views/photo/index.html.erb</p>
+<% if logged_in? %>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#tab1" data-toggle="tab">写真</a></li>
+  <li><a href="#tab2" data-toggle="tab">アップロード</a></li>
+</ul>
+<div id="myTabContent" class="tab-content">
+  <div class="tab-pane fade in active" id="tab1">
+
+    <!-- タブ1 -->
+    <div class="list-group">
+      <% @employees.each do |employee| %>
+        <%= link_to(employee, class: 'list-group-item') do %>
+          <h4 class="lits-group-item-heading">          
+            <%= employee.nickname %>
+          </h4>
+          <p class="list-group-item-text">
+          <%= image_tag employee.image_url %>
+          </p>
+        <% end %>
+      <% end %>
+    </div>
+
+  </div>
+  <div class="tab-pane fade" id="tab2">
+    
+    <!-- タブ2 -->
+    <div class="panel panel-default">
+      
+      <!--
+      <div class="panel-heading">
+        アップロード
+      </div>
+      -->
+
+      <div class="panel-body">
+        <%= form_tag("photo/", {:multipart => true}) do |f| %>
+        <input name="target_file" type="file" />
+        <p class="help-block">複数JPGをZIPで固めてアップロードしてください。JPG単体には対応していません。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
+        <%= submit_tag("送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-default") %>
+        <% end %>
+      </div>
+    </div>
+    
+  </div>
+</div>
+<% else %>
+<h2>ログインしてください</h2>
+<% end %>

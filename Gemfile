@@ -43,3 +43,8 @@ gem 'therubyracer'
 gem 'omniauth'
 gem 'omniauth-twitter'
 
+gem 'exifr'
+##gem 'rubyzip'
+gem 'zip'
+## gem 'digest/sha1'
+## gem 'securerandom'
