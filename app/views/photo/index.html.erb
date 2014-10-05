@@ -9,7 +9,7 @@
     <!-- タブ1 -->
     <div class="list-group">
       <% @employees.each do |employee| %>
-        <%= link_to(employee, class: 'list-group-item') do %>
+        <%= link_to("employees/#{employee.id}", class: 'list-group-item') do %>
           <h4 class="lits-group-item-heading">          
             <%= employee.nickname %>
           </h4>

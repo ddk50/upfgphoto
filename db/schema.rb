@@ -11,17 +11,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141004092921) do
+ActiveRecord::Schema.define(version: 20141004112817) do
 
   create_table "employees", force: true do |t|
     t.string   "nickname"
     t.string   "provider"
     t.string   "image_url"
+    t.string   "uid",        null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "employees", ["provider"], name: "index_employees_on_provider", unique: true
+  add_index "employees", ["provider", "uid"], name: "index_employees_on_provider_and_uid", unique: true
+
+  create_table "photos", force: true do |t|
+    t.integer  "employee_id", null: false
+    t.string   "filepath"
+    t.datetime "shotdate"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "photos", ["shotdate"], name: "index_photos_on_shotdate"
 
   create_table "users", force: true do |t|
     t.string   "provider",   null: false

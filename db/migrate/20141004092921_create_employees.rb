@@ -5,9 +5,10 @@ class CreateEmployees < ActiveRecord::Migration
       t.string :provider
       t.string :nickname
       t.string :image_url
+      t.string :uid,        null: false
 
       t.timestamps
     end
-    add_index :employees, [:provider], unique: true
+    add_index :employees, [:provider, :uid], unique: true
   end
 end

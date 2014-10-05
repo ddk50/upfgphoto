@@ -7,11 +7,12 @@ class SessionsController < ApplicationController
     ##
     ## create an employee instance when logged in
     ##
-    employee = Employee.find_or_create_by(nickname: user.nickname)
+    employee = Employee.find_or_create_by(uid: user.uid)
     employee.update(nickname: user.nickname,
                     provider: user.provider,
                     nickname: user.nickname,
-                    image_url: user.image_url)
+                    image_url: user.image_url,
+                    uid: user.uid)
     
     redirect_to root_path, notice: 'ログインしました'
   end

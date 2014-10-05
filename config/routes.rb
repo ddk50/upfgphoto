@@ -1,7 +1,4 @@
 Rails.application.routes.draw do
-  root :to => 'photo#index'
-  get '/auth/:provider/callback' => 'sessions#create'
-  get '/logout' => 'sessions#destroy', as: :logout
   # get 'photo/index'
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -9,8 +6,18 @@ Rails.application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
-  post 'photo' => 'photo#upload'
 
+  root :to => 'photo#index'
+
+  get 'employees/index'
+  get 'employees/:id' => 'employees#show'
+
+  get '/auth/:provider/callback' => 'sessions#create'
+  get '/logout' => 'sessions#destroy', as: :logout
+
+  post 'photo' => 'photo#upload'
+  get 'photo/:id' => 'photo#show'
+  
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
