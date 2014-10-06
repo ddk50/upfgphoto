@@ -35,7 +35,7 @@
       <div class="panel-body">
         <%= form_tag("photo/", {:multipart => true}) do |f| %>
         <input name="target_file" type="file" />
-        <p class="help-block">複数JPGをZIPで固めてアップロードしてください。JPG単体には対応していません。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
+        <p class="help-block">JPGをZIPで固めてアップロードしてください。複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
         <%= submit_tag("送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-default") %>
         <% end %>
       </div>

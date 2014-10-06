@@ -62,7 +62,7 @@ class PhotoController < ApplicationController
           end
         }
       end
-      redirect_to root_path, notice: 'アップロード完了'
+      redirect_to root_path, notice: "アップロード完了 #{additions.size}個のファイルを追加"
     rescue => e
       additions.each{|path|
         File.delete(path)
