@@ -3,6 +3,8 @@ class EmployeesController < ApplicationController
   end
 
   def show
-    @photos = Photo.where(employee_id: current_employee.id)
+    id = params[:id]
+    @employee = Employee.find_by_id(id)
+    @photos   = Photo.where(employee_id: id)
   end
 end
