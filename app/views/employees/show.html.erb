@@ -14,10 +14,14 @@
      <% end %>
    </div>
  </div>
- <div class="btn-group btn-group-horizontal">
-   <% @pages_count.times do |i| %>
-     <%= link_to("#{i}", "/employees/#{@employee.id}/#{i}", class: "btn btn-default") %>
-   <% end %>
+
+ <div class="text-center">   
+   <ul class="pagination">
+     <% @pages_count.times do |i| %>
+         <li><%= link_to("#{i}", "/employees/#{@employee.id}/#{i}", class: "btn btn-default") %></li>
+     <% end %>
+   </ul>
  </div>
+
 </div>
 
