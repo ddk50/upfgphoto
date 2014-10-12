@@ -8,6 +8,10 @@ class PhotoController < ApplicationController
   def index
     @employees = Employee.all    
   end
+
+  def view
+    @photoid = params[:id].to_i
+  end
   
   def show
     photoid = params[:id]

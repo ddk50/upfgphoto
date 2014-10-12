@@ -1,22 +1,22 @@
- <div class="container">
-   <div class="row">
-     <div class="col-lg-12">
-       <h2 class="page-header"><%= @employee.nickname %>'s Image Gallery</h2>
-     </div>
-     <% @photos.each do |p| %>
-       <div class="col-lg-3 col-md-4 col-xs-6 thumb">
-         <%= link_to("/photo/#{p.id}", class: 'thumbnail') do %>
-           <!-- <img class="img-responsive" src="http://placehold.it/400x300" alt=""> -->
-           <%= image_tag("/photo/#{p.id}", class: "img-responsive", 
-               width: 400, height: 300) %>
-         <% end %>
-       </div>
-     <% end %>
-   </div>
- </div>
- <div class="btn-group btn-group-horizontal">
-   <% @pages_count.times do |i| %>
-     <%= link_to("#{i}", "/employees/#{@employee.id}/#{i}", class: "btn btn-default") %>
-   <% end %>
- </div>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header"><%= @employee.nickname %>'s Image Gallery</h2>
+    </div>
+    <% @photos.each do |p| %>
+    <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+      <%= link_to(photo_view_url(id: p.id), class: "thumbnail") do %>
+      <!-- <img class="img-responsive" src="http://placehold.it/400x300" alt=""> -->
+        <%= image_tag(photo_show_url(id: p.id), class: "img-responsive", 
+            width: 400, height: 300) %>
+      <% end %>
+    </div>
+    <% end %>
+  </div>
+</div>
+<div class="btn-group btn-group-horizontal">
+  <% @pages_count.times do |i| %>
+    <%= link_to(i, employees_page_url(id: @employee.id, page: i), class: "btn btn-default") %>
+  <% end %>
+</div>
 </div>

@@ -10,14 +10,15 @@ Rails.application.routes.draw do
   root :to => 'photo#index'
 
   get 'employees/index'
-  get 'employees/:id' => 'employees#show'
-  get 'employees/:id/:page' => 'employees#show'
+  get 'employees/:id' => 'employees#show', as: :employees
+  get 'employees/:id/:page' => 'employees#show', as: :employees_page
 
   get '/auth/:provider/callback' => 'sessions#create'
   get '/logout' => 'sessions#destroy', as: :logout
 
   post 'photo' => 'photo#upload'
-  get 'photo/:id' => 'photo#show'
+  get 'photo/:id' => 'photo#show', as: :photo_show
+  get 'photo/:id/view' => 'photo#view', as: :photo_view
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
