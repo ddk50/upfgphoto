@@ -1,5 +1,5 @@
 
-PAGE_WINDOW_SIZE = 10
+PAGE_WINDOW_SIZE = 9
 
 class EmployeesController < ApplicationController
   def index
