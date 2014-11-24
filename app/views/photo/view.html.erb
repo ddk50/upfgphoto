@@ -1,10 +1,35 @@
 <div class="container">
+  
   <div class="row">
-    <div class="col-lg-12">
-      <h2 class="page-header">写真<%= @photoid %></h2> 
-    </div>
-    <div class="col-lg-12">
-      <%= image_tag(photo_show_url(id: @photoid), class: "img-responsive") %>
+    <div class="col-md-12">
+      <h2 class="page-header">写真<%= @photoid %></h2>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-12">
+        <%= form_tag(photo_delete_url(id: @photoid), :method => :delete) do %>
+           <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
+           :class => "btn btn-danger") %>
+        <% end %>
+    </div>
+  </div>
+
+  <div class="row top15">
+    <div class="col-lg-12">
+      <%= image_tag(photo_show_url(id: @photoid), class: "img-responsive") %>      
+    </div>
+  </div>
+
+  <div class="row top10">
+    <div class="col-md-12">
+      <dl class="dl-horizontal">
+        <dt>アップロード者</dt>
+        <dd><%= @holdername%></dd>
+        <dt>写真撮影日時</dt>
+        <dd><%= @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") %></dd>
+      </dl>
+    </div>
+  </div>
+  
 </div>

@@ -18,7 +18,14 @@ Rails.application.routes.draw do
 
   post 'photo' => 'photo#upload'
   get 'photo/:id' => 'photo#show', as: :photo_show
+  get 'photo/:id/thumbnail' => 'photo#thumbnail', as: :photo_thumbnail
+  delete 'photo/:id' => 'photo#delete', as: :photo_delete
   get 'photo/:id/view' => 'photo#view', as: :photo_view
+  get 'photo/:id/download' => 'photo#download', as: :photo_download
+
+  post 'photo/delete/multiple' => 'photo#delete_multiple_items'
+  get 'photo/download/multiple' => 'photo#get_multiple_items'
+  get 'photo/download/zip/:fname' => 'photo#get_zip', as: :zip_download
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
