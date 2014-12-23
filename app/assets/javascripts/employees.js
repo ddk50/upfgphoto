@@ -1,5 +1,6 @@
 var ready;
 ready = function () {
+
     $("#deleteall").click(function() {
         var photoids= new Array();
         

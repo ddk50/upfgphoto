@@ -14,6 +14,8 @@ class PhotoController < ApplicationController
     @photoid    = params[:id].to_i
     @photo      = Photo.find_by_id(@photoid)
     @holdername = @photo.employee.nickname    
+    @tags       = Tag2photo.where(photo_id: @photoid)
+    logger.debug(sprintf("############### GET_TAG (%s) ###############", @tags.size ))
   end
   
   def show
@@ -48,9 +50,9 @@ class PhotoController < ApplicationController
     if not (photo.employee_id == current_employee.id)
       redirect_to employees_url(current_employee.id), notice: "他人の写真は削除できません"
     else
+      photo.destroy
       delete_thumbnail(photo.id)
       File.delete(photo.filepath)
-      photo.delete
       redirect_to employees_url(current_employee.id), notice: "写真#{photoid}を削除"
     end    
   end
@@ -60,14 +62,25 @@ class PhotoController < ApplicationController
     photos = params[:items_ids]
     err = nil
     msg = nil
+    reserve = 0
+    deleted = 0
     begin
       ActiveRecord::Base.transaction do
         photos.each{|id|
-          p = Photo.find_by_id(id.to_i)
-          p.delete
+          p = Photo.find_by_id(id.to_i)          
+          if not p.employee.id != current_employee.id
+            p.destroy
+            deleted = deleted + 1
+          else
+            reserve = reserve + 1
+          end
         }
       end
-      msg = "#{photos.size}個のファイルを削除"
+      if reserve > 0
+        msg = "#{deleted}個のファイルを削除、#{reserve}個のファイルを保留。他人の写真を削除しようとした可能性があります"
+      else
+        msg = "#{deleted}個のファイルを削除"
+      end
     rescue => e
       msg = "トランザクションエラー"
       err = true
@@ -158,10 +171,19 @@ class PhotoController < ApplicationController
 
   def upload
     f = params[:target_file]
-    @original_filename = f.original_filename # ファイル名
+
+    if f == nil
+      redirect_to root_path, notice: "アップロードするファイルを指定してください"
+      return
+    end
+
+    @original_filename = f.original_filename # filename
     @content_type = f.content_type           # Content-Type
-    @size = f.size                           # ファイルサイズ
-    @read = f.read                           # ファイルの内容
+    @size = f.size                           # filesize
+    @read = f.read                           # file content
+    tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
+    
+    logger.debug("#################### UPLOAD TAGS #{tags} ####################")
 
     ##
     ## File.open(Rails.root + '/tmp/files/' + @original_filename, 'wb') do |f|
@@ -184,7 +206,7 @@ class PhotoController < ApplicationController
         Dir.glob(tmppath + "/*").each {|f|
           shotdatetime = getshottime(f.to_s)
           if shotdatetime                      
-            
+            p
             newphoto = Photo.new(employee_id: current_employee.id)
             newphoto.save
             
@@ -196,7 +218,13 @@ class PhotoController < ApplicationController
 
             newphoto.filepath = tmp
             newphoto.shotdate = shotdatetime.to_datetime
-            newphoto.save
+            newphoto.save            
+
+            tags.each{|tagname|
+              tagid = update_or_create_tag(tagname)
+              t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
+              t.save
+            }            
           end
         }
       end
@@ -258,6 +286,13 @@ class PhotoController < ApplicationController
     else
       File.delete(delthem)
     end
+  end
+
+  def update_or_create_tag(tagname)
+    tag = Tag.find_or_initialize_by(name: tagname);
+    tag.name = tagname;
+    tag.save!
+    return tag.id
   end
 
   public

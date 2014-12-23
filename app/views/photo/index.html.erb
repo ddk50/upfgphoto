@@ -1,7 +1,16 @@
 <% if logged_in? %>
+
+<div class="tags-cloud glassy-bg">
+  <h4>最近のトレンド</h4>
+  <% tag_cloud(Tag.counts, %w{css1 css2 css3 css4}) do |tag, css_class| %>
+    <%= link_to tag.name, tagphoto_url(tag: tag.name), class: css_class %>
+  <% end %>
+</div>
+
 <ul class="nav nav-tabs">
-  <li class="active"><a href="#tab1" data-toggle="tab">写真</a></li>
-  <li><a href="#tab2" data-toggle="tab">アップロード</a></li>
+  <li class="active"><a href="#tab1" data-toggle="tab">メンバー</a></li>
+  <li><a href="#tab2" data-toggle="tab">ZIPでアップロード</a></li>
+  <li><a href="#tab3" data-toggle="tab">写真検索</a></li>
 </ul>
 <div id="myTabContent" class="tab-content">
   <div class="tab-pane fade in active" id="tab1">
@@ -21,6 +30,7 @@
     </div>
 
   </div>
+  
   <div class="tab-pane fade" id="tab2">
     
     <!-- タブ2 -->
@@ -34,14 +44,47 @@
 
       <div class="panel-body">
         <%= form_tag("photo/", {:multipart => true}) do |f| %>
-        <input name="target_file" type="file" />
-        <p class="help-block">JPGをZIPで固めてアップロードしてください。複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
-        <%= submit_tag("送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-default") %>
-        <% end %>
+        <form class="form-horizontal" role="form">
+          
+          <div class="form-group">
+            <p class="control-label"><b>タグ</b></p>
+            <div id="bloodhound">
+              <div class="input-group">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button">タグを追加</button>
+                </span>
+                <input id="bloodhoundtextbox" type="text" class="form-control">
+              </div><!-- /input-group -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div id="phototags">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <p class="control-label"><b>最近使われたタグ</b></p>
+            <div id="recentusephototags">
+              
+            </div>
+          </div>
+
+          <div class="form-group">
+            <p class="control-label"><b>ファイル</b></p>
+            <input name="target_file" type="file" />
+            <p class="help-block"><B>JPGをZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
+            <%= submit_tag("送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-default") %>
+          </div>
       </div>
-    </div>
+      <% end %>
+    </div>    
+  </div>
+
+  <div class="tab-pane fade" id="tab3">
     
   </div>
+
 </div>
 <% else %>
 <h2>ログインしてください</h2>

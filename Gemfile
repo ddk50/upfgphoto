@@ -50,3 +50,6 @@ gem 'zip'
 ## gem 'securerandom'
 
 gem 'rmagick', :require => 'RMagick'
+
+
+

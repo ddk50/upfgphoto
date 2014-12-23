@@ -27,6 +27,11 @@ Rails.application.routes.draw do
   get 'photo/download/multiple' => 'photo#get_multiple_items'
   get 'photo/download/zip/:fname' => 'photo#get_zip', as: :zip_download
   
+  get 'tags' => 'tags#gettags'
+  get 'hottags' => 'tags#hottags'
+
+  get 'tags/:tag' => 'tags#show', as: :tagphoto
+  get 'tags/:tag/:page' => 'tags#show', as: :tagphoto_page
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
