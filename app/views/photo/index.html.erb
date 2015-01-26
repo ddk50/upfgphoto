@@ -1,167 +1,167 @@
 <% if logged_in? %>
 
-<div class="tags-cloud glassy-bg">
-  <h4>最近のトレンド</h4>
-  <% tag_cloud(Tag.counts, %w{css1 css2 css3 css4}) do |tag, css_class| %>
-    <%= link_to tag.name, tagphoto_url(tag: tag.name), class: css_class %>
-  <% end %>
-</div>
-
-<ul class="nav nav-tabs">
-  <li class="active"><a href="#tab1" data-toggle="tab">メンバー</a></li> <!-- タブ1 -->
-  <li><a href="#tab2" data-toggle="tab">JPGでアップロード</a></li> <!-- タブ2 -->
-  <li><a href="#tab3" data-toggle="tab">ZIPでアップロード</a></li> <!-- タブ3 -->
-</ul>
-<div id="myTabContent" class="tab-content">
-  
-  <div class="tab-pane fade in active" id="tab1">
-    <!-- タブ1 -->
-    <div class="list-group">
-      <% @employees.each do |employee| %>
-        <%= link_to("employees/#{employee.id}", class: 'list-group-item') do %>
-          <h4 class="lits-group-item-heading">          
-            <%= employee.nickname %> <<%= employee.name %>>
-          </h4>
-          <p class="list-group-item-text">
-            <%= image_tag employee.image_url %>
-	    <%= employee.description %>
-          </p>
-        <% end %>
-      <% end %>
-    </div>
+  <div class="tags-cloud glassy-bg">
+    <h4>最近のトレンド</h4>
+    <% tag_cloud(Tag.counts, %w{css1 css2 css3 css4}) do |tag, css_class| %>
+      <%= link_to tag.name, tagphoto_url(tag: tag.name), class: css_class %>
+    <% end %>
   </div>
 
-  <div class="tab-pane fade" id="tab2">
-    <!-- タブ2 -->
-    <div class="panel panel-default">
-      <div class="panel-body">
-
-        <%= form_tag(photo_upload_jpg_path, {:multipart => true}) do |f| %>
-        <form class="form-horizontal" role="form">
-          
-          <div class="form-group">
-            <p class="control-label"><b>タグ</b></p>
-            <div id="bloodhoundjpg">
-              <div class="input-group">
-                <span class="input-group-btn">
-                  <button class="btn btn-default" type="button">タグを追加</button>
-                </span>
-                <input id="bloodhoundtextboxjpg" type="text" class="form-control">
-              </div><!-- /input-group -->
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div id="phototagsjpg">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <p class="control-label"><b>最近使われたタグ</b></p>
-            <div id="recentusephototagsjpg">
-              
-            </div>
-          </div>
-
-          <div class="form-group">
-            <p class="control-label"><b>ファイル</b></p>
-	    <!--            <input name="target_file" type="file" />-->
-
-	    <input type="file" id="target_file_jpg" name="target_file_jpg" style="display: none;">
-	    <div style="width:40%;float:left;margin-right:10px;" class="input-group">
-	      <span class="input-group-btn">
-		<button class="btn btn-default" type="button" onclick="$('#target_file_jpg').click();">
-		  <i class="glyphicon glyphicon-folder-open"></i>
-		</button>
-	      </span>
-	      <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
-	    </div>
-	    <!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
-	    <script type="text/javascript">
-	      $(function(){
-	          $('#target_file_jpg').change(function() {
-                      $('#dummy_file').val($(this).val());
-	          });
-	      });
-	    </script>
-            <p class="help-block"><B>JPGファイルを指定してください</B></p>
-	  </div>	  
-	  
-          <div class="form-group">
-            <%= submit_tag("JPGを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
-	  </div>
-	  
-      </div>
-      <% end %>
-    </div>
-  </div>
-  
-  
-  <div class="tab-pane fade" id="tab3">    
-    <!-- タブ3 -->
-    <div class="panel panel-default">      
-      <div class="panel-body">
-        <%= form_tag("photo/", {:multipart => true}) do |f| %>
-        <form class="form-horizontal" role="form">
-          
-          <div class="form-group">
-            <p class="control-label"><b>タグ</b></p>
-            <div id="bloodhoundzip">
-              <div class="input-group">
-                <span class="input-group-btn">
-                  <button class="btn btn-default" type="button">タグを追加</button>
-                </span>
-                <input id="bloodhoundtextboxzip" type="text" class="form-control">
-              </div><!-- /input-group -->
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div id="phototagszip">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <p class="control-label"><b>最近使われたタグ</b></p>
-            <div id="recentusephototagszip">
-              
-            </div>
-          </div>
-
-          <div class="form-group">
-            <p class="control-label"><b>ファイル</b></p>
-	    <!--            <input name="target_file" type="file" />-->
-
-	    <input type="file" id="target_file_zip" name="target_file_zip" style="display: none;">
-	    <div style="width:40%;float:left;margin-right:10px;" class="input-group">
-	      <span class="input-group-btn">
-		<button class="btn btn-default" type="button" onclick="$('#target_file_zip').click();">
-		  <i class="glyphicon glyphicon-folder-open"></i>
-		</button>
-	      </span>
-	      <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
-	    </div>
-	    <!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
-	    <script type="text/javascript">
-	      $(function(){
-	          $('#target_file_zip').change(function() {
-                      $('#dummy_file').val($(this).val());
-	          });
-	      });
-	    </script>
-	  </div>
-          <p class="help-block"><B>JPGをZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
-          <%= submit_tag("ZIPを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
-      </div>
-      <% end %>
-    </div>    
-  </div>
-
-  <div class="tab-pane fade" id="tab3">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#tab1" data-toggle="tab">メンバー</a></li> <!-- タブ1 -->
+    <li><a href="#tab2" data-toggle="tab">JPGでアップロード</a></li> <!-- タブ2 -->
+    <li><a href="#tab3" data-toggle="tab">ZIPでアップロード</a></li> <!-- タブ3 -->
+  </ul>
+  <div id="myTabContent" class="tab-content">
     
-  </div>
+    <div class="tab-pane fade in active" id="tab1">
+      <!-- タブ1 -->
+      <div class="list-group">
+	<% @employees.each do |employee| %>
+          <%= link_to("employees/#{employee.id}", class: 'list-group-item') do %>
+            <h4 class="lits-group-item-heading">          
+              <%= employee.nickname %> <%= employee.name %>
+            </h4>
+            <p class="list-group-item-text">
+              <%= image_tag employee.image_url %>
+	      <%= employee.description %>
+            </p>
+          <% end %>
+	<% end %>
+      </div>
+    </div>
 
-</div>
+    <div class="tab-pane fade" id="tab2">
+      <!-- タブ2 -->
+      <div class="panel panel-default">
+	<div class="panel-body">
+
+          <%= form_tag(photo_upload_jpg_path, {:multipart => true}) do |f| %>
+            <form class="form-horizontal" role="form">
+              
+              <div class="form-group">
+		<p class="control-label"><b>タグ</b></p>
+		<div id="bloodhoundjpg">
+		  <div class="input-group">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">タグを追加</button>
+                    </span>
+                    <input id="bloodhoundtextboxjpg" type="text" class="form-control">
+		  </div><!-- /input-group -->
+		</div>
+              </div>
+
+              <div class="form-group">
+		<div id="phototagsjpg">
+		</div>
+              </div>
+
+              <div class="form-group">
+		<p class="control-label"><b>最近使われたタグ</b></p>
+		<div id="recentusephototagsjpg">
+		  
+		</div>
+              </div>
+
+              <div class="form-group">
+		<p class="control-label"><b>ファイル</b></p>
+		<!--            <input name="target_file" type="file" />-->
+
+		<input type="file" id="target_file_jpg" name="target_file_jpg" style="display: none;">
+		<div style="width:40%;float:left;margin-right:10px;" class="input-group">
+		  <span class="input-group-btn">
+		    <button class="btn btn-default" type="button" onclick="$('#target_file_jpg').click();">
+		      <i class="glyphicon glyphicon-folder-open"></i>
+		    </button>
+		  </span>
+		  <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+		</div>
+		<!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
+		<script type="text/javascript">
+		  $(function(){
+	          $('#target_file_jpg').change(function() {
+                  $('#dummy_file').val($(this).val());
+	          });
+		  });
+		</script>
+		<p class="help-block"><B>JPGファイルを指定してください</B></p>
+	      </div>	  
+	      
+              <div class="form-group">
+		<%= submit_tag("JPGを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
+	      </div>
+	      
+	</div>
+	<% end %>
+      </div>
+    </div>
+    
+    
+    <div class="tab-pane fade" id="tab3">    
+      <!-- タブ3 -->
+      <div class="panel panel-default">      
+	<div class="panel-body">
+          <%= form_tag("photo/", {:multipart => true}) do |f| %>
+            <form class="form-horizontal" role="form">
+              
+              <div class="form-group">
+		<p class="control-label"><b>タグ</b></p>
+		<div id="bloodhoundzip">
+		  <div class="input-group">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">タグを追加</button>
+                    </span>
+                    <input id="bloodhoundtextboxzip" type="text" class="form-control">
+		  </div><!-- /input-group -->
+		</div>
+              </div>
+
+              <div class="form-group">
+		<div id="phototagszip">
+		</div>
+              </div>
+
+              <div class="form-group">
+		<p class="control-label"><b>最近使われたタグ</b></p>
+		<div id="recentusephototagszip">
+		  
+		</div>
+              </div>
+
+              <div class="form-group">
+		<p class="control-label"><b>ファイル</b></p>
+		<!--            <input name="target_file" type="file" />-->
+
+		<input type="file" id="target_file_zip" name="target_file_zip" style="display: none;">
+		<div style="width:40%;float:left;margin-right:10px;" class="input-group">
+		  <span class="input-group-btn">
+		    <button class="btn btn-default" type="button" onclick="$('#target_file_zip').click();">
+		      <i class="glyphicon glyphicon-folder-open"></i>
+		    </button>
+		  </span>
+		  <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+		</div>
+		<!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
+		<script type="text/javascript">
+		  $(function(){
+	          $('#target_file_zip').change(function() {
+                  $('#dummy_file').val($(this).val());
+	          });
+		  });
+		</script>
+	      </div>
+              <p class="help-block"><B>JPGをZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
+              <%= submit_tag("ZIPを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
+	</div>
+	<% end %>
+      </div>    
+    </div>
+
+    <div class="tab-pane fade" id="tab3">
+      
+    </div>
+
+  </div>
 <% else %>
-<h2>ログインしてください</h2>
+  <h2>ログインしてください</h2>
 <% end %>
