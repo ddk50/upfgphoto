@@ -240,12 +240,8 @@ class PhotoController < ApplicationController
           newphoto.save
           
           tmp = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
-
-          shotdatetime = getshottime(file.to_s)
-
-          newphoto.filepath = tmp
-          newphoto.shotdate = shotdatetime != nil ? shotdatetime.to_datetime : Time.now.to_datetime
-          newphoto.save
+          
+          set_and_save_photo_exif(newphoto, file.to_s, tmp)
 
           FileUtils.mv(file.to_s, tmp)
           additions << [tmp, newphoto.id]
@@ -302,13 +298,9 @@ class PhotoController < ApplicationController
         newphoto = Photo.new(employee_id: current_employee.id)
         newphoto.save
 
-        spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
+        spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"      
 
-        shotdatetime = getshottime(tmpfullpath)
-        
-        newphoto.filepath = spool_path
-        newphoto.shotdate = shotdatetime != nil ? shotdatetime.to_datetime : Time.now.to_datetime
-        newphoto.save            
+        set_and_save_photo_exif(newphoto, tmpfullpath, spool_path)
 
         tags.each{|tagname|
           tagid = update_or_create_tag(tagname)
@@ -336,6 +328,33 @@ class PhotoController < ApplicationController
   ## private
   ##
   private
+  def set_and_save_photo_exif(newphoto, jpgpath, spool_path)
+    begin
+      exif = EXIFR::JPEG.new(jpgpath)
+      newphoto.filepath      = spool_path
+      newphoto.shotdate      = exif.date_time_original != nil ? exif.date_time_original.to_datetime : nil
+      newphoto.model         = exif.model
+      newphoto.exposure_time = exif.exposure_time.to_s
+      newphoto.f_number      = exif.f_number.to_f.to_s
+      newphoto.focal_length  = exif.focal_length.to_i
+      newphoto.focal_length_in_35mm_film = exif.focal_length_in_35mm_film.to_i
+      newphoto.iso_speed_ratings = exif.iso_speed_ratings
+      newphoto.update_date_time = exif.date_time != nil ? exif.date_time.to_datetime : nil
+    rescue EXIFR::MalformedJPEG
+      newphoto.filepath      = spool_path
+      newphoto.shotdate      = nil
+      newphoto.model         = nil
+      newphoto.exposure_time = nil
+      newphoto.f_number      = nil
+      newphoto.focal_length  = nil
+      newphoto.focal_length_in_35mm_film = nil
+      newphoto.iso_speed_ratings = nil
+      newphoto.update_date_time = nil
+    end
+      
+    newphoto.save 
+  end
+
   #output_path:: 展開先ディレクトリ 
   def extract(src_path, output_path)
     i = 0
@@ -355,14 +374,14 @@ class PhotoController < ApplicationController
     end
   end
 
-  def getshottime(path)
-    begin
-      exif = EXIFR::JPEG.new(path)
-      return exif.date_time_original
-    rescue EXIFR::MalformedJPEG
-      return nil
-    end
-  end
+  # def getshottime(path)
+  #   begin
+  #     exif = EXIFR::JPEG.new(path)
+  #     return exif.date_time_original
+  #   rescue EXIFR::MalformedJPEG
+  #     return nil
+  #   end
+  # end
 
   def photo_img_url(id)
     "/photo/#{id}"

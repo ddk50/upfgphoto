@@ -21,7 +21,21 @@
         <dt>アップロード者</dt>
         <dd><%= link_to(@holdername, employees_url(id: @photo.employee.id)) %></dd>
         <dt>写真撮影日時</dt>
-        <dd><%= @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") %></dd>
+        <dd><%= @photo.shotdate ? @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
+        <dt>モデル</dt>
+	<dd><%= @photo.model %></dd>
+	<dt>露光時間</dt>
+	<dd><%= @photo.exposure_time %></dd>	
+	<dt>f値</dt>
+	<dd><%= @photo.f_number %></dd>	
+	<dt>焦点距離</dt>
+	<dd><%= @photo.focal_length %></dd>
+	<dt>35mm換算での焦点距離</dt>
+	<dd><%= @photo.focal_length_in_35mm_film %></dd>
+	<dt>ISO感度</dt>
+	<dd><%= @photo.iso_speed_ratings %></dd>
+	<dt>写真編集日時</dt>
+	<dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
       </dl>
       <ul class="list-inline">
         <% @tags.each do |t| %>
