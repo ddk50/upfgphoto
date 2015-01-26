@@ -23,9 +23,9 @@
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav nabvar-nav navbar-right">
           <% if logged_in? %>
-          <li><%= link_to 'ログアウト', logout_path %></li>
+            <li><%= link_to 'ログアウト', logout_path %></li>
           <% else %>
-          <li><%= link_to 'Twitterでログイン', '/auth/twitter' %></li>
+            <li><%= link_to 'Twitterでログイン', '/auth/twitter' %></li>
           <% end %>
         </ul>
       </div>

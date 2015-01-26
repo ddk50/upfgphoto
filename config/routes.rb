@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
   get 'employees/index'
   get 'employees/:id' => 'employees#show', as: :employees
-  get 'employees/:id/:page' => 'employees#show', as: :employees_page
+##  get 'employees/:id/:page' => 'employees#show', as: :employees_page
 
   get '/auth/:provider/callback' => 'sessions#create'
   get '/logout' => 'sessions#destroy', as: :logout
