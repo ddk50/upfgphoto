@@ -4,10 +4,14 @@ class User < ActiveRecord::Base
     uid       = auth_hash[:uid]
     nickname  = auth_hash[:info][:nickname]
     image_url = auth_hash[:info][:image]
+    description = auth_hash[:info][:description]
+    name        = auth_hash[:info][:name]
 
     User.find_or_create_by(provider: provider, uid: uid) do |user|
-      user.nickname  = nickname
-      user.image_url = image_url
+      user.nickname    = nickname
+      user.image_url   = image_url
+      user.description = description
+      user.name        = name
     end
   end
 end

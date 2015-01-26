@@ -17,7 +17,9 @@ ActiveRecord::Schema.define(version: 20141205082713) do
     t.string   "nickname"
     t.string   "provider"
     t.string   "image_url"
-    t.string   "uid",        null: false
+    t.string   "uid",         null: false
+    t.text     "description"
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -59,10 +61,12 @@ ActiveRecord::Schema.define(version: 20141205082713) do
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true
 
   create_table "users", force: true do |t|
-    t.string   "provider",   null: false
-    t.string   "uid",        null: false
-    t.string   "nickname",   null: false
-    t.string   "image_url",  null: false
+    t.string   "provider",    null: false
+    t.string   "uid",         null: false
+    t.string   "nickname",    null: false
+    t.string   "image_url",   null: false
+    t.text     "description"
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -20,10 +20,11 @@
       <% @employees.each do |employee| %>
         <%= link_to("employees/#{employee.id}", class: 'list-group-item') do %>
           <h4 class="lits-group-item-heading">          
-            <%= employee.nickname %>
+            <%= employee.nickname %> <<%= employee.name %>>
           </h4>
           <p class="list-group-item-text">
             <%= image_tag employee.image_url %>
+	    <%= employee.description %>
           </p>
         <% end %>
       <% end %>
