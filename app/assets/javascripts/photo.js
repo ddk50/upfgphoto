@@ -21,14 +21,19 @@ ready = function() {
     
     engine.initialize();
     
-    $('#bloodhound .form-control').typeahead(null, {
-        name:'stations',
+    $('#bloodhoundjpg .form-control').typeahead(null, {
+        name:'bloodhoundjpg',
         source: engine.ttAdapter()
     })
 
-    function onClickTagBtn() {
-        container = $('#phototags');        
-        name = $('#bloodhoundtextbox').val();
+    $('#bloodhoundzip .form-control').typeahead(null, {
+        name:'bloodhoundzip',
+        source: engine.ttAdapter()
+    })
+
+    function onClickTagBtn(phototagsid, bloodhoundtextboxid, bloodhoundid) {
+        container = $(phototagsid); //phototagsjpg or phototagszip
+        name = $(bloodhoundtextboxid).val(); //bloodhoundtextboxjpg
 
         if (name.length == 0) {
             return;
@@ -55,70 +60,113 @@ ready = function() {
                              value:   name,
                            }).prependTo($('#checkboxlabel'+id));
 
-            $('label[for="forcheckboxlabel'+id+'"]').wrapInner('<a href="tags/'+name+'" target="_blank"><a/>');
+            $(phototagsid + ' label[for="forcheckboxlabel'+id+'"]').wrapInner('<a href="tags/'+name+'" target="_blank"><a/>');
             
             insetedTags.push(name);
-            $('#bloodhoundtextbox').val("");
+            $(bloodhoundtextboxid).val("");
 
-            $('label').click(function(e){ // or $('label a').click(function(e){
-                e.stopPropagation()
-            })
+            // $(phototagsid + ' label').click(function(e){
+            //     e.stopPropagation()
+            // })
+
+            $(phototagsid + ' input').click(function(e){
+	    	e.preventDefault();
+	    	var that = this;    
+	    	setTimeout(function() { that.checked = !that.checked; }, 1);
+            });
             
         }        
     }
 
-    $('#bloodhound :button').click(function() {        
-        onClickTagBtn();
-    });
+    function bloodhoundforjpg() {
+	$("#bloodhoundjpg" + ' :button').click(function() {
+            onClickTagBtn('#phototagsjpg', '#bloodhoundtextboxjpg', '#bloodhoundjpg');
+	});
+	$("#bloodhoundjpg :input[type=text]").keypress(function(ev) {
+            if ((ev.which && ev.which === 13) ||
+		(ev.keyCode && ev.keyCode === 13)) {
+		onClickTagBtn('#phototagsjpg', '#bloodhoundtextboxjpg', '#bloodhoundjpg');
+		return false;
+            } else {
+		return true;
+            }
+	});
+    }
 
-    $("input[type=text]").keypress(function(ev) {
-        if ((ev.which && ev.which === 13) ||
-            (ev.keyCode && ev.keyCode === 13)) {
-            onClickTagBtn();
-            return false;
-        } else {
-            return true;
-        }
-    });
+    function bloodhoundforzip() {
+	$("#bloodhoundzip" + ' :button').click(function() {
+            onClickTagBtn('#phototagszip', '#bloodhoundtextboxzip', '#bloodhoundzip');
+	});
+	$("#bloodhoundzip :input[type=text]").keypress(function(ev) {
+            if ((ev.which && ev.which === 13) ||
+		(ev.keyCode && ev.keyCode === 13)) {
+		onClickTagBtn('#phototagszip', '#bloodhoundtextboxzip', '#bloodhoundzip');
+		return false;
+            } else {
+		return true;
+            }
+	});
+    }
+
+    bloodhoundforjpg();
+    bloodhoundforzip();
     //
     // End tag autocomplete logic
     //
 
 
+    function gethottag(recentusephototagsid) {
+	$.ajax({
+            type: "GET",
+            url: "/hottags.json",
+            dataType: "json",            
+            success: function(response) {
+		container = $(recentusephototagsid);
+		response.map(function(x) { 
+                    id = gId = gId + 1;            
+                    $('<label />', { id:    'checkboxlabel'+id, 
+                                     for:   'forcheckboxlabel'+id,
+                                     class: 'checkbox-inline',
+                                     text:   x
+				   }).appendTo(container);
+
+                    $('<input />', { type:    'checkbox', 
+                                     id:      'checkbox'+id, 
+                                     checked: false,
+                                     name:    'tags[]',
+                                     value:   x
+				   }).prependTo($('#checkboxlabel'+id))
+
+                    $(recentusephototagsid + ' label[for="forcheckboxlabel'+id+'"]').wrapInner('<a href="tags/'+x+'" target="_blank"><a/>');
+		});
+
+//		$(recentusephototagsid + ' input').click(function(e){
+//                    e.stopPropagation()
+//		})
+
+//		$('label').click(function(e){
+//                    e.stopPropagation()
+//		})
+
+//		$(recentusephototagsid).find('input').bind('click', function(e) {
+//		    e.stopPropagation();
+//		});
+
+		$(recentusephototagsid + ' input').click(function(e){
+		    e.preventDefault();
+		    var that = this;    
+		    setTimeout(function() { that.checked = !that.checked; }, 1);
+		});
+
+            },
+            error: function(response) {
+            }
+	});
+    }
+
+    gethottag('#recentusephototagsjpg');
+    gethottag('#recentusephototagszip');
     
-    $.ajax({
-        type: "GET",
-        url: "hottags.json",
-        dataType: "json",
-        
-        success: function(response) {
-            container = $('#recentusephototags');
-            response.map(function(x) { 
-                id = gId = gId + 1;            
-                $('<label />', { id:    'checkboxlabel'+id, 
-                                 for:   'forcheckboxlabel'+id,
-                                 class: 'checkbox-inline',
-                                 text:   x
-                               }).appendTo(container);
-
-                $('<input />', { type:    'checkbox', 
-                                 id:      'checkbox'+id, 
-                                 checked: false,
-                                 name:    'tags[]',
-                                 value:   x
-                               }).prependTo($('#checkboxlabel'+id))
-
-                $('label[for="forcheckboxlabel'+id+'"]').wrapInner('<a href="tags/'+x+'" target="_blank"><a/>');
-            });
-
-            $('label').click(function(e){ // or $('label a').click(function(e){
-                e.stopPropagation()
-            })
-        },
-
-        error: function(response) {
-        }
-    });
 }
 
 $(document).ready(ready)

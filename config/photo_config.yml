@@ -1,0 +1,17 @@
+development:
+  download_tmp_path: '/tmp/files'
+  spool_dir: '/mnt/upfgphotos/dev'
+  photo_resie_rate: 0.1
+  page_window_size: 9
+
+test:
+  download_tmp_path: '/tmp/files'
+  spool_dir: '/mnt/upfgphotos/test'
+  photo_resie_rate: 0.1
+  page_window_size: 9
+
+production:
+  download_tmp_path: '/tmp/files'
+  spool_dir: '/mnt/upfgphotos/prod'
+  photo_resie_rate: 0.1
+  page_window_size: 9

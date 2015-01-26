@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   get '/logout' => 'sessions#destroy', as: :logout
 
   post 'photo' => 'photo#upload'
+  post 'photo_jpg' => 'photo#uploadjpg', as: :photo_upload_jpg
   get 'photo/:id' => 'photo#show', as: :photo_show
   get 'photo/:id/thumbnail' => 'photo#thumbnail', as: :photo_thumbnail
   delete 'photo/:id' => 'photo#delete', as: :photo_delete

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-PAGE_WINDOW_SIZE = 9
+# PAGE_WINDOW_SIZE = 9
 
 class TagsController < ApplicationController
 
@@ -10,7 +10,7 @@ class TagsController < ApplicationController
     
     tag_id = Tag.find_by_name(tagname);
     @tagname = tagname
-    photos = Tag2photo.where(tag_id: tag_id).offset(page * PAGE_WINDOW_SIZE).limit(PAGE_WINDOW_SIZE).reverse_order
+    photos = Tag2photo.where(tag_id: tag_id).offset(page * PHOTO_CONFIG['page_window_size']).limit(PHOTO_CONFIG['page_window_size']).order('photos.shotdate DESC')
 
     ##
     ## tagとの参照関係はのこってるけど、photoとの参照関係が    
@@ -23,10 +23,10 @@ class TagsController < ApplicationController
       end
     }
     
-    @photo_count = Tag2photo.where(tag_id: tag_id).size
-    @pages_count = (@photo_count % PAGE_WINDOW_SIZE) > 0 ? 
-                   ((@photo_count / PAGE_WINDOW_SIZE) + 1) : 
-                   @photo_count / PAGE_WINDOW_SIZE
+    @photo_count = @photos.size
+    @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
+                   ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
+                   @photo_count / PHOTO_CONFIG['page_window_size']
   end
 
   def gettags

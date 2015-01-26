@@ -51,5 +51,16 @@ gem 'zip'
 
 gem 'rmagick', :require => 'RMagick'
 
+group :development, :test do
+   gem 'rspec-rails', '3.0.0'
+   gem 'factory_girl_rails', '~> 4.4.1'
+   gem 'database_cleaner'
+end
 
+group :test do
+   gem 'shoulda-matchers', '~> 2.6.0'
+   gem 'capybara', '~> 2.2.1'
+   gem 'spork'
+   gem 'database_cleaner'
+end
 

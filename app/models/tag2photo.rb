@@ -8,4 +8,6 @@ class Tag2photo < ActiveRecord::Base
   belongs_to :photo
 
   validates_uniqueness_of :photo_id, :scope => [:tag_id]
+
+  default_scope { includes(:photo) }
 end
