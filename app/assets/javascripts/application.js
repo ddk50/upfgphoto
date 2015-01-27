@@ -15,4 +15,5 @@
 //= require turbolinks
 //= require bootstrap.min
 //= require typeahead.bundle
+//= require bootstrap-datepicker
 //= require_tree .

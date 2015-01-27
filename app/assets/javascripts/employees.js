@@ -1,5 +1,39 @@
 var ready;
 ready = function () {
+    
+    $('#date-pickere-container .input-daterange').datepicker({
+	format: 'yyyy-mm-dd'
+    });    
+
+    $("#searchbydatebtn").click(function() {
+	var start = $("#start").val();
+	var end   = $("#end").val();
+
+	if (!(start && end)) {
+	    return;
+	}
+
+	var params = getParameter();
+	var withoutParamurl = window.location.href.split('?')[0];
+	var newparamstr = "?";
+
+	params["start"] = start;
+	params["end"]   = end;
+	
+	var first = 1;
+	for (var i in params) {
+	    if (first) {
+		newparamstr += i + "=" + params[i];
+		first = 0;
+	    } else {
+		newparamstr += "&" + i + "=" + params[i];
+	    }
+	}
+	if (first) {
+	    newparamstr = "";
+	}
+	window.location = withoutParamurl + newparamstr;
+    });
 
     $("#deleteall").click(function() {
         var photoids= new Array();
@@ -77,6 +111,17 @@ function enable_btn(id, msg)
 {
     $(id).attr('value', msg).attr('disabled', false);
     $(id).closest('form').submit();
+}
+
+function getParameter()
+{
+    var arg  = {}
+    var pair = location.search.substring(1).split('&');
+    for(i = 0 ; pair[i] ; i++) {
+	var kv = pair[i].split('=');
+	arg[kv[0]] = kv[1];
+    }
+    return arg;
 }
 
 $(document).ready(ready)
