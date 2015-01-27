@@ -9,7 +9,9 @@
     <div class="col-md-8">
       <div class="form-inline form-group">
         <%= submit_tag("ダウンロード", :class => "btn btn-primary", :id => "downloadall") %>
-        <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
+	<% if current_employee.id == @employee.id %>
+          <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
+	<% end %>
       </div>
     </div>
 
