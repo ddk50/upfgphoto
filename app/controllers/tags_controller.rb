@@ -4,6 +4,8 @@
 
 class TagsController < ApplicationController
 
+  before_action :authenticate_user!
+
   def show
     tagname = params[:tag]
     page = params[:page] == nil ? 0 : params[:page].to_i

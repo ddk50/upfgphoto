@@ -7,6 +7,8 @@
 class InvalidFileFormat < StandardError; end
 
 class PhotoController < ApplicationController
+
+  before_action :authenticate_user!, except: :index
   
   def index
     @employees = Employee.all
@@ -15,6 +17,7 @@ class PhotoController < ApplicationController
   def view
     @photoid    = params[:id].to_i
     @photo      = Photo.find_by_id(@photoid)
+    @holder     = @photo.employee
     @holdername = @photo.employee.nickname
     @tags       = Tag2photo.where(photo_id: @photoid)
     logger.debug(sprintf("############### GET_TAG (%s) ###############", @tags.size ))

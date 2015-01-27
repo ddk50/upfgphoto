@@ -8,9 +8,11 @@
 
   <div class="row">
     <div class="col-md-12">
-      <%= form_tag(photo_delete_url(id: @photoid), :method => :delete) do %>
-        <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
-		       :class => "btn btn-danger") %>
+      <% if current_employee.id == @holder.id %>
+	<%= form_tag(photo_delete_url(id: @photoid), :method => :delete) do %>
+          <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
+			 :class => "btn btn-danger") %>
+	<% end %>
       <% end %>
     </div>
   </div>
