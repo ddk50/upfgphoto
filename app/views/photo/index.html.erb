@@ -23,6 +23,7 @@
               <%= employee.nickname %> <%= employee.name %>
             </h4>
             <p class="list-group-item-text">
+	      <span class="badge"><%= employee.photos.size %></span>
               <%= image_tag employee.image_url %>
 	      <%= employee.description %>
             </p>
