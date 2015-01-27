@@ -13,6 +13,7 @@ class TagsController < ApplicationController
     tag_id = Tag.find_by_name(tagname);
     @tagname = tagname
     photos = Tag2photo.where(tag_id: tag_id).offset(page * PHOTO_CONFIG['page_window_size']).limit(PHOTO_CONFIG['page_window_size']).order('photos.shotdate DESC')
+    @photo_count = Tag2photo.where(tag_id: tag_id).size
 
     ##
     ## tagとの参照関係はのこってるけど、photoとの参照関係が    
@@ -25,14 +26,13 @@ class TagsController < ApplicationController
       end
     }
     
-    @photo_count = @photos.size
     @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
                    ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
                    @photo_count / PHOTO_CONFIG['page_window_size']
   end
 
   def gettags
-    array = getrecentusetags(100)
+    array = getrecentusetags(500)
     logger.debug("################### GETTAGS #{array.to_json} ##################")
     
     respond_to do |format|

@@ -20,7 +20,7 @@ class ApplicationController < ActionController::Base
     !!session[:user_id]
   end
 
-  def authenticate_user!
+  def authenticate_user!    
     if current_user == nil
       redirect_to root_path
     end
