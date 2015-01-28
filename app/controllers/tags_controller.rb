@@ -19,6 +19,8 @@ class TagsController < ApplicationController
     ## tagとの参照関係はのこってるけど、photoとの参照関係が    
     ## 切れた時Tag2Photoのエントリが残りますのでなんとかしましょう
     ##
+    ## [FIXME] Tag2Photoのエントリが残る!!
+    ##
     @photos = []
     photos.each{|p| 
       if not p.photo == nil
