@@ -85,10 +85,10 @@
 	          });
 		  });
 		</script>
-		<p class="help-block"><B>JPGファイルを指定してください</B></p>
-	      </div>	  
+	      </div>
+	      <p class="help-block"><B>JPGファイルを指定してください</B></p>
 	      
-              <div class="form-group">
+              <div style="padding-top: 20px;">
 		<%= submit_tag("JPGを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
 	      </div>
 	      
@@ -152,7 +152,10 @@
 		</script>
 	      </div>
               <p class="help-block"><B>JPGをZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
-              <%= submit_tag("ZIPを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
+
+	      <div class="form-group">
+		<%= submit_tag("ZIPを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
+	      </div>
 	</div>
 	<% end %>
       </div>    
