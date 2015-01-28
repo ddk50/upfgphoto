@@ -11,12 +11,23 @@ class PhotoController < ApplicationController
   before_action :authenticate_user!, except: :index
   
   def index
-    @employees = Employee.all
+    employees = Employee.all
+
+    ##
+    ## [FIXME] Can it write in SQL?
+    ##
+    @employees = employees.sort {|x, y| y.photos.size <=> x.photos.size }
   end
 
   def view
     @photoid    = params[:id].to_i
     @photo      = Photo.find_by_id(@photoid)
+
+    if @photo == nil
+      redirect_to root_path, alert: "この写真は存在しません"
+      return
+    end
+
     @holder     = @photo.employee
     @holdername = @photo.employee.nickname
     @tags       = Tag2photo.where(photo_id: @photoid)

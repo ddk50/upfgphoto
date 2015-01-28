@@ -19,3 +19,6 @@ tmp
 
 # Ignore whitelist
 config/whitelist.yml
+
+# Ignore db file
+db/data.yml
