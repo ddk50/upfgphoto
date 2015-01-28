@@ -6,7 +6,8 @@ class Tag < ActiveRecord::Base
   validate :name, :uniqueness => true
 
   def self.counts
-    self.select("name, count(tag2photos.tag_id) as count").join(:tag2photos).group("tag2photos.tag_id").to_a
+    Tag.select("Tags.name, count(tag2photos.tag_id) as count").
+      joins(:tag2photos).group("tag2photos.tag_id")
   end
 
 end
