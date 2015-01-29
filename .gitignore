@@ -22,3 +22,6 @@ config/whitelist.yml
 
 # Ignore db file
 db/data.yml
+
+# Ignore db backupfile
+backups
