@@ -28,6 +28,7 @@ class TagsController < ApplicationController
       end
     }
     
+    @page = page
     @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
                    ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
                    @photo_count / PHOTO_CONFIG['page_window_size']

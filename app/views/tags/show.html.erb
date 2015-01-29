@@ -20,7 +20,13 @@
 <div class="text-center">   
   <ul class="pagination">
     <% @pages_count.times do |i| %>
-    <li><%= link_to(i, tagphoto_page_url(tag: @tagname, page: i), class: "btn btn-default") %></li>
+      <% if @page == i %>
+	<li class="active"><%= link_to(i, tagphoto_page_url(tag: @tagname, page: i), class: "btn btn-default") %></li>
+      <% else %>
+	<li>
+	  <%= link_to(i, tagphoto_page_url(tag: @tagname, page: i), class: "btn btn-default") %>
+	</li>
+      <% end %>
     <% end %>
   </ul>
 </div>
