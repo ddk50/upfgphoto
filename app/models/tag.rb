@@ -10,4 +10,11 @@ class Tag < ActiveRecord::Base
       joins(:tag2photos).group("tag2photos.tag_id")
   end
 
+  def self.update_or_create_tag(tagname)
+    tag = Tag.find_or_initialize_by(name: tagname);
+    tag.name = tagname;
+    tag.save!
+    return tag.id
+  end
+
 end

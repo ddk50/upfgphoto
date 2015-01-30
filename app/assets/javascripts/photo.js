@@ -16,8 +16,40 @@ var ready = function() {
             }
         }
     });
-    
+        
     engine.initialize();
+
+    $('input#edittagbox').tagsinput({
+        typeaheadjs: {
+            name: 'engine',
+            displayKey: 'value',
+            valueKey: 'value',
+            source: engine.ttAdapter(),
+            freeInput: true
+        }
+    });
+    
+    $("button#submittag").click(function() {
+        var selVal = $('input#edittagbox').val().split(",");
+        var id = $('#largeimageview').attr("alt");
+        $.ajax({
+            url: '/edittags.json',
+            type: 'POST',
+            data: {
+                'photoid': id,
+                'tags': selVal
+            },
+
+            success: function(response) {
+                alert("タグ書き換えに成功しました");
+            },
+            
+            error: function(response) {
+                alert("タグ書き換えに失敗しました");
+            }
+
+        });
+    });
     
     $('#bloodhoundjpg .form-control').typeahead(null, {
         name:'bloodhoundjpg',

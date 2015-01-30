@@ -46,16 +46,16 @@
     <div class="col-md-12">
       <div class="input-group">
         <span class="input-group-btn">
-          <button class="btn btn-default" type="button">タグを編集</button>
+          <button id="submittag" class="btn btn-default" type="button">タグを編集</button>
         </span>
-        <input type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-role="tagsinput"/>
+        <input id="edittagbox" type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-provide="typeahead"/>
       </div>
     </div>
   </div>
 
   <div class="row top15">
     <div class="col-lg-12">
-      <%= image_tag(photo_show_url(id: @photoid), class: "img-responsive") %>      
+      <%= image_tag(photo_show_url(id: @photoid), class: "img-responsive", id: "largeimageview") %>
     </div>
   </div>
   

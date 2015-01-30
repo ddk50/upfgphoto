@@ -261,7 +261,7 @@ class PhotoController < ApplicationController
           additions << [tmp, newphoto.id]
 
           tags.each{|tagname|
-            tagid = update_or_create_tag(tagname)
+            tagid = Tag.update_or_create_tag(tagname)
             t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
             t.save
           }            
@@ -317,7 +317,7 @@ class PhotoController < ApplicationController
         set_and_save_photo_exif(newphoto, tmpfullpath, spool_path)
 
         tags.each{|tagname|
-          tagid = update_or_create_tag(tagname)
+          tagid = Tag.update_or_create_tag(tagname)
           t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
           t.save
         }
@@ -411,13 +411,6 @@ class PhotoController < ApplicationController
     else
       File.delete(delthem)
     end
-  end
-
-  def update_or_create_tag(tagname)
-    tag = Tag.find_or_initialize_by(name: tagname);
-    tag.name = tagname;
-    tag.save!
-    return tag.id
   end
 
   public
