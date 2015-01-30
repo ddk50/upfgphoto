@@ -1,8 +1,6 @@
-var ready;
 var gId = 0;
 var insetedTags = [];
-
-ready = function() {
+var ready = function() {
     
     //
     // Begin tag autocomplete logic

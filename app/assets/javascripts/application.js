@@ -12,9 +12,9 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require turbolinks
 //= require bootstrap.min
-//= require typeahead.bundle
 //= require bootstrap-datepicker
+//= require bootstrap-tagsinput.min
+//= require typeahead.bundle
 //= require jquery.lazyload.min
 //= require_tree .

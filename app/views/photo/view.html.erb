@@ -39,13 +39,17 @@
 	<dt>写真編集日時</dt>
 	<dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
       </dl>
-      <ul class="list-inline">
-        <% @tags.each do |t| %>
-           <%= link_to(tagphoto_url(tag: t.tag.name)) do %>
-           <li><%= t.tag.name %></li>
-           <% end %>
-        <% end %>
-      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="input-group">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button">タグを編集</button>
+        </span>
+        <input type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-role="tagsinput"/>
+      </div>
     </div>
   </div>
 
