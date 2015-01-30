@@ -16,4 +16,5 @@
 //= require bootstrap.min
 //= require typeahead.bundle
 //= require bootstrap-datepicker
+//= require jquery.lazyload.min
 //= require_tree .

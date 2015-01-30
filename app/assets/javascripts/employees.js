@@ -1,5 +1,8 @@
-var ready;
-ready = function () {
+var ready = function () {
+
+    $("img.img-lazy-responsive").lazyload({
+        effect : "fadeIn"
+    });
     
     $('#date-pickere-container .input-daterange').datepicker({
 	format: 'yyyy-mm-dd'
@@ -124,7 +127,8 @@ function getParameter()
     return arg;
 }
 
-$(document).ready(ready)
-$(document).on('page:load', ready)
+$(document).ready(ready);
+$(document).on('page:load', ready);
+
 
 

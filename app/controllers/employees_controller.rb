@@ -1,5 +1,5 @@
 
-PAGE_WINDOW_SIZE = 9
+PAGE_WINDOW_SIZE = 100
 
 class EmployeesController < ApplicationController
 
