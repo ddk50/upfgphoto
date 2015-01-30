@@ -2,7 +2,7 @@
 
   <div class="tags-cloud glassy-bg">
     <h4>最近のトレンド</h4>
-    <% tag_cloud(Tag.counts, %w{tagcss1 tagcss2 tagcss3 tagcss4}) do |tag, css_class| %>
+    <% tag_cloud(Tag.counts, %w{tagcss1 tagcss2 tagcss3 tagcss4 tagcss5}) do |tag, css_class| %>
       <%= link_to tag.name, tagphoto_url(tag: tag.name), class: css_class %>
     <% end %>
   </div>
