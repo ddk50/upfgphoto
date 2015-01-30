@@ -9,8 +9,7 @@
     <% @photos.each do |p| %>
     <div class="col-lg-3 col-md-4 col-xs-6 thumb">
       <%= link_to(photo_view_url(id: p.photo.id), class: "thumbnail") do %>
-      <%= image_tag(photo_thumbnail_url(id: p.photo.id), class: "img-responsive", 
-          width: 400, height: 300) %>
+      <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.photo.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
       <% end %>
     </div>
     <% end %>
