@@ -62,9 +62,16 @@
         </div>
       </div>
 
-      <%= link_to(photo_view_url(id: p.id), class: "thumbnail") do %>
+      <%= link_to(photo_view_url(id: p.id), class: "thumbnail", style: "margin-bottom: 5px;") do %>
         <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
       <% end %>
+
+      <ul class="nav nav-pills">
+        <% p.tags.each do |tag| %>
+          <li><%= link_to(tagphoto_url(tag: tag.name)) do %> <%= tag.name %> <% end %></li>
+        <% end %>
+      </ul>
+
     </div>
     <% end %>
   </div>
