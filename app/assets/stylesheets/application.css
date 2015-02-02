@@ -77,3 +77,10 @@
 /*   color: #fff; */
 /*   background-color: #CECBCB; */
 /* } */
+
+.largethumbnail {
+    padding: 15px;
+    border-bottom:#DDD 1px solid;
+    background:#fff;
+    box-shadow:0 0 5px rgba(0, 0, 0, .1);    
+}
