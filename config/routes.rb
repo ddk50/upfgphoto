@@ -18,9 +18,12 @@ Rails.application.routes.draw do
 
   post 'photo' => 'photo#upload'
   post 'photo_jpg' => 'photo#uploadjpg', as: :photo_upload_jpg
+
   get 'photo/:id' => 'photo#show', as: :photo_show
-  get 'photo/:id/thumbnail' => 'photo#thumbnail', as: :photo_thumbnail
   delete 'photo/:id' => 'photo#delete', as: :photo_delete
+  post 'photo/:id' => 'photo#edit', as: :photo_edit
+
+  get 'photo/:id/thumbnail' => 'photo#thumbnail', as: :photo_thumbnail
   get 'photo/:id/view' => 'photo#view', as: :photo_view
   get 'photo/:id/download' => 'photo#download', as: :photo_download
 

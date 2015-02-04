@@ -43,6 +43,23 @@ class PhotoController < ApplicationController
               )
   end
 
+  def edit
+    photoid = params[:id].to_i
+    caption = params[:photocaption]
+    description = params[:photodescription]
+    photo = Photo.find_by_id(photoid)
+
+    if not (photo.employee_id == current_employee.id)
+      redirect_to photo_view_url(photo.id), alert: "他人の写真は変更できません"
+    else
+      photo.caption     = caption
+      photo.description = description
+      photo.save
+      
+      redirect_to photo_view_url(photo.id), notice: "変更完了"
+    end
+  end
+
   def thumbnail
     photoid = params[:id]
     rate    = PHOTO_CONFIG['photo_resie_rate']
