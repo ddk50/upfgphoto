@@ -195,8 +195,7 @@ var ready = function() {
     }
 
     gethottag('#recentusephototagsjpg');
-    gethottag('#recentusephototagszip');
-    
+    gethottag('#recentusephototagszip');    
 }
 
 $(document).ready(ready)
