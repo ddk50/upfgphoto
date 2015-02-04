@@ -28,26 +28,31 @@
 
   <div class="row top10">
     <div class="col-md-12">
-      <dl class="dl-horizontal">
-        <dt>アップロード者</dt>
-        <dd><%= link_to(@holdername, employees_url(id: @photo.employee.id)) %></dd>
-        <dt>写真撮影日時</dt>
-        <dd><%= @photo.shotdate ? @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
-        <dt>モデル</dt>
-	<dd><%= @photo.model %></dd>
-	<dt>露光時間</dt>
-	<dd><%= @photo.exposure_time %></dd>	
-	<dt>f値</dt>
-	<dd><%= @photo.f_number %></dd>	
-	<dt>焦点距離</dt>
-	<dd><%= @photo.focal_length %></dd>
-	<dt>35mm換算での焦点距離</dt>
-	<dd><%= @photo.focal_length_in_35mm_film %></dd>
-	<dt>ISO感度</dt>
-	<dd><%= @photo.iso_speed_ratings %></dd>
-	<dt>写真編集日時</dt>
-	<dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
-      </dl>
+
+      <div class="panel panel-info">
+        <div class="panel-body">
+          <dl class="dl-horizontal">
+            <dt>アップロード者</dt>
+            <dd><%= link_to(@holdername, employees_url(id: @photo.employee.id)) %></dd>
+            <dt>写真撮影日時</dt>
+            <dd><%= @photo.shotdate ? @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
+            <dt>モデル</dt>
+	    <dd><%= @photo.model %></dd>
+	    <dt>露光時間</dt>
+	    <dd><%= @photo.exposure_time %></dd>	
+	    <dt>f値</dt>
+	    <dd><%= @photo.f_number %></dd>	
+	    <dt>焦点距離</dt>
+	    <dd><%= @photo.focal_length %></dd>
+	    <dt>35mm換算での焦点距離</dt>
+	    <dd><%= @photo.focal_length_in_35mm_film %></dd>
+	    <dt>ISO感度</dt>
+	    <dd><%= @photo.iso_speed_ratings %></dd>
+	    <dt>写真編集日時</dt>
+	    <dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
+          </dl>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -60,7 +65,7 @@
 
           <div class="input-group">
             <span class="input-group-btn">
-              <button id="submittag" class="btn btn-default" type="button">タグを編集</button>
+              <button id="submittag" class="btn btn-default" type="button">編集</button>
             </span>
             <input id="edittagbox" type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-provide="typeahead"/>
           </div>
@@ -81,11 +86,11 @@
             <%= form_tag(photo_edit_path(id: @photoid), method: "POST", multipart: true) do |f| %>
               <p></p>
               <div class="form-group">
-                <label for="introduction" class="control-label">写真のタイトル</label>
+                <label for="introduction" class="control-label">タイトル</label>
                 <input id="photocaption" name="photocaption" type="text" class="form-control" value="<%= @photo.caption %>" onKeyPress="submitStop(event)">
               </div>
               <div class="form-group">
-                <label for="introduction" class="control-label">写真の紹介文</label>
+                <label for="introduction" class="control-label">紹介文</label>
                 <textarea id="photodescription" name="photodescription" class="form-control" rows="3"><%= @photo.description %></textarea>
               </div>
               <%= submit_tag("変更", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
