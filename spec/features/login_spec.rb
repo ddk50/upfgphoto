@@ -6,7 +6,7 @@ describe 'ユーザが写真の登録を行うために，ログインをする'
     context 'かつTwitterでのログインに成功した時' do
       before do
         visit root_path
-        click_link 'Twitterでログイン'
+        click_link 'Login as Twitter'
       end
 
       it 'トップページに遷移していること' do
