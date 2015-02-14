@@ -1,12 +1,16 @@
 var ready = function () {
 
-    $("img.img-lazy-responsive").lazyload({
-        effect : "fadeIn"
-    });
+    // $('#myprofile').affix({
+    //     offset: {
+    //         top: 10,
+    //     }
+    // });
     
-    $('#date-pickere-container .input-daterange').datepicker({
-	format: 'yyyy-mm-dd'
-    });    
+    // var params = getParameter();
+    // if (params["start"] && params["end"]) {
+    //     $("#start").val = params["start"];
+    //     $("#end").val   = params["end"];
+    // }
 
     $("#searchbydatebtn").click(function() {
 	var start = $("#start").val();
@@ -78,7 +82,7 @@ var ready = function () {
         $("[name='photo_id[]']:checked").each(function() {
             photoids.push(this.value);
         });
-
+        
         $.ajax({
             type: "GET",
             url: "/photo/download/multiple",
@@ -88,15 +92,19 @@ var ready = function () {
             dataType: "json",
 
             success: function(response) {
-                window.location = response.redirect;
-                enable_btn("#downloadall", "ダウンロード");
+                if (response.result == "success") {
+                    window.location = response.redirect;
+                    enable_btn("#downloadall", "ダウンロード");
+                } else if (response.result == "error") {                    
+                    enable_btn("#downloadall", "ダウンロード");
+                    alert(response.msg);
+                }
 
             },
             
             error: function(response) {
-                window.location = response.redirect;
                 enable_btn("#downloadall", "ダウンロード");
-                location.reload();
+                alert("通信エラー" + response.msg);
             }
         });
 
@@ -129,6 +137,3 @@ function getParameter()
 
 $(document).ready(ready);
 $(document).on('page:load', ready);
-
-
-

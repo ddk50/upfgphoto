@@ -16,12 +16,17 @@ class SessionsController < ApplicationController
     ## create an employee instance when logged in
     ##
     employee = Employee.find_or_create_by(uid: user.uid)
-    employee.update(nickname: user.nickname,
-                    provider: user.provider,
-                    image_url: user.image_url,
-                    uid: user.uid,
-                    description: user.description,
-                    name: user.name)
+    if not employee.edited
+      employee.update_attributes!(nickname: user.nickname,
+                                  provider: user.provider,
+                                  image_url: user.image_url,
+                                  uid: user.uid,
+                                  description: user.description,
+                                  name: user.name)
+    else
+      employee.touch
+      employee.save
+    end
     
     redirect_to root_path, notice: 'ログインしました'
   end

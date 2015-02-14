@@ -1,18 +1,21 @@
 development:
   download_tmp_path: '/tmp/files'
-  spool_dir: '/mnt/upfgphotos/dev'
+  spool_dir: '/mnt/upfgphotos2/dev/photo'
+  avatar_dir: '/mnt/upfgphotos2/dev/avatar'
   photo_resie_rate: 0.1
   page_window_size: 100
 
 test:
   download_tmp_path: '/tmp/files'
-  spool_dir: '/mnt/upfgphotos/test'
+  spool_dir: '/mnt/upfgphotos2/test/photo'
+  avatar_dir: '/mnt/upfgphotos2/test/avatar'
   photo_resie_rate: 0.1
   page_window_size: 100
 
 production:
   download_tmp_path: '/tmp/files'
-  spool_dir: '/mnt/upfgphotos/prod'
+  spool_dir: '/mnt/upfgphotos2/production/photo'
+  avatar_dir: '/mnt/upfgphotos2/production/avatar'
   photo_resie_rate: 0.1
   page_window_size: 100
 

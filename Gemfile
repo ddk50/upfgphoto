@@ -44,7 +44,8 @@ gem 'omniauth'
 gem 'omniauth-twitter'
 
 gem 'exifr'
-gem 'zip'
+##gem 'zip'
+gem 'rubyzip', :require => 'zip'
 
 ## gem 'digest/sha1'
 ## gem 'securerandom'
@@ -65,3 +66,6 @@ group :test do
 end
 
 gem 'yaml_db'
+gem 'dalli'
+
+

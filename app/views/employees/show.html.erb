@@ -1,97 +1,41 @@
-<div class="container">
-  <div class="row">
-    <div class="col-lg-12">
-      <h2 class="page-header"><%= @employee.nickname %>'s Image Gallery <span class="badge"><%= @photo_count %></span></h2>
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header"><%= @employee.nickname %>'s Image Gallery <span class="badge"><%= @photo_count %></span></h2>
+  </div>
+</div>
+
+<div class="row">
+  <%= render 'layouts/photosearchbar' %>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="form-inline form-group">
+      <%= submit_tag("ダウンロード", :class => "btn btn-success", :id => "downloadall") %>
+      
+      <div class="checkbox" style="margin-left:10px; margin-right:10px;">
+        <label><input type="checkbox" id="photo_check_group" class="photocheckAll"> 全てにチェックを入れる</label>
+      </div>
+      
+      <% if current_employee.id == @employee.id %>
+        <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
+      <% end %>
+
     </div>
   </div>
+</div>
 
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="form-inline form-group">
-        <%= submit_tag("ダウンロード", :class => "btn btn-primary", :id => "downloadall") %>
-	<% if current_employee.id == @employee.id %>
-          <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
-	<% end %>
-      </div>
-    </div>
+<div class="row">
+  <div class="col-lg-12">
+    <hr>
   </div>
+</div>
 
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="form-inline form-group">
-
-	<div id="date-pickere-container">
-	  <div class="input-daterange input-group" id="datepicker">
-	    <input type="text" class="input-sm form-control" name="start" id="start"/>
-	    <span class="input-group-addon"> to </span>
-	    <input type="text" class="input-sm form-control" name="end" id="end"/>
-	  </div>
-	  <button id="searchbydatebtn" type="submit" class="btn btn-default"> 撮影日時で検索</button>
-	</div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="form-inline form-group">
-
-	<!-- single btn -->
-	<div class="btn-group">
-	  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-	    並び替え <span class="caret"></span>
-	  </button>
-	  <ul class="dropdown-menu" role="menu">
-	    <li><%= link_to 'アップロードした順', params.merge(sort: 'uploaddesc') %></li>
-	    <li><%= link_to '撮影日時が新しい順', params.merge(sort: 'desc') %></li>
-	    <li><%= link_to '撮影日時が古い順', params.merge(sort: 'asc') %></li>
-	  </ul>
-	</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <% @photos.each do |p| %>
-      <div class="col-lg-3 col-md-4 col-xs-6 thumb largethumbnail">
-        
-        <div class="caption">
-          <h3><%= p.caption %></h3>
-        </div>
-
-        <ul class="nav nav-pills">
-          <% p.tags.each do |tag| %>
-            <li><%= link_to(tagphoto_url(tag: tag.name), style: "padding: 4px 4px 4px 4px;") do %> <span class="label label-primary"> <%= tag.name %> </span> <% end %></li>
-          <% end %>
-        </ul>
-
-        <div id="photo-coner-check-box">
-          <div class="checkbox-inline">
-            <%= check_box_tag("photo_id[]", p.id) %>
-          </div>
-        </div>
-
-        <%= link_to(photo_view_url(id: p.id), class: "thumbnail", style: "margin-bottom: 5px;") do %>
-          <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
+<div class="row">
+  <%= render 'layouts/photos', locals: {contents: @photos} %>
 </div>
 
 <div class="text-center">   
-  <ul class="pagination">
-    <% @pages_count.times do |i| %>
-      <% if @page == i %>
-	<li class="active"><%= link_to(i, params.merge(page: i), class: "btn btn-default") %></li>
-      <% else %>
-	<li>
-	  <%= link_to(i, params.merge(page: i), class: "btn btn-default") %>
-	</li>
-      <% end %>
-    <% end %>
-  </ul>
+  <%= render 'layouts/pagination', locals: {pages_count: @pages_count, current_page: @current_page} %>
 </div>
 
-</div>

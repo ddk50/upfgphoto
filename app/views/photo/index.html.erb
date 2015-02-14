@@ -1,171 +1,135 @@
 <% if logged_in? %>
 
-  <div class="tags-cloud glassy-bg">
-    <h4>最近のトレンド</h4>
-    <% tag_cloud(Tag.counts, %w{tagcss1 tagcss2 tagcss3 tagcss4 tagcss5}) do |tag, css_class| %>
-      <%= link_to tag.name, tagphoto_url(tag: tag.name), class: css_class %>
+  <div class="row">
+    <div class="col-xs-12 col-sm-12" style="margin-bottom: 50px; margin-top: 20px;">
+      <img src="images/topbanner.jpg" class="img-responsive img-center" alt="img_modal" data-toggle="modal" data-target="#myModal" style="cursor: pointer;">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad">
+      <div class="form-group">
+        <div id="bloodhoundphototop"> <!-- <div id="bloodhoundjpg"> -->
+          <div class="input-group">
+            <input id="bloodhoundtextboxphototop" type="text" class="form-control"> <!-- <input id="bloodhoundtextboxjpg" type="text" class="form-control"> -->
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                Go!
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-4 col-lg-4"></div>
+  </div>
+
+  <div class="row">
+    <div id="d3cloudtagcontainer" class="col-lg-12">
+      <div class="d3cloudtag">
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <h3 class="head text-center"><span style="color:#f48260;">♥</span>POPULAR PHOTOS<span style="color:#f48260;">♥</span></h3>
+  </div>
+
+  <div id="photos" class="photoshadow">
+    <% @recent_photos.each do |photo| %>
+      <div class="wrapper">
+        <div class="fix" style="position: relative;">
+          <%= image_tag("/images/blank.gif", data: { original2: photo_show_url(photo.id), original: photo_thumbnail_url(photo.id)}, class: "img-lazy-responsive", style: "z-index: -1;") %>
+          <div class="desc">
+            <% @likecount = photo.likecount.size %>
+            <p class="desc_content glyphicon glyphicon-eye-open"><%=rand(50)%></p>
+            <i id="like<%=photo.id%>" class="desc_content glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(photo.id)%>" data-count="<%= @likecount%>">
+              <span id="like<%=photo.id%>-bs3"><%= @likecount %></span>
+            </i>
+          </div>
+        </div>
+      </div>
     <% end %>
   </div>
 
-  <ul class="nav nav-tabs">
-    <li class="active"><a href="#tab1" data-toggle="tab">メンバー</a></li> <!-- タブ1 -->
-    <li><a href="#tab2" data-toggle="tab">JPGでアップロード</a></li> <!-- タブ2 -->
-    <li><a href="#tab3" data-toggle="tab">ZIPでアップロード</a></li> <!-- タブ3 -->
-  </ul>
-  <div id="myTabContent" class="tab-content">
-    
-    <div class="tab-pane fade in active" id="tab1">
-      <!-- タブ1 -->
-      <div class="media">
-	<% @employees.each do |employee| %>
-          <%= link_to("employees/#{employee.id}", class: 'list-group-item') do %>
-	    <div class="media-left">
-	      <span class="badge"><%= employee.photos.size %></span>
-	      <%= image_tag employee.image_url %>
-	    </div>
-	    <div class="media-body">
-	      <h4 class="media-heading"><%= employee.nickname %> <%= employee.name %></h4>
-	      <%= employee.description %>
-	    </div>
-          <% end %>
-	<% end %>
+  <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">         
+        <div class="modal-body">
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  <div class="row">
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">UPFG内閣総理大臣からのメッセージ</h4>
+          </div>
+          <div class="modal-body text-center">
+            <h1><a href="<%= employee_profile_url(current_employee.id) %>">プロフィールを入力してください</a></h1>
+            <h4><b>円滑な組織運営を行うため，人事システムを導入しました．</b></h4>
+            <h5>UPFGは2015年現在日本で最も大きなコンツェルン型サークルとして認識されています．これは私たちが成功しつつあることを大きく証拠づけています．</h5>
+            <h5>新たな年を迎え，UPFGにはより一層の活動拡大が見込まれます．それに伴う組織の人員拡大は避けられず，現在関係者の数は100人弱を数えるまでにいたりました．これはすでに中小企業クラスの人員規模です．</h5>
+            <h5>そのため組織内の人員がお互いの存在を把握していない，顔と名前が一致しない人が大勢いるという方もおられるのではないでしょうか？これは特に組織に加入したての新人にとって大きな問題となります．すでに完成された人の輪のなかに入って行くことの困難さは皆さんもある程度認めるところかと思います．</h5>
+            <h5>そこで，どのような人が入ってきたのか．どのような人がいてどのような活動を行っているのかといった人事情報を一元管理し可視化したいと考えました．皆さんに個人のプロフィールを入力して頂き，組織の中での自分の立ち位置を大いにアピールしてもらいたいのです．これは構成員同士の交流を円滑に進める助けとなることでしょう．</h5></h5>
+            <h5>とはいえ，みなさんは「なぜ写真共有システムに人事入力を行う場があるのか？」と訝しがられるかもしれません．確かに写真共有システムと人事システムを融合するというアイデアは一見すると奇妙です．しかし，私は今後このシステムをUPFG内の総合コミュニティサイトとして成長させていきたいと考えています．組織に関係する写真を互いに見せ合うことで皆さんは構成員の人となりを知ることができ，その結果，組織内の交流はより円滑になることでしょう．写真共有システムと人事システムを融合するこの試みは，その前段階としての試験的な試みであります．</h5>
+            <h5>システムとしてまだまだ不完全な部分も多いことと思います．ですが，はじめから完璧なものを作ることは不可能です．そのため，テスト段階である本システムを皆さんに積極的に使っていただき，意見を聞かせて欲しいのです．皆様の意見とともに成長して行きたいと考えております．Done is better than perfect．私はこの標語をオフィスに掲げ日々労働に励んでおります（大嘘）</h5>
+            <br/>
+<!--            <h5>とにかく，本人情報を入力してください．無駄な抵抗はやめましょう．私はUPFGの情報を支配しています．あなたにはこの意味がお分かりでしょう．このシステムはECDHE-RSA及び128bit ミリタリーグレードAESアルゴリズムで高度に暗号化されています．嘘だと思うんだったらブラウザのURL欄の鍵マークをクリックしてみろや．UPFG外の人間に情報が漏れることはありません．抵抗は無意味です．私はあなた方の住所を知っています．</h5> -->
+            <div class="alert alert-info">                
+              <%= link_to '顔写真とプロフィールを入力する', employee_profile_url(current_employee.id) %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
       </div>
     </div>
+  </div> 
 
-    <div class="tab-pane fade" id="tab2">
-      <!-- タブ2 -->
-      <div class="panel panel-default">
-	<div class="panel-body">
-
-          <%= form_tag(photo_upload_jpg_path, {:multipart => true}) do |f| %>
-            <form class="form-horizontal" role="form">
-              
-              <div class="form-group">
-		<p class="control-label"><b>タグ</b></p>
-		<div id="bloodhoundjpg">
-		  <div class="input-group">
-                    <span class="input-group-btn">
-                      <button class="btn btn-default" type="button">タグを追加</button>
-                    </span>
-                    <input id="bloodhoundtextboxjpg" type="text" class="form-control">
-		  </div><!-- /input-group -->
-		</div>
-              </div>
-
-              <div class="form-group">
-		<div id="phototagsjpg">
-		</div>
-              </div>
-
-              <div class="form-group">
-		<p class="control-label"><b>最近使われたタグ</b></p>
-		<div id="recentusephototagsjpg">
-		  
-		</div>
-              </div>
-
-              <div class="form-group">
-		<p class="control-label"><b>ファイル</b></p>
-		<!--            <input name="target_file" type="file" />-->
-
-		<input type="file" id="target_file_jpg" name="target_file_jpg" style="display: none;">
-		<div style="width:40%;float:left;margin-right:10px;" class="input-group">
-		  <span class="input-group-btn">
-		    <button class="btn btn-default" type="button" onclick="$('#target_file_jpg').click();">
-		      <i class="glyphicon glyphicon-folder-open"></i>
-		    </button>
-		  </span>
-		  <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
-		</div>
-		<!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
-		<script type="text/javascript">
-		  $(function(){
-	          $('#target_file_jpg').change(function() {
-                  $('#dummy_file').val($(this).val());
-	          });
-		  });
-		</script>
-	      </div>
-	      <p class="help-block"><B>JPGファイルを指定してください</B></p>
-	      
-              <div style="padding-top: 20px;">
-		<%= submit_tag("JPGを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
-	      </div>
-	      
-	</div>
-	<% end %>
+  <hr />  
+  <div class="text-center">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="col-md-6">
+          <ul class="nav nav-pills nav-stacked">
+            <li><h4>姉妹サイト</h4></li>
+            <li><a href="http://hirukara.camelon.info/">Hirukara</a></li>
+            <li><a href="http://rw.camelon.info/">Menemosyne</a></li>
+            <li><a href="http://kb.camelon.info/">Koebutter</a></li>
+            <li><a href="http://gomi.camelon.info/">Gomitter└(┐┘)┌</a></li>
+            
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <ul class="nav nav-pills nav-stacked">
+            <li><h4>開発者および関係者リンク</h4></li>
+            <li><a href="https://trello.com/upfg">Trello</a></li>
+            <li><a href="https://upfg.esa.io/">esa</a></li>
+            <li><a href="https://github.com/ddk50/upfgphoto">GitHub</a></li>
+            <li><a href="https://docs.google.com/spreadsheets/d/1TIFu8FYMyihz3iHpSB6rjiVE7sdzRoFXoOJeNsmR2nk/edit#gid=1170380632">光画部システム要望申請書</a></li>            
+          </ul>
+        </div>  
       </div>
     </div>
-    
-    
-    <div class="tab-pane fade" id="tab3">    
-      <!-- タブ3 -->
-      <div class="panel panel-default">      
-	<div class="panel-body">
-          <%= form_tag("photo/", {:multipart => true}) do |f| %>
-            <form class="form-horizontal" role="form">
-              
-              <div class="form-group">
-		<p class="control-label"><b>タグ</b></p>
-		<div id="bloodhoundzip">
-		  <div class="input-group">
-                    <span class="input-group-btn">
-                      <button class="btn btn-default" type="button">タグを追加</button>
-                    </span>
-                    <input id="bloodhoundtextboxzip" type="text" class="form-control">
-		  </div><!-- /input-group -->
-		</div>
-              </div>
-
-              <div class="form-group">
-		<div id="phototagszip">
-		</div>
-              </div>
-
-              <div class="form-group">
-		<p class="control-label"><b>最近使われたタグ</b></p>
-		<div id="recentusephototagszip">
-		  
-		</div>
-              </div>
-
-              <div class="form-group">
-		<p class="control-label"><b>ファイル</b></p>
-		<!--            <input name="target_file" type="file" />-->
-
-		<input type="file" id="target_file_zip" name="target_file_zip" style="display: none;">
-		<div style="width:40%;float:left;margin-right:10px;" class="input-group">
-		  <span class="input-group-btn">
-		    <button class="btn btn-default" type="button" onclick="$('#target_file_zip').click();">
-		      <i class="glyphicon glyphicon-folder-open"></i>
-		    </button>
-		  </span>
-		  <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
-		</div>
-		<!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
-		<script type="text/javascript">
-		  $(function(){
-	          $('#target_file_zip').change(function() {
-                  $('#dummy_file').val($(this).val());
-	          });
-		  });
-		</script>
-	      </div>
-              <p class="help-block"><B>JPGをZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。対応しているファイルはZIPで固めたJPGファイルだけです。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
-
-	      <div class="form-group">
-		<%= submit_tag("ZIPを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
-	      </div>
-	</div>
-	<% end %>
-      </div>    
+    <hr>
+    <div class="row">
+      <div class="col-lg-12">
+        <ul style="list-style:none;">
+          <li>© <%= Time.now.strftime("%G") %> <a href="https://twitter.com/upfg">UPFG 電通省</a></li>
+        </ul>
+      </div>
     </div>
-
-    <div class="tab-pane fade" id="tab3">
-      
-    </div>
-
   </div>
+
 <% else %>
   <h2>ログインしてください</h2>
 <% end %>

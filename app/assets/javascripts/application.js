@@ -17,4 +17,64 @@
 //= require bootstrap-tagsinput.min
 //= require typeahead.bundle
 //= require jquery.lazyload.min
+//= require d3.min
+//= require d3.layout.cloud
 //= require_tree .
+
+var ready = function () {
+
+    $("img.img-lazy-responsive").lazyload({
+        effect: "fadeIn",
+        failure_limit: 999
+    });    
+
+    // $('#date-pickere-container .input-daterange').datepicker({
+    //     format: 'yyyy-mm-dd'
+    // });
+
+    $('.input-daterange').datepicker({
+        format: 'yyyy-mm-dd'
+    });
+
+    $('i.glyphicon-thumbs-up, i.glyphicon-thumbs-down').click(function(){
+        
+        var id = this.id
+        var $this = $(this);
+        var likeurl = $this.data('likeurl');
+
+	$.ajax({
+            type: "POST",
+            url: likeurl,
+            dataType: "json",
+            success: function(response) {
+                if (response.status == "success") {
+                    c = $this.data('count');
+                    if (!c) c = 0;
+                    c++;
+                    $this.data('count', c);
+                    $('#'+id+'-bs3').html(c);
+
+                    alert("Likeしました");
+                } else if (response.status == "error") {
+                    alert(response.msg);
+                }
+            },
+            error: function(response) {
+                alert("通信エラー" + reponse);
+            }
+        });
+    });
+    
+    $(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
+        event.preventDefault();
+        $(this).ekkoLightbox();
+    });
+
+    $('.photocheckAll').on('change', function() {
+        $('.' + this.id).prop('checked', this.checked);
+    });
+}
+
+$(document).ready(ready);
+$(document).on('page:load', ready);
+

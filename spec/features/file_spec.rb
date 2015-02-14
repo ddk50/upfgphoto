@@ -15,7 +15,7 @@ describe 'ユーザが写真の登録を行うために，ログインをする 
            }
         })
         visit root_path
-        click_link 'Login as Twitter'
+        click_link 'Sign in with Twitter'
       end
 
       it 'ログインが失敗すること' do
@@ -41,7 +41,7 @@ describe 'ユーザが写真の登録を行うために，ログインをする 
         })
 
         visit root_path
-        click_link 'Login as Twitter'
+        click_link 'Sign in with Twitter'
       end
 
       it 'ログインが成功すること' do

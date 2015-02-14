@@ -5,18 +5,66 @@
 ## PHOTO_RESIE_RATE  = 0.1
 
 class InvalidFileFormat < StandardError; end
+class InvalidFieldFormat < StandardError; end
+class InvalidRequest < StandardError; end
 
 class PhotoController < ApplicationController
 
-  before_action :authenticate_user!, except: :index
-  
-  def index
-    employees = Employee.all
+  before_action :authenticate_user!, except: :index 
 
-    ##
-    ## [FIXME] Can it write in SQL?
-    ##
-    @employees = employees.sort {|x, y| y.photos.size <=> x.photos.size }
+  def index
+    @recent_photos = Photo.select("Photos.id, count(activities.target_photo_id) as count")
+      .joins(:activities)
+      .group("activities.target_photo_id")
+      .where(activities: {action_type: Activity.action_types[:like_photo]})
+      .order('count DESC')
+      .limit(40)
+    
+  end
+
+  def d3cloudtags
+    max_font_size = 26.0
+    tags = Tag.counts
+    max = tags.sort_by(&:count).last    
+    freq_list = tags.map{|val|
+      { key: val.name, 
+        value: (val.count.to_f / max.count * (max_font_size - 1.0)).round,
+        url: tagphoto_url(val.name) 
+      }
+    }
+    
+    respond_to do |format|
+      format.json { render :json => 
+        {:result   => 'success',
+         :msg      => freq_list }
+      }
+    end
+  end
+
+  def uploadpanel    
+  end
+
+  def editpanel
+    id = current_employee.id
+    page = params[:page] == nil ? 0 : params[:page].to_i
+    perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
+    rel  = Photo.employee_photo(id)
+
+    @employee = Employee.find_by_id(id)
+    
+    @photos = rel    
+      .like_tag(params[:tag])
+      .between_date(params[:start], params[:end])
+      .photo_order(params[:sort])
+      .offset(page * perpage)
+      .limit(perpage)
+
+    photo_count = rel.size
+    @current_page = page
+    @pages_count = (photo_count % perpage) > 0 ? 
+                   ((photo_count / perpage) + 1) : 
+                   photo_count / perpage
+    
   end
 
   def view
@@ -47,16 +95,34 @@ class PhotoController < ApplicationController
     photoid = params[:id].to_i
     caption = params[:photocaption]
     description = params[:photodescription]
-    photo = Photo.find_by_id(photoid)
+    tags = params[:tags].to_s.split(",")
+    
+    photo = Photo.find_by_id(photoid)    
 
     if not (photo.employee_id == current_employee.id)
-      redirect_to photo_view_url(photo.id), alert: "他人の写真は変更できません"
+      redirect_to :back, alert: "他人の写真は変更できません"
     else
-      photo.caption     = caption
-      photo.description = description
-      photo.save
+
+      begin
+        ActiveRecord::Base.transaction do
+          exists_tags = Tag2photo.where(photo_id: photoid)
+          exists_tags.destroy_all
+
+          tags.each{|t|
+            tag_id = Tag.update_or_create_tag(t)
+            newt = Tag2photo.new(photo_id: photoid, tag_id: tag_id)
+            newt.save!
+          }
+
+          photo.caption     = caption
+          photo.description = description
+          photo.save!
+        end
+        redirect_to :back, notice: "変更完了"
+      rescue => e      
+        redirect_to :back, alert: e.to_s
+      end
       
-      redirect_to photo_view_url(photo.id), notice: "変更完了"
     end
   end
 
@@ -92,7 +158,7 @@ class PhotoController < ApplicationController
     ensure
       if destroyed
         delete_thumbnail(photo.id)
-        File.delete(photo.filepath)
+        delete_photo(photo.id)
       end
     end
   end
@@ -102,30 +168,22 @@ class PhotoController < ApplicationController
     photos = params[:items_ids]
     err = false
     msg = nil
-    reserve = 0
-    deleted = 0
     deleted_photoids = []
     begin
       ActiveRecord::Base.transaction do
         photos.each{|id|
           p = Photo.find_by_id(id.to_i)          
           if not p.employee.id != current_employee.id
-            p.destroy
+            p.destroy!
             deleted_photoids << p.id
-            deleted = deleted + 1
           else
-            reserve = reserve + 1
+            raise InvalidRequest, "他人の写真を削除しようとしています"
           end
         }
       end
-      if reserve > 0
-        msg = "#{deleted}個のファイルを削除、#{reserve}個のファイルを保留。他人の写真を削除しようとした可能性があります"
-      else
-        msg = "#{deleted}個のファイルを削除"
-      end
       err = false
     rescue => e
-      msg = "トランザクションエラー"
+      msg = "トランザクションエラー: #{e.to_s}"
       err = true
     ensure
       if not err
@@ -141,14 +199,17 @@ class PhotoController < ApplicationController
 
     if err
       respond_to do |format|
-        format.json { render :json => 
+        format.html { redirect_to :back, notice: msg }
+        format.json { 
+          render :json => 
           {:result   => 'error',  
-           :redirect => employees_url(current_employee.id),
-           :msg      => msg }
+            :redirect => employees_url(current_employee.id),
+            :msg      => msg }
         }
       end
     else
       respond_to do |format|
+        format.html { redirect_to :back, notice: "#{deleted_photoids.size}個の写真を削除" }
         format.json { render :json => 
           {:result   => 'success',  
            :redirect => employees_url(current_employee.id),
@@ -162,12 +223,13 @@ class PhotoController < ApplicationController
   def get_zip
     begin
       zipfilename = params[:fname]
-      logger.debug(sprintf("############### GET_ZIP (%s) ###############", zipfilename))
-      send_data(File.read("/tmp/" + zipfilename), 
+      zipfile_fullpath = PHOTO_CONFIG['download_tmp_path'] + '/' + zipfilename + '.zip'
+      logger.debug(sprintf("############### GET_ZIP (%s) ###############", zipfile_fullpath))
+      send_data(File.read(zipfile_fullpath), 
                 :type => 'application/zip', 
-                :filename => zipfilename)
+                :filename => File.basename(zipfile_fullpath))
     ensure
-      File.delete("/tmp/" + zipfilename) if File.exist?("/tmp/" + zipfilename)
+      File.delete(zipfile_fullpath) if File.exist?(zipfile_fullpath)
     end
   end
 
@@ -175,42 +237,33 @@ class PhotoController < ApplicationController
   ## (get) download multiple items
   ##
   def get_multiple_items
-    photos   = params[:items_ids]    
+    photos = params[:items_ids]
 
     logger.debug("############## DOWNLOAD ##################")
     
     begin      
-      temp_file = Tempfile.new(["download", 'zip'])
+      zip_temp_path = PHOTO_CONFIG['download_tmp_path'] + 
+        '/' + SecureRandom.uuid.to_s + '.zip'      
       ret       = Photo.where(id: photos)
 
-      if photos.size <= 0
-        throw "ひとつ以上のファイルを選択してください"
+      if ret.size <= 0
+        raise InvalidFieldFormat, "ひとつ以上のファイルを選択してください"
       end
 
-      Zip::ZipOutputStream.open(temp_file.path) { |zip| 
+      Zip::File.open(zip_temp_path, Zip::File::CREATE) {|zip|
         ret.each{|p|
-          zip.put_next_entry(File.basename(p.filepath))
-          File.open(p.filepath, "r+b") do |file|
-            zip.write(file.read())
-          end
+          filepath = PHOTO_CONFIG['spool_dir'] + "/" + "#{p.id}.jpg"
+          zip.add("#{p.id}.jpg", filepath)
         }
       }
-
-      zip_data = File.read(temp_file.path)
-
-      logger.debug(sprintf("$$$$$$$$$$$ (%s -> %s -> %s) $$$$$$$$$$$$", 
-                           temp_file.path,
-                           File.basename(temp_file.path),
-                           zip_download_url(format: :zip, 
-                                            fname: File.basename(temp_file.path))))
       
       respond_to do |format|
         format.json { render :json => 
           {:result   => 'success',
-            :redirect => zip_download_url(format: :zip, fname: File.basename(temp_file.path)),
+            :redirect => zip_download_url(File.basename(zip_temp_path)),
             :msg      => "" }
         }
-      end
+      end      
 
     rescue => e
       logger.debug("############## DOWNLOAD err #{e} ##################")
@@ -218,23 +271,21 @@ class PhotoController < ApplicationController
         format.json { render :json => 
           {:result   => 'error',  
             :redirect => employees_url(current_employee.id),
-            :msg      => "エラー: #{e}" }
+            :msg      => "エラー: #{e.to_s}" }
         }
-      end      
-    ensure
-      temp_file.close
+      end
     end
   end
 
   
-  def upload
-    f = params[:target_file_zip]
+  def upload    
+    f = params[:target_file_upload]
 
     if f == nil
       redirect_to root_path, alert: "アップロードするファイルを指定してください"
       return
     end
-
+    
     @original_filename = f.original_filename # filename
     @content_type = f.content_type           # Content-Type
     @size = f.size                           # filesize
@@ -244,125 +295,52 @@ class PhotoController < ApplicationController
     logger.debug("#################### UPLOAD TAGS #{tags} ####################")
     
     tmppath = PHOTO_CONFIG['download_tmp_path'] + '/' + SecureRandom.uuid.to_s
+    deleteall(tmppath) if FileTest.exist?(tmppath)
     FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
 
-    tmpfullpath = tmppath + "/" + SecureRandom.uuid.to_s + ".zip"
+    tmpfullpath = tmppath + "/" + @original_filename
 
     File.open(tmpfullpath, 'wb') do |newfile|
       newfile.write(@read)
     end
 
     additions = []
+    
     begin
-
-      filetype = checkfiletype(tmpfullpath)
-      if not filetype =~ /Zip\sarchive\sdata/
-        raise InvalidFileFormat, "ZIPファイル以外は指定しないでください"
-      end
       
-      filenum = extract(tmpfullpath, tmppath)
+      case checkfiletype(tmpfullpath)
+      when /Zip\sarchive\sdata/        
+        ## uploaded as zip
+        store_zip(tmpfullpath, tmppath, tags, additions)
+      when /JPEG\simage\sdata/
+        ## uploaded as jpg
+        store_jpg(tmpfullpath, tmppath, tags, additions)
+      else
+        raise InvalidFileFormat, "JPGかZIPファイル以外は指定しないでください"
+      end
 
-      ActiveRecord::Base.transaction do
-        Dir.glob(tmppath + "/*").each {|file|
-          
-          next if not checkfiletype(file.to_s) =~ /JPEG\simage\sdata/
-          
-          newphoto = Photo.new(employee_id: current_employee.id)
-          newphoto.save
-          
-          tmp = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
-          
-          set_and_save_photo_exif(newphoto, file.to_s, tmp)
-
-          FileUtils.mv(file.to_s, tmp)
-          additions << [tmp, newphoto.id]
-
-          tags.each{|tagname|
-            tagid = Tag.update_or_create_tag(tagname)
-            t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
-            t.save
-          }            
-        }
-      end ## transaction end
-
-      redirect_to root_path, 
+      redirect_to :back, 
                  notice: "アップロード完了 #{additions.size}個のファイルを追加"
       
     rescue => e
       additions.each{|path, id|
         File.delete(path)
       }
-      redirect_to root_path, 
+      redirect_to :back, 
                   alert: ('トランザクションエラー ' + e.to_s)
     ensure
       deleteall(tmppath)
     end
     
-  end
-
-  def uploadjpg
-    begin 
-      f = params[:target_file_jpg]
-      if f == nil
-        raise InvalidFileFormat, "アップロードするファイルを指定してください"
-      end
-
-      tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
-
-      tmppath = PHOTO_CONFIG['download_tmp_path'] + '/' + SecureRandom.uuid.to_s
-      FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
-      tmpfullpath = tmppath + "/" + SecureRandom.uuid.to_s + ".jpg"
-
-      File.open(tmpfullpath, 'wb') do |newfile|
-        newfile.write(f.read)
-      end
-
-      filetype = checkfiletype(tmpfullpath)
-      logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>> #{filetype}")
-      if not filetype =~ /JPEG\simage\sdata/        
-        raise InvalidFileFormat, "JPGファイル以外は指定しないでください"
-      end
-      
-      logger.debug("#################### UPLOAD TAGS #{tags} ####################")    
-
-      ActiveRecord::Base.transaction do
-        newphoto = Photo.new(employee_id: current_employee.id)
-        newphoto.save
-
-        spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"      
-
-        set_and_save_photo_exif(newphoto, tmpfullpath, spool_path)
-
-        tags.each{|tagname|
-          tagid = Tag.update_or_create_tag(tagname)
-          t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
-          t.save
-        }
-
-        FileUtils.mv(tmpfullpath, spool_path)
-      end
-
-      redirect_to root_path, 
-                  notice: "アップロード完了"
-      
-    rescue => e
-      redirect_to root_path, 
-                  alert: ('トランザクションエラー ' + e.to_s)   
-    ensure
-      deleteall(tmppath)      
-    end
-    
-  end
-  
+  end  
   
   ##
   ## private
   ##
   private
-  def set_and_save_photo_exif(newphoto, jpgpath, spool_path)
+  def set_and_save_photo_exif(newphoto, jpgpath)
     begin
       exif = EXIFR::JPEG.new(jpgpath)
-      newphoto.filepath      = spool_path
       newphoto.shotdate      = exif.date_time_original != nil ? exif.date_time_original.to_datetime : nil
       newphoto.model         = exif.model
       newphoto.exposure_time = exif.exposure_time.to_s
@@ -372,7 +350,6 @@ class PhotoController < ApplicationController
       newphoto.iso_speed_ratings = exif.iso_speed_ratings
       newphoto.update_date_time = exif.date_time != nil ? exif.date_time.to_datetime : nil
     rescue EXIFR::MalformedJPEG
-      newphoto.filepath      = spool_path
       newphoto.shotdate      = nil
       newphoto.model         = nil
       newphoto.exposure_time = nil
@@ -383,39 +360,66 @@ class PhotoController < ApplicationController
       newphoto.update_date_time = nil
     end
       
-    newphoto.save 
+    newphoto.save!
+  end
+
+  def store_zip(tmpfullpath, tmppath, tags, additions)    
+    extract(tmpfullpath, tmppath)    
+    ActiveRecord::Base.transaction do
+      Dir.glob(tmppath + "/*").each {|file|
+        
+        next if not checkfiletype(file.to_s) =~ /JPEG\simage\sdata/
+        
+        newphoto = Photo.new(employee_id: current_employee.id)
+        newphoto.save!
+        
+        spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
+        
+        set_and_save_photo_exif(newphoto, file.to_s)
+
+        FileUtils.mv(file.to_s, spool_path)
+        additions << [spool_path, newphoto.id]
+
+        tags.each{|tagname|
+          tagid = Tag.update_or_create_tag(tagname)
+          t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
+          t.save!
+        }            
+      }
+    end ## transaction end
+  end
+
+  def store_jpg(tmpfullpath, tmppath, tags, additions)    
+    ActiveRecord::Base.transaction do
+      newphoto = Photo.new(employee_id: current_employee.id)
+      newphoto.save!
+
+      spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
+
+      set_and_save_photo_exif(newphoto, tmpfullpath)
+
+      tags.each{|tagname|
+        tagid = Tag.update_or_create_tag(tagname)
+        t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
+        t.save!
+      }
+
+      FileUtils.mv(tmpfullpath, spool_path)
+      additions << [spool_path, newphoto.id]
+    end ## transaction end
   end
 
   #output_path:: 展開先ディレクトリ 
   def extract(src_path, output_path)
-    i = 0
-    output_path = (output_path + "/").sub("//", "/")
-    Zip::ZipInputStream.open(src_path) do |s|
-      while f = s.get_next_entry()
-        d = File.dirname(f.name)
-        FileUtils.makedirs(output_path + d)
-        f =  output_path + f.name
-        unless f.match(/\/$/)
-          File.open(f, "w+b") do |wf|
-            wf.puts(s.read())
-          end
-        end
-        i = i + 1
+##    Zip.unicode_names = true
+    extract_root_dir = output_path
+    Zip::File.open(src_path) do |zip_file|
+      # Handle entries one by one
+      zip_file.each do |entry|
+        # Extract to file/directory/symlink
+        entry.extract("#{extract_root_dir}/#{entry.name}")
       end
     end
-  end
-
-  # def getshottime(path)
-  #   begin
-  #     exif = EXIFR::JPEG.new(path)
-  #     return exif.date_time_original
-  #   rescue EXIFR::MalformedJPEG
-  #     return nil
-  #   end
-  # end
-
-  def photo_img_url(id)
-    "/photo/#{id}"
   end
 
   def deleteall(delthem)

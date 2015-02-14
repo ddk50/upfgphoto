@@ -9,15 +9,21 @@ Rails.application.routes.draw do
 
   root :to => 'photo#index'
 
-  get 'employees/index'
+  get 'employees/index' => 'employees#index', as: :employees_show
   get 'employees/:id' => 'employees#show', as: :employees
+  get 'employees/:id/profile' => 'employees#profile', as: :employee_profile
+  get 'employees/:id/avatar' => 'employees#avatar', as: :employee_avatar
+  post 'employees/:id/edit' => 'employees#edit', as: :employee_edit
 ##  get 'employees/:id/:page' => 'employees#show', as: :employees_page
 
   get '/auth/:provider/callback' => 'sessions#create'
   get '/logout' => 'sessions#destroy', as: :logout
 
-  post 'photo' => 'photo#upload'
-  post 'photo_jpg' => 'photo#uploadjpg', as: :photo_upload_jpg
+  get 'd3cloudtags' => 'photo#d3cloudtags', as: :d3cloudtags
+  
+  post 'photo' => 'photo#upload', as: :photo_upload
+  get 'uploadpanel' => 'photo#uploadpanel', as: :photo_panel
+  get 'editpanel' => 'photo#editpanel', as: :edit_panel
 
   get 'photo/:id' => 'photo#show', as: :photo_show
   delete 'photo/:id' => 'photo#delete', as: :photo_delete
@@ -33,10 +39,14 @@ Rails.application.routes.draw do
   
   get 'tags' => 'tags#gettags'
   get 'hottags' => 'tags#hottags'
-  post 'edittags' => 'tags#edittags'
 
   get 'tags/:tag' => 'tags#show', as: :tagphoto
-  get 'tags/:tag/:page' => 'tags#show', as: :tagphoto_page
+
+  post 'activities/poke/:employee_id' => 'activities#poke', as: :activities_poke
+  post 'activities/viewphoto/:photo_id' => 'activities#viewphoto', as: :activities_viewphoto
+  post 'activities/likephoto/:photo_id' => 'activities#likephoto', as: :activities_likephoto
+  post 'activities/clearfeeds' => 'activities#clearfeeds', as: :activities_clearfeeds
+  
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

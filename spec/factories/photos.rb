@@ -15,7 +15,6 @@ FactoryGirl.define do
 
   factory :photo do
     employee
-    sequence(:filepath) {|i| "#{i}.jpg" }
     shotdate Time.now.to_datetime
     model 'Canon 5d markII'
     exposure_time '1/256'

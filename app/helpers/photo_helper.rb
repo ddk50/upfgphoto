@@ -6,8 +6,4 @@ module PhotoHelper
       yield(tag, classes[index.round])
     end
   end
-
-  def gsub_enter(text)
-    text.gsub(/\n/, '<br />').html_safe
-  end
 end

@@ -1,0 +1,60 @@
+<div class="col-lg-12">
+  <div id="filter-panel" class="collapse filter-panel">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <form class="form-inline" role="form">
+          <div class="form-group">
+            <label class="filter-col" style="margin-right:0;" for="pref-perpage">ページあたり:</label>
+            <select id="pref-perpage" class="form-control" name="perpage">
+              <% 100.step(500, 50) do |num| %>
+                <option value="<%= num %>"><%= num %></option>
+              <% end %>
+            </select>                                
+          </div> <!-- form group [rows] -->
+          
+          <div class="form-group">
+            <label class="control-label" for="pref-search">タグ:</label>
+            <input id="bloodhoundsearchbar" class="form-control input-sm" type="text" id="pref-search" name="tag" data-provide="typeahead" />
+
+          </div><!-- form group [search] -->
+          
+          <div class="form-group">
+            <label class="filter-col" style="margin-right:0;" for="pref-orderby">順番:</label>
+            <select id="pref-orderby" class="form-control">
+              <option>昇順</option>
+              <option>降順</option>
+            </select>            
+          </div> <!-- form group [order by] --> 
+          
+          <div class="form-group">
+	    <div id="date-pickere-container">
+              <label class="filter-col" style="margin-right:0;" for="pref-dateby">日付:</label>
+	      <div class="input-daterange input-group" id="datepicker">
+	        <input type="text" class="input-sm form-control" name="start" id="start" value="" />
+	        <span class="input-group-addon"> to </span>
+	        <input type="text" class="input-sm form-control" name="end" id="end" value="" />
+	      </div>
+	    </div>
+          </div>
+           
+          <div class="form-group">
+            <button type="submit" class="btn btn-default filter-col">
+              <span class="glyphicon glyphicon-search"></span> Go
+            </button>  
+          </div>
+          
+        </form>
+      </div>
+    </div>
+  </div>    
+
+  <div class="form-inline form-group">
+
+    <%= render 'layouts/photo_simple_searchbar' %>
+    
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#filter-panel">
+      <span class="glyphicon glyphicon-cog"></span> 絞り込み検索
+    </button>
+    
+  </div>
+</div>
