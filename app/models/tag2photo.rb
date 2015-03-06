@@ -15,11 +15,16 @@ class Tag2photo < ActiveRecord::Base
   validates_uniqueness_of :photo_id, :scope => [:tag_id]
 
   default_scope { includes(:photo) }
+  default_scope { includes(:tag) }
 
   def self.each_tags(photo_id)
-    tags = Tag2photo.where(photo_id: photo_id)
-    tags.each{|t|
-      yield t.tag
+    tags = Tag2photo.where(photo_id: photo_id)    
+    tags.map{|t|
+      if block_given?
+        yield t.tag 
+      else
+        t.tag
+      end
     }
   end
 

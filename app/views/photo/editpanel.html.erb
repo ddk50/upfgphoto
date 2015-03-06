@@ -37,7 +37,7 @@
               <% end %>
             </td>
             <td>
-              <input id="edittagbox" name="tags" type="text" value="<%= p.tags.map{|t| t.name }.join(",") %>" />
+              <input id="edittagbox" name="tags" type="text" value="<%= p.tag2photos.each_tags(p.id).map{|t| t.name }.join(",") %>" />
             </td>
             <td>
               <input id="photocaption" name="photocaption" type="text" class="form-control" value="<%= p.caption %>" onKeyPress="submitStop(event)">

@@ -4,7 +4,8 @@ class SearchController < ApplicationController
     perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
     @keyword = params[:tag]
 
-    rel = Photo.like_tag(params[:tag])
+    rel = Photo
+      .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
 
