@@ -11,7 +11,7 @@ module Search
       when /photo_upload_date_desc/       
         order('photos.created_at DESC')
       else
-        all
+        order('photos.created_at DESC')
       end    
     end
   end
