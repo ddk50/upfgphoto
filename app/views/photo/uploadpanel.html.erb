@@ -1,0 +1,63 @@
+<div class="panel panel-default" style="margin-top: 10px;">
+  <div class="panel-heading">
+    <h3 class="panel-title">ZIPかJPGでアップロード</h3>
+  </div>
+  <div class="panel-body">
+    <%= form_tag(photo_upload_path, {:multipart => true}) do |f| %>
+      <form class="form-horizontal" role="form">
+        
+        <div class="form-group">
+          <p class="control-label"><b>タグ</b></p>
+          <div id="bloodhoundzip">
+	    <div class="input-group">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button">タグを追加</button>
+              </span>
+              <input id="bloodhoundtextboxzip" type="text" class="form-control">
+	    </div><!-- /input-group -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div id="phototagszip">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <p class="control-label"><b>最近使われたタグ</b></p>
+          <div id="recentusephototagszip">
+	    
+          </div>
+        </div>
+
+        <div class="form-group">
+          <p class="control-label"><b>ファイル</b></p>
+          <!--            <input name="target_file" type="file" />-->
+
+          <input type="file" id="target_file_upload" name="target_file_upload" style="display: none;">
+          <div style="width:40%;float:left;margin-right:10px;" class="input-group">
+	    <span class="input-group-btn">
+	      <button class="btn btn-default" type="button" onclick="$('#target_file_upload').click();">
+	        <i class="glyphicon glyphicon-folder-open"></i>
+	      </button>
+	    </span>
+	    <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+          </div>
+          <!-- <input type="submit" name="csv_up" class="btn btn-primary" value="upload"> -->
+          <script type="text/javascript">
+	    $(function(){
+	    $('#target_file_upload').change(function() {
+            $('#dummy_file').val($(this).val());
+	    });
+	    });
+          </script>
+        </div>
+        <p class="help-block"><B>JPGかZIPで固めてアップロードしてください。</B>複数JPGをZIPに固めても問題ありません。ZIPアーカイブ内にはディレクトリは作らないでください。ディレクトリ下にあるJPGファイルはすべて無視されます。</p>
+
+        <div class="form-group">
+          <%= submit_tag("ファイルを送信", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
+        </div>
+    <% end %>
+  </div>
+</div>
+

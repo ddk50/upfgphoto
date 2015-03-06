@@ -1,0 +1,63 @@
+
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header"><%= current_employee.nickname %>'s Image Gallery <span class="badge"><%= current_employee.photos.size %></span></h2>
+  </div>
+</div>
+
+<div class="row">
+  <%= render 'layouts/photosearchbar' %>
+</div>
+
+<div id="list_de_trucs" class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>写真</th>
+        <th>タグ</th>
+        <th>タイトル</th>
+        <th>キャプション</th>
+        <th>#</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @photos.each do |p| %>
+          <tr>
+            <td>
+	      <%= form_tag(photo_delete_url(id: p.id), :method => :delete) do %>
+                <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
+			       :class => "btn btn-danger") %>
+	      <% end %>
+            </td>
+	    <%= form_tag(photo_edit_url(id: p.id), :method => :post) do %>
+            <td>
+              <%= link_to(photo_view_url(id: p.id)) do %>
+                <%= image_tag("/images/blank.gif", class: "img-lazy-responsive media-object", width: 64, height: 64, data: { original: photo_thumbnail_url(id: p.id) } ) %>
+              <% end %>
+            </td>
+            <td>
+              <input id="edittagbox" name="tags" type="text" value="<%= p.tag2photos.each_tags(p.id).map{|t| t.name }.join(",") %>" />
+            </td>
+            <td>
+              <input id="photocaption" name="photocaption" type="text" class="form-control" value="<%= p.caption %>" onKeyPress="submitStop(event)">
+            </td>
+            <td>
+              <textarea id="photodescription" name="photodescription" class="form-control" rows="3"><%= p.description %></textarea>
+            </td>
+            <td>
+              <p></p>
+              <%= submit_tag("編集", :data => {:disable_with => "Sending..."}, 
+			     :class => "btn btn-default") %>
+            </td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="text-center">   
+  <%= render 'layouts/pagination', locals: {pages_count: @pages_count, current_page: @current_page} %>
+</div>
+

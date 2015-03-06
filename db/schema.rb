@@ -11,24 +11,47 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150204112628) do
+ActiveRecord::Schema.define(version: 20150226232334) do
+
+  create_table "activities", force: true do |t|
+    t.integer  "employee_id",                        null: false
+    t.integer  "target_employee_id"
+    t.integer  "target_photo_id"
+    t.integer  "action_type",                        null: false
+    t.boolean  "checked",            default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "activities", ["checked"], name: "index_activities_on_checked"
+  add_index "activities", ["employee_id"], name: "index_activities_on_employee_id"
+  add_index "activities", ["target_employee_id"], name: "index_activities_on_target_employee_id"
+  add_index "activities", ["target_photo_id"], name: "index_activities_on_target_photo_id"
 
   create_table "employees", force: true do |t|
     t.string   "nickname"
     t.string   "provider"
     t.string   "image_url"
-    t.string   "uid",         null: false
+    t.string   "uid",                         null: false
     t.text     "description"
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "branch"
+    t.string   "position"
+    t.datetime "hiredate"
+    t.datetime "birthdate"
+    t.string   "address"
+    t.string   "phone"
+    t.string   "email"
+    t.boolean  "existavatar", default: false
+    t.boolean  "edited",      default: false
   end
 
   add_index "employees", ["provider", "uid"], name: "index_employees_on_provider_and_uid", unique: true
 
   create_table "photos", force: true do |t|
     t.integer  "employee_id",               null: false
-    t.string   "filepath"
     t.datetime "shotdate"
     t.string   "model"
     t.string   "exposure_time"
@@ -43,6 +66,7 @@ ActiveRecord::Schema.define(version: 20150204112628) do
     t.text     "description"
   end
 
+  add_index "photos", ["employee_id"], name: "index_photos_on_employee_id"
   add_index "photos", ["shotdate"], name: "index_photos_on_shotdate"
 
   create_table "tag2photos", force: true do |t|

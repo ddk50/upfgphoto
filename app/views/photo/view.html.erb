@@ -56,42 +56,28 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-
-      <div class="panel panel-info">
-        <div class="panel-heading">タグ編集</div>
-        <div class="panel-body">
-
-          <div class="input-group">
-            <span class="input-group-btn">
-              <button id="submittag" class="btn btn-default" type="button">編集</button>
-            </span>
-            <input id="edittagbox" type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-provide="typeahead"/>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </div>
-
   <% if current_employee.id == @holder.id %>
     <div class="row">
       <div class="col-md-12">
 
         <div class="panel panel-info">
-          <div class="panel-heading">タイトルと紹介文の編集</div>
+          <div class="panel-heading">キャプションやタグの編集</div>
           <div class="panel-body">
 
             <%= form_tag(photo_edit_path(id: @photoid), method: "POST", multipart: true) do |f| %>
               <p></p>
               <div class="form-group">
-                <label for="introduction" class="control-label">タイトル</label>
+                <label for="photocaption" class="control-label">タイトル</label>
                 <input id="photocaption" name="photocaption" type="text" class="form-control" value="<%= @photo.caption %>" onKeyPress="submitStop(event)">
               </div>
               <div class="form-group">
-                <label for="introduction" class="control-label">紹介文</label>
+                <label for="photodescription" class="control-label">紹介文</label>
                 <textarea id="photodescription" name="photodescription" class="form-control" rows="3"><%= @photo.description %></textarea>
+              </div>
+              <div class="form-group">
+                <label for="edittagbox" class="control-label">タグ</label>
+                </br>
+                <input id="edittagbox" name="tags" type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-provide="typeahead"/>
               </div>
               <%= submit_tag("変更", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
             <% end %>

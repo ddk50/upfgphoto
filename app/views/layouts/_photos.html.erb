@@ -1,0 +1,47 @@
+<% locals[:contents].each do |p| %>
+  <% p = p.photo if p.respond_to?(:photo) %>
+  <article class="col-lg-3 col-md-4 col-xs-6">
+    <div id="photothumbnail">
+      <div class="panel panel-default">
+
+        <div class="panel-body">                       
+          <ul class="nav nav-pills">
+
+            <% p.tag2photos.each_tags(p.id) do |tag| %>
+              <li><%= link_to(tagphoto_url(tag: tag.name), style: "padding: 4px 4px 4px 4px;") do %> <span class="label label-primary"> <%= tag.name %> </span> <% end %></li>
+            <% end %>
+          </ul>
+
+          <div id="photo-coner-check-box">
+            <div class="checkbox-inline">
+              <%= check_box_tag("photo_id[]", p.id, false, {class: "photo_check_group"}) %>
+            </div>
+          </div>
+
+          <%= link_to(photo_view_url(id: p.id), class: "thumbnail", style: "margin-bottom: 0px;") do %>
+            <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
+          <% end %>
+          
+        </div>
+
+        <div class="panel-footer">
+          <h4>
+            <a href="<%= photo_view_url(id: p.id) %>" title="<%= p.caption %>">
+              <% if p.caption == nil %>
+                untitled
+              <% else %>
+                <%= p.caption %>
+              <% end %>
+            </a>
+          </h4>
+          <span class="pull-right">
+            <% @likecount = p.likecount.size %>
+            <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
+            <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%=p.id%>-bs3"></div>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </article>
+<% end %>

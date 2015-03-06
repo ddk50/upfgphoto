@@ -26,3 +26,5 @@ db/data.yml
 # Ignore db backupfile
 backups
 
+# UPFG banner
+public/images/topbanner.jpg
