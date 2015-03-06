@@ -1,8 +1,19 @@
 # -*- coding: utf-8 -*-
 class SessionsController < ApplicationController
   def create
+    
+    granted = false
 
-    if not WHITE_LIST.include?(request.env['omniauth.auth'][:info][:nickname])
+    logger.debug("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb #{request.env['omniauth.auth'][:info][:nickname]}")    
+
+    WHITE_LIST.each{|val|
+      if val.to_s == request.env['omniauth.auth'][:info][:nickname].to_s
+        granted = true
+        break
+      end      
+    }
+    
+    if not granted
       redirect_to root_path, alert: 'メンバーではありません．管理人に連絡して追加してもらってください'
       return
     end

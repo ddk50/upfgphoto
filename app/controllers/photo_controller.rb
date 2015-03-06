@@ -392,6 +392,7 @@ class PhotoController < ApplicationController
     output_path = (output_path + "/").sub("//", "/")
     Zip::ZipInputStream.open(src_path) do |s|
       while f = s.get_next_entry()
+        logger.debug("------------------------------- #{f.name} --------------------------")
         d = File.dirname(f.name)
         FileUtils.makedirs(output_path + d)
         f =  output_path + f.name
