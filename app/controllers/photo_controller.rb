@@ -48,16 +48,15 @@ class PhotoController < ApplicationController
     id = current_employee.id
     page = params[:page] == nil ? 0 : params[:page].to_i
     perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
-    rel  = Photo.employee_photo(id)
-
-    @employee = Employee.find_by_id(id)
     
-    @photos = rel    
+    rel  = Photo.employee_photo(id)      
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
-      .offset(page * perpage)
-      .limit(perpage)
+
+    @employee = Employee.find_by_id(id)
+    
+    @photos = rel.offset(page * perpage).limit(perpage)
 
     photo_count = rel.size
     @current_page = page

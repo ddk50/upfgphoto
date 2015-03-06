@@ -80,21 +80,20 @@ class EmployeesController < ApplicationController
                params[:perpage] == "") ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
 
     @employee = Employee.find_by_id(id)
+
     rel = Photo.employee_photo(id)
-    
-    @photos = rel
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
-      .offset(page * perpage)
-      .limit(perpage)
     
-    photo_count = rel.size
+    @photos = rel.offset(page * perpage).limit(perpage)
+    
+    @photo_count = rel.size
     
     @current_page = page
-    @pages_count = (photo_count % perpage) > 0 ? 
-                   ((photo_count / perpage) + 1) : 
-                   photo_count / perpage
+    @pages_count = (@photo_count % perpage) > 0 ? 
+                   ((@photo_count / perpage) + 1) : 
+                   @photo_count / perpage
     
   end
 

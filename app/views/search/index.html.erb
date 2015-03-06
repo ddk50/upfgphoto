@@ -1,0 +1,36 @@
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header">'<%= @keyword %>' が含まれる写真 <span class="badge"><%= @photo_count %></span></h2>
+  </div>
+</div>
+
+<div class="row">
+  <%= render 'layouts/photosearchbar' %>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="form-inline form-group">
+      <%= submit_tag("ダウンロード", :class => "btn btn-success", :id => "downloadall") %>
+      
+      <div class="checkbox" style="margin-left:10px; margin-right:10px;">
+        <label><input type="checkbox" id="photo_check_group" class="photocheckAll"> 全てにチェックを入れる</label>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <hr>
+  </div>
+</div>
+
+<div class="row">
+  <%= render 'layouts/photos', locals: {contents: @photos} %>
+</div>
+
+<div class="text-center">   
+  <%= render 'layouts/pagination', locals: {pages_count: @pages_count, current_page: @current_page} %>
+</div>

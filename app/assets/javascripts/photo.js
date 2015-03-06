@@ -139,7 +139,7 @@ var ready = function() {
 	$("#bloodhoundphototop" + ' :button').click(function() {
             var val = $("#bloodhoundphototop :input[type=text]")[1].value;
             if (val != "" ) {
-                window.location = "tags/" + val;
+                window.location = "search/index?tag=" + val;
             }
 	});
 	$("#bloodhoundphototop :input[type=text]").keypress(function(ev) {
@@ -147,7 +147,7 @@ var ready = function() {
 		(ev.keyCode && ev.keyCode === 13)) {
                 var val = $("#bloodhoundphototop :input[type=text]")[1].value;
                 if (val != "") {
-                    window.location = "tags/" + val;
+                    window.location = "search/index?tag=" + val;
                 }
 		return false;
             } else {

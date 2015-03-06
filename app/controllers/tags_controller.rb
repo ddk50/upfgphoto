@@ -18,7 +18,7 @@ class TagsController < ApplicationController
       .limit(PHOTO_CONFIG['page_window_size'])
       .photo_order(params[:sort])
     
-    photo_count = rel.size
+    @photo_count = rel.size
 
     # ##
     # ## tagとの参照関係はのこってるけど、photoとの参照関係が    
@@ -34,9 +34,9 @@ class TagsController < ApplicationController
     # }
     
     @current_page = page
-    @pages_count = (photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
-                   ((photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
-                   photo_count / PHOTO_CONFIG['page_window_size']
+    @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
+                   ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
+                   @photo_count / PHOTO_CONFIG['page_window_size']
   end
 
   def gettags
