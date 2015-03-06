@@ -68,4 +68,4 @@ end
 gem 'yaml_db'
 gem 'dalli'
 
-
+gem 'unicorn'
