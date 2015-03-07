@@ -255,7 +255,7 @@ var ready = function() {
                 .size([w, h])
                 .rotate(0)
                 .fontSize(function(d) {
-                    return fontSize(d.value);                   
+                    return fontSize(+d.value);
                 })
                 .on("end", draw);
 

@@ -20,6 +20,9 @@ tmp
 # Ignore whitelist
 config/whitelist.yml
 
+# Ignore secrets keys
+config/secrets.yml
+
 # Ignore db file
 db/data.yml
 

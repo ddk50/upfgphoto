@@ -2,14 +2,15 @@
 # ワーカーの数
 worker_processes 4
 
-# ソケット
-listen  '/tmp/unicorn.sock'
-pid     '/tmp/unicorn.pid'
+rails_root = File.expand_path('../../', __FILE__)
 
-# ログ
-log = '${my_app}/log/unicorn.log'
-stderr_path File.expand_path('log/unicorn.log', ENV['RAILS_ROOT'])
-stdout_path File.expand_path('log/unicorn.log', ENV['RAILS_ROOT'])
+working_directory rails_root
+
+listen "#{rails_root}/tmp/unicorn.sock"
+pid "#{rails_root}/tmp/unicorn.pid"
+
+stderr_path "#{rails_root}/log/unicorn_error.log"
+stdout_path "#{rails_root}/log/unicorn.log"
 
 preload_app true
 GC.respond_to?(:copy_on_write_friendly=) and GC.copy_on_write_friendly = true

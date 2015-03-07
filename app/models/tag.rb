@@ -9,6 +9,7 @@ class Tag < ActiveRecord::Base
     Tag.select("Tags.name, count(tag2photos.tag_id) as count")
       .joins(:tag2photos)
       .group("tag2photos.tag_id")
+      .order("count DESC")
   end
 
   def self.update_or_create_tag(tagname)

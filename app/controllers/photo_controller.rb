@@ -23,7 +23,7 @@ class PhotoController < ApplicationController
   end
 
   def d3cloudtags
-    max_font_size = 26.0
+    max_font_size = 20.0
     tags = Tag.counts
     max = tags.sort_by(&:count).last    
     freq_list = tags.map{|val|

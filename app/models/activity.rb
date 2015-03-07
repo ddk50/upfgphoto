@@ -17,16 +17,19 @@ class Activity < ActiveRecord::Base
     new.save!
   end
 
+  ##
+  ## [FIXME] 消した写真が参照されていた場合はnilで例外がぶ飛
+  ##
   def feed
     case self.action_type
     when "poke_employee" then
       sprintf("%sさんからPokeが届いています", self.employee.name)
     when "like_photo" then
       sprintf("%sさんが貴方の写真(%d)をいいねと言っています", 
-              self.employee.name, self.target_photo.id)
+              self.employee.name, self.target_photo_id)
     when "view_photo" then
       sprintf("%sさんが貴方の写真(%d)を見ました", self.employee.name, 
-              self.target_photo.id)
+              self.target_photo_id)
     end
   end
   
