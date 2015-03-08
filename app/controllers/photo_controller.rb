@@ -100,6 +100,7 @@ class PhotoController < ApplicationController
 
     if not (photo.employee_id == current_employee.id)
       redirect_to :back, alert: "他人の写真は変更できません"
+      return
     else
 
       begin
@@ -281,7 +282,7 @@ class PhotoController < ApplicationController
     f = params[:target_file_upload]
 
     if f == nil
-      redirect_to root_path, alert: "アップロードするファイルを指定してください"
+      redirect_to :back, alert: "アップロードするファイルを指定してください"
       return
     end
     

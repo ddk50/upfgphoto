@@ -105,6 +105,7 @@ GEM
       thor (>= 0.18.1, < 2.0)
     raindrops (0.13.0)
     rake (10.3.2)
+    rb-readline (0.5.2)
     rdoc (4.1.2)
       json (~> 1.4)
     ref (1.0.5)
@@ -190,6 +191,7 @@ DEPENDENCIES
   omniauth
   omniauth-twitter
   rails (= 4.1.1)
+  rb-readline
   rmagick
   rspec-rails (= 3.0.0)
   rubyzip

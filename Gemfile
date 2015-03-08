@@ -69,3 +69,4 @@ gem 'yaml_db'
 gem 'dalli'
 
 gem 'unicorn'
+gem 'rb-readline'
