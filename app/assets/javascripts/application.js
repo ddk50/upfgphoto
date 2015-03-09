@@ -19,9 +19,18 @@
 //= require jquery.lazyload.min
 //= require d3.min
 //= require d3.layout.cloud
+//= require pinterest-grid-plugin
 //= require_tree .
 
 var ready = function () {
+
+    $('#pinBoot').pinterest_grid({
+        no_columns: 4,
+        padding_x: 10,
+        padding_y: 10,
+        margin_bottom: 50,
+        single_column_breakpoint: 700
+    });
 
     $("img.img-lazy-responsive").lazyload({
         effect: "fadeIn",
