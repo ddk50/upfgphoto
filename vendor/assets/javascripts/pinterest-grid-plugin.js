@@ -125,11 +125,11 @@
             });
         });
 
-        this.tallest($container);
+        this.tallest($container, single_column_mode);
         $(window).resize();
     };
 
-    Plugin.prototype.tallest = function (_container) {
+    Plugin.prototype.tallest = function (_container, single_column_mode) {
         var column_heights = [];
         var largest = 0;
 
@@ -142,7 +142,12 @@
         }
 
         largest = Math.max.apply(Math, column_heights);
-        _container.css('height', largest + (this.options.padding_y + this.options.margin_bottom));
+
+        if (single_column_mode) {
+            _container.css('height', largest + 800 + (this.options.padding_y + this.options.margin_bottom));
+        } else {
+            _container.css('height', largest + (this.options.padding_y + this.options.margin_bottom));
+        }
     };
 
     Plugin.prototype.make_layout_change = function (_self) {

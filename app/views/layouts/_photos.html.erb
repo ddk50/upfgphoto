@@ -1,4 +1,4 @@
-<section id="pinBoot">
+<section id="photothumbnail">
 
   <% locals[:contents].each do |p| %>
     <% p = p.photo if p.respond_to?(:photo) %>
@@ -19,15 +19,17 @@
       <%= link_to(photo_view_url(id: p.id), style: "margin-bottom: 0px;") do %>
         <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
         <h4><%= p.caption %></h4>
-        <p><%= p.description %></p>
       <% end %>
+      <p><%= p.description %></p>
 
+      <div class="panel-footer">
+        <span class="pull-right">
+          <% @likecount = p.likecount.size %>
+          <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
+          <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%=p.id%>-bs3"></div>
+        </span>
+      </div>
 
-      <span class="pull-right">
-        <% @likecount = p.likecount.size %>
-        <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
-        <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%=p.id%>-bs3"></div>
-      </span>
     </article>
   <% end %>
 
