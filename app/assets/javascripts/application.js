@@ -20,6 +20,7 @@
 //= require d3.min
 //= require d3.layout.cloud
 //= require pinterest-grid-plugin
+//= require jquery.qtip.min
 //= require_tree .
 
 var ready = function () {

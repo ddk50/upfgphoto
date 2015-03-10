@@ -4,6 +4,26 @@ var ready = function() {
 
     var windowWidth = $(window).width();
 
+    $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
+        position: {
+            my: 'top center',
+            at: 'bottom center',
+            target: $('#bloodhoundtextboxzip'),
+        },
+        show: {
+            event: 'focus'
+        },
+        hide: {
+           event: 'blur'
+        },
+        content: {
+            text: 'Enterキーを押すか, 「タグを追加」ボタンを押して確定してください'
+        },
+        style: {
+            classes: 'tipsStyle'
+        }
+    });
+
     $('#photos img').on('click', function(){
         var src = $(this).attr('data-original2');
         var img = '<img src="' + src + '" class="img-responsive"/>';
