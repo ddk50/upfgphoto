@@ -52,14 +52,14 @@
             clearTimeout(resize_finish);
             resize_finish = setTimeout( function () {
                 self.make_layout_change(self);
-            }, 11);
+            }, 100);
         });
 
         self.make_layout_change(self);
 
-        setTimeout(function() {
-            $(window).resize();
-        }, 500);
+        // setTimeout(function() {
+        //     $(window).resize();
+        // }, 500);
     };
 
     Plugin.prototype.calculate = function (single_column_mode) {
