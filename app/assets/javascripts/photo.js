@@ -6,9 +6,9 @@ var ready = function() {
 
     $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
         position: {
-            my: 'top center',
-            at: 'bottom center',
-            target: $('#bloodhoundtextboxzip'),
+            my: 'bottom center',
+            at: 'top center',
+            target: $('#bloodhoundtextboxzip')
         },
         show: {
             event: 'focus'
