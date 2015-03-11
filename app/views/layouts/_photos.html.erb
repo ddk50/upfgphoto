@@ -17,7 +17,7 @@
       </div>
 
       <%= link_to(photo_view_url(id: p.id), style: "margin-bottom: 0px;") do %>
-        <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id)}, class: "img-lazy-responsive", width: 400, height: 300) %>
+        <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id, type: 'small')}, class: "img-lazy-responsive", width: 400, height: 300) %>
         <h4><%= p.caption %></h4>
       <% end %>
       <p><%= p.description %></p>

@@ -32,7 +32,7 @@ Rails.application.routes.draw do
   delete 'photo/:id' => 'photo#delete', as: :photo_delete
   post 'photo/:id' => 'photo#edit', as: :photo_edit
 
-  get 'photo/:id/thumbnail' => 'photo#thumbnail', as: :photo_thumbnail
+  get 'photo/:id/thumbnail/:type' => 'photo#thumbnail', as: :photo_thumbnail
   get 'photo/:id/view' => 'photo#view', as: :photo_view
   get 'photo/:id/download' => 'photo#download', as: :photo_download
 

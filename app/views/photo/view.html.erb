@@ -12,7 +12,9 @@
 
   <div class="row top15" style="margin-bottom: 10px;">
     <div class="col-lg-12">
-      <%= image_tag(photo_show_url(id: @photoid), class: "img-responsive", id: "largeimageview") %>
+      <%= link_to(photo_show_url(id: @photoid), style: "margin-bottom: 0px;") do %>
+        <%= image_tag(photo_thumbnail_url(id: @photoid, type: 'large'), class: "img-responsive", id: "largeimageview") %>
+      <% end %>
     </div>
   </div>
 

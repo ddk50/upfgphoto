@@ -2,20 +2,23 @@ development:
   download_tmp_path: '/tmp/files'
   spool_dir: '/mnt/upfgphotos2/dev/photo'
   avatar_dir: '/mnt/upfgphotos2/dev/avatar'
-  photo_resie_rate: 0.1
+  thumbnail_large_dir: '/mnt/upfgphotos2/dev/thumbnail_large'
+  thumbnail_small_dir: '/mnt/upfgphotos2/dev/thumbnail_small'
   page_window_size: 50
 
 test:
   download_tmp_path: '/tmp/files'
   spool_dir: '/mnt/upfgphotos2/test/photo'
   avatar_dir: '/mnt/upfgphotos2/test/avatar'
-  photo_resie_rate: 0.1
+  thumbnail_large_dir: '/mnt/upfgphotos2/test/thumbnail_large'
+  thumbnail_small_dir: '/mnt/upfgphotos2/test/thumbnail_small'
   page_window_size: 50
 
 production:
   download_tmp_path: '/tmp/files'
   spool_dir: '/mnt/upfgphotos2/production/photo'
   avatar_dir: '/mnt/upfgphotos2/production/avatar'
-  photo_resie_rate: 0.1
+  thumbnail_large_dir: '/mnt/upfgphotos2/production/thumbnail_large'
+  thumbnail_small_dir: '/mnt/upfgphotos2/production/thumbnail_small'
   page_window_size: 50
 

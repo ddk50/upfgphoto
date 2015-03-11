@@ -40,7 +40,7 @@
     <% @recent_photos.each do |photo| %>
       <div class="wrapper">
         <div class="fix" style="position: relative;">
-          <%= image_tag("/images/blank.gif", data: { original2: photo_show_url(photo.id), original: photo_thumbnail_url(photo.id)}, class: "img-lazy-responsive", style: "z-index: -1;") %>
+          <%= image_tag("/images/blank.gif", data: { original2: photo_show_url(photo.id), original: photo_thumbnail_url(id: photo.id, type: 'small')}, class: "img-lazy-responsive", style: "z-index: -1;") %>
           <div class="desc">
             <% @likecount = photo.likecount.size %>
             <p class="desc_content glyphicon glyphicon-eye-open"><%=rand(50)%></p>

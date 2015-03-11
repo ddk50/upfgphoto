@@ -128,11 +128,20 @@ class PhotoController < ApplicationController
 
   def thumbnail
     photoid = params[:id]
-    rate    = PHOTO_CONFIG['photo_resie_rate']
-    thumbnail_path = PHOTO_CONFIG['spool_dir'] + "/thumbnail_#{photoid}.jpg"
-    if not FileTest.exist?(thumbnail_path)
-      image = Magick::ImageList.new("#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg")
-      image.thumbnail(rate).write(thumbnail_path)
+    type = params[:type]
+    original_path = PHOTO_CONFIG['spool_dir'] + "/" + "#{photoid}.jpg"
+    thumbnail_path = nil
+
+    case type
+    when 'large'
+      thumbnail_path = PHOTO_CONFIG['thumbnail_large_dir'] + "/thumbnail_#{photoid}.jpg"
+      gen_thumbnail(original_path, photoid, :large) if not FileTest.exist?(thumbnail_path)
+    when 'small'
+      thumbnail_path = PHOTO_CONFIG['thumbnail_small_dir'] + "/thumbnail_#{photoid}.jpg"
+      gen_thumbnail(original_path, photoid, :small) if not FileTest.exist?(thumbnail_path)
+    else
+      thumbnail_path = PHOTO_CONFIG['thumbnail_small_dir'] + "/thumbnail_#{photoid}.jpg"
+      gen_thumbnail(original_path, photoid, :small) if not FileTest.exist?(thumbnail_path)
     end
 
     send_data(
@@ -435,15 +444,55 @@ class PhotoController < ApplicationController
   end
 
   public
-  def gen_thumbnail(original_path, photoid)
-    rate    = PHOTO_CONFIG['photo_resie_rate']
-    thumbnail_path = PHOTO_CONFIG['spool_dir'] + "/thumbnail_#{photoid}.jpg"
-    image = Magick::ImageList.new(original_path)
-    image.thumbnail(rate).write(thumbnail_path)
+  def gen_thumbnail(original_path, photoid, type)
+    
+    thumbnail_path = nil
+    image = Magick::ImageList.new(original_path).first
+    
+    height = image.rows
+    width  = image.columns
+    rate   = 0.1
+    
+    case type
+    when :small then
+      if width > height
+        ## 横
+        rate = 400.0 / width.to_f
+      else
+        ## 縦        
+        rate = 500.0 / height.to_f
+      end     
+      thumbnail_path = PHOTO_CONFIG['thumbnail_small_dir'] + "/thumbnail_#{photoid}.jpg"
+    when :large then
+      if width > height
+        ## 横
+        rate = 1024.0 / width.to_f
+      else
+        ## 縦        
+        rate = 1024.0 / height.to_f
+      end
+      thumbnail_path = PHOTO_CONFIG['thumbnail_large_dir'] + "/thumbnail_#{photoid}.jpg"
+    else
+      return
+    end
+
+    if rate >= 1.0
+      image.thumbnail(1.0).write(thumbnail_path)
+    else
+      image.thumbnail(rate).write(thumbnail_path)
+    end
+  
   end
 
   def delete_thumbnail(photoid)
-    File.delete(PHOTO_CONFIG['spool_dir'] + "/thumbnail_#{photoid}.jpg")
+    thumbnail_paths = [ PHOTO_CONFIG['thumbnail_large_dir'] + "/thumbnail_#{photoid}.jpg",
+                        PHOTO_CONFIG['thumbnail_small_dir'] + "/thumbnail_#{photoid}.jpg" ]
+        
+    thumbnail_paths.each{|path|
+      if FileTest.exist?(path)
+        File.delete(path)
+      end
+    }
   end
 
   def delete_photo(photoid)
