@@ -3,28 +3,34 @@
   border: 1px solid #ccc;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   display: inline-block;
-/*  padding: 4px 6px; kazushi edit*/
-  padding: 4px 10px;
-/*  margin-bottom: 10px; kazushi edit */ 
-  margin-bottom: 0px; /* kazushi edit */
-  margin-left: -3px; /* kazushi addition */
+  padding: 4px 6px;
   color: #555;
   vertical-align: middle;
   border-radius: 4px;
   max-width: 100%;
   line-height: 22px;
-  height: 34px; /* kazushi addition */
   cursor: text;
+  width: 100%; /* Kazushi Addition */
 }
 .bootstrap-tagsinput input {
   border: none;
   box-shadow: none;
   outline: none;
   background-color: transparent;
-  padding: 0;
+  padding: 0 6px;
   margin: 0;
   width: auto !important;
   max-width: inherit;
+}
+.bootstrap-tagsinput.form-control input::-moz-placeholder {
+  color: #777;
+  opacity: 1;
+}
+.bootstrap-tagsinput.form-control input:-ms-input-placeholder {
+  color: #777;
+}
+.bootstrap-tagsinput.form-control input::-webkit-input-placeholder {
+  color: #777;
 }
 .bootstrap-tagsinput input:focus {
   border: none;
