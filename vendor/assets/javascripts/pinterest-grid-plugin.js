@@ -28,7 +28,7 @@
     defaults = {
         padding_x: 10,
         padding_y: 10,
-        no_columns: 3,
+        no_columns: 4,
         margin_bottom: 50,
         single_column_breakpoint: 700
     },
@@ -45,14 +45,16 @@
     }
 
     Plugin.prototype.init = function () {
-        var self = this,
-        resize_finish;
+        var self = this;
+        var resize_finish = false;
 
         $(window).resize(function() {
-            clearTimeout(resize_finish);
+            if (resize_finish !== false) {
+                clearTimeout(resize_finish);
+            }
             resize_finish = setTimeout( function () {
                 self.make_layout_change(self);
-            }, 100);
+            }, 500);
         });
 
         self.make_layout_change(self);
