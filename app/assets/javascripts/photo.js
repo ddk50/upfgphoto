@@ -76,11 +76,11 @@ var ready = function() {
         });        
     }
 
-    $(".photodescription").focusout(function(event) {
+    $(".photodescription").change(function(event) {
         editdescription($(this));
     });
 
-    $(".photocaption").focusout(function(event) {
+    $(".photocaption").change(function(event) {
         editcaption($(this));
     });
 
