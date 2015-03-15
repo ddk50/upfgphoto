@@ -77,8 +77,6 @@ class PhotoController < ApplicationController
 
     @holder     = @photo.employee
     @holdername = @photo.employee.nickname
-    @tags       = Tag2photo.where(photo_id: @photoid)
-    logger.debug(sprintf("############### GET_TAG (%s) ###############", @tags.size ))
   end
   
   def show
@@ -94,7 +92,6 @@ class PhotoController < ApplicationController
     photoid = params[:id].to_i
     caption = params[:photocaption]
     description = params[:photodescription]
-    tags = params[:tags].to_s.split(",")
     
     photo = Photo.find_by_id(photoid)    
 
@@ -104,20 +101,9 @@ class PhotoController < ApplicationController
     else
 
       begin
-        ActiveRecord::Base.transaction do
-          exists_tags = Tag2photo.where(photo_id: photoid)
-          exists_tags.destroy_all
-
-          tags.each{|t|
-            tag_id = Tag.update_or_create_tag(t)
-            newt = Tag2photo.new(photo_id: photoid, tag_id: tag_id)
-            newt.save!
-          }
-
-          photo.caption     = caption
-          photo.description = description
-          photo.save!
-        end
+        photo.caption     = caption
+        photo.description = description
+        photo.save!
         redirect_to :back, notice: "変更完了"
       rescue => e      
         redirect_to :back, alert: e.to_s
@@ -341,7 +327,75 @@ class PhotoController < ApplicationController
       deleteall(tmppath)
     end
     
-  end  
+  end 
+
+  def editdescription
+    photodescription = params[:photodescription]
+    photoid = params[:photoid]
+
+    begin
+      raise InvalidFieldFormat, "写真番号を指定してください" if photoid == nil
+
+      photo = Photo.find_by_id(photoid)
+
+      if not (photo.employee_id == current_employee.id)
+        raise InvalidRequest, "他人の写真の説明文は変更できません"
+      end
+
+      photo.description = photodescription
+      photo.save!
+
+      respond_to do |format|
+        format.json { render :json => 
+          { :status   => 'success', 
+            :msg => '' }
+        }
+      end
+
+    rescue => e
+      respond_to do |format|
+        format.json { render :json => 
+          { :status   => 'error',
+            :msg => e.to_s }
+        }
+      end      
+    end
+  end
+
+
+  def editcaption
+    photocaption = params[:photocaption]
+    photoid = params[:photoid]
+
+    begin      
+      raise InvalidFieldFormat, "写真番号を指定してください" if photoid == nil
+      photo = Photo.find_by_id(photoid)    
+
+      if not (photo.employee_id == current_employee.id)
+        raise InvalidRequest, "他人の写真のタイトルは変更できません"
+      end
+
+      photo.caption = photocaption
+      photo.save!
+
+      respond_to do |format|
+        format.json { render :json => 
+          { :status => 'success', 
+            :msg => '' }
+        }
+      end
+
+    rescue => e
+      respond_to do |format|
+        format.json { render :json => 
+          { :status   => 'error',
+            :msg => e.to_s }
+        }
+      end
+    end
+
+  end
+
   
   ##
   ## private

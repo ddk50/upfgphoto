@@ -1,8 +1,105 @@
 var gId = 0;
 var insetedTags = [];
+var already_loaded_tags = false;
+
+var load = function() {
+    already_loaded_tags = true;
+}
+
 var ready = function() {
 
     var windowWidth = $(window).width();
+
+    function edittag($this) {
+        var selVal = $this.val().split(",");
+        var id = $this.attr("data-photoid");
+        $.ajax({
+            url: '/edittags.json',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'photoid': id,
+                'tags': selVal
+            },
+            success: function(response) {
+                if (response.status == 'error') {
+                    alert('書き換えエラー ' + response.msg);
+                }
+            },
+            error: function(response) {
+                alert('通信エラー');
+            }
+        });
+    }
+
+    function editdescription($this) {
+        var selVal = $this.val();
+        var id = $this.attr("data-photoid");
+        $.ajax({
+            url: '/editdescription.json',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'photoid': id,
+                'photodescription': selVal
+            },
+            success: function(response) {
+                if (response.status == 'error') {
+                    alert('書き換えエラー ' + response.msg);
+                }
+            },
+            error: function(response) {
+                alert('通信エラー');
+            }
+        });        
+    }
+
+    function editcaption($this) {
+        var selVal = $this.val();
+        var id = $this.attr("data-photoid");
+        $.ajax({
+            url: '/editcaption.json',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'photoid': id,
+                'photocaption': selVal
+            },
+            success: function(response) {
+                if (response.status == 'error') {
+                    alert('書き換えエラー ' + response.msg);
+                }
+            },
+            error: function(response) {
+                alert('通信エラー');
+            }
+        });        
+    }
+
+    $(".photodescription").focusout(function(event) {
+        editdescription($(this));
+    });
+
+    $(".photocaption").focusout(function(event) {
+        editcaption($(this));
+    });
+
+    $(".edittagbox").on('itemAdded', function(event) {
+        if (already_loaded_tags) {
+            edittag($(this));
+        }
+     });
+
+     $(".edittagbox").on('itemRemoved', function(event) {
+         if (already_loaded_tags) {
+             edittag($(this));
+         }
+     });
+
+    /* smooth scrolling for scroll to top */
+    $('.scroll-top').click(function(){
+        $('body,html').animate({scrollTop:0},1000);
+    })
 
     $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
         position: {
@@ -54,7 +151,7 @@ var ready = function() {
         
     engine.initialize();
 
-    $('input#edittagbox').tagsinput({
+    $('.edittagbox').tagsinput({
         typeaheadjs: {
             name: 'engine',
             displayKey: 'value',
@@ -243,6 +340,7 @@ var ready = function() {
 
             },
             error: function(response) {
+                alert('通信エラー');
             }
 	});
     }
@@ -383,6 +481,6 @@ var ready = function() {
     
 }
 
-$(document).ready(ready)
-$(document).on('page:load', ready)
+$(document).ready(ready);
+$(window).load(load);
 

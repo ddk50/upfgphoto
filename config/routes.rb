@@ -42,6 +42,9 @@ Rails.application.routes.draw do
   
   get 'tags' => 'tags#gettags'
   get 'hottags' => 'tags#hottags'
+  post 'edittags' => 'tags#edittags'
+  post 'editdescription' => 'photo#editdescription'
+  post 'editcaption' => 'photo#editcaption'
 
   get 'tags/:tag' => 'tags#show', as: :tagphoto
 

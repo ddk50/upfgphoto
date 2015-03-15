@@ -10,21 +10,19 @@
     </div>
   </div>
 
-  <div class="row top15" style="margin-bottom: 10px;">
-    <div class="col-lg-12">
-      <%= link_to(photo_show_url(id: @photoid), style: "margin-bottom: 0px;") do %>
-        <%= image_tag(photo_thumbnail_url(id: @photoid, type: 'large'), class: "img-responsive", id: "largeimageview") %>
-      <% end %>
+  <div class="row">
+    <div class="col-md-12">     
+      
+      <input class="edittagbox" type="text" value="<%= @photo.tags.map{|t| t.name }.join(",") %>" data-provide="typeahead" data-photoid="<%= @photo.id %>"/>
+
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="input-group">
-        <span class="input-group-btn">
-
-        </span>
-      </div>
+  <div class="row top15" style="margin-bottom: 10px;">
+    <div class="col-lg-12 text-center">
+      <%= link_to(photo_show_url(id: @photoid), style: "margin-bottom: 0px;") do %>
+        <%= image_tag(photo_thumbnail_url(id: @photoid, type: 'large'), class: "img-responsive", id: "largeimageview", alt: @photoid) %>
+      <% end %>
     </div>
   </div>
 
@@ -66,23 +64,16 @@
           <div class="panel-heading">キャプションやタグの編集</div>
           <div class="panel-body">
 
-            <%= form_tag(photo_edit_path(id: @photoid), method: "POST", multipart: true) do |f| %>
-              <p></p>
-              <div class="form-group">
-                <label for="photocaption" class="control-label">タイトル</label>
-                <input id="photocaption" name="photocaption" type="text" class="form-control" value="<%= @photo.caption %>" onKeyPress="submitStop(event)">
-              </div>
-              <div class="form-group">
-                <label for="photodescription" class="control-label">紹介文</label>
-                <textarea id="photodescription" name="photodescription" class="form-control" rows="3"><%= @photo.description %></textarea>
-              </div>
-              <div class="form-group">
-                <label for="edittagbox" class="control-label">タグ</label>
-                </br>
-                <input id="edittagbox" name="tags" type="text" value="<%= @tags.map{|t| t.tag.name }.join(",") %>" data-provide="typeahead"/>
-              </div>
-              <%= submit_tag("変更", :data => {:disable_with => "Sending..."}, :class => "btn btn-primary") %>
-            <% end %>
+            <p></p>
+            <div class="form-group">
+              <label for="photocaption" class="control-label">タイトル</label>
+              <input class="photocaption form-control" name="photocaption" type="text" value="<%= @photo.caption %>" onKeyPress="submitStop(event)" data-photoid="<%= @photo.id %>">
+            </div>
+            <div class="form-group">
+              <label for="photodescription" class="control-label">紹介文</label>
+              <textarea class="photodescription form-control" name="photodescription" rows="3" data-photoid="<%= @photo.id %>"><%= @photo.description %></textarea>
+            </div>
+              
           </div>
         </div>
             

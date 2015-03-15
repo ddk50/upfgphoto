@@ -57,6 +57,53 @@ class TagsController < ApplicationController
     end
   end
 
+  def edittags
+    newtags = params[:tags] == nil ? [] : params[:tags]
+    photoid = params[:photoid]
+   
+    err = false
+
+    if photoid == nil
+      respond_to do |format|
+        format.json { render :json => 
+          {:status   => 'error',
+           :msg => '写真IDが指定されていません'}
+        }
+      end
+      return
+    end
+    
+    begin      
+      ActiveRecord::Base.transaction do
+        tags = Tag2photo.where(photo_id: photoid)
+        tags.delete_all
+
+        newtags.each{|t|
+          tag_id = Tag.update_or_create_tag(t)
+          newt = Tag2photo.new(photo_id: photoid, tag_id: tag_id)
+          newt.save!
+        }
+      end      
+    rescue => e
+      err = true
+    end
+
+    if err
+      respond_to do |format|
+        format.json { render :json => 
+          {:status   => 'error'} 
+        }
+      end
+    else
+      respond_to do |format|
+        format.json { render :json => 
+          {:status   => 'success'} 
+       }
+      end
+    end
+    
+  end
+
   def getrecentusetags(lim)
     Tag.order("updated_at DESC").limit(lim).map{|tag| tag.name }
   end

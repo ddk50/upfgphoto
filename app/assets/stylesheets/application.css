@@ -286,3 +286,14 @@ stylize any heading tags withing white-panel below
 .tipsStyle {
     font-size: 13px;
 }
+
+.scroll-top {
+    position: fixed;
+    bottom: 0;
+    right: 6%;
+    z-index: 100;
+    background: #A0A0A0;
+    font-size: 24px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
