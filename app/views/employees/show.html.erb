@@ -17,9 +17,11 @@
         <label><input type="checkbox" id="photo_check_group" class="photocheckAll"> 全てにチェックを入れる</label>
       </div>
       
-      <% if current_employee.id == @employee.id %>
-        <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
-      <% end %>
+      <div class="pull-right">
+        <% if current_employee.id == @employee.id %>
+          <%= submit_tag("一括削除", :class => "btn btn-danger", :id => "deleteall") %>
+        <% end %>
+      </div>
 
     </div>
   </div>
