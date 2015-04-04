@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   post 'photo' => 'photo#upload', as: :photo_upload
   get 'uploadpanel' => 'photo#uploadpanel', as: :photo_panel
   get 'editpanel' => 'photo#editpanel', as: :edit_panel
+  post 'ddupload' => 'photo#ddupload', as: :ddphoto_upload
 
   get 'photo/:id' => 'photo#show', as: :photo_show
   delete 'photo/:id' => 'photo#delete', as: :photo_delete

@@ -9,6 +9,24 @@
   <%= render 'layouts/photosearchbar' %>
 </div>
 
+<div class="row">
+  <div class="col-lg-12">
+    <%= form_tag(ddphoto_upload_path(format: :json),
+                 method: :post, 
+                 class: "dropzone dz-clickable", 
+                 id: "dduploadzone",
+                 multipart: true) do %>
+      <div class="dz-message">
+        <%= image_tag("/images/icn-upload.png") %>
+        <h3>ドラッグアンドドロップでアップロードできます</h3>
+        <h4>ここにファイルをドラッグアンドドロップしてください</h4>
+        <br>
+        <span class="note">いいよ！来いよ！</span>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <div id="list_de_trucs" class="table-responsive">
   <table class="table">
     <thead>

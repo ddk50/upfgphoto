@@ -272,62 +272,30 @@ class PhotoController < ApplicationController
     end
   end
 
-  
-  def upload    
-    f = params[:target_file_upload]
 
-    if f == nil
-      redirect_to :back, alert: "アップロードするファイルを指定してください"
-      return
-    end
-    
-    @original_filename = f.original_filename # filename
-    @content_type = f.content_type           # Content-Type
-    @size = f.size                           # filesize
-    @read = f.read                           # file content
-    tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
-    
-    logger.debug("#################### UPLOAD TAGS #{tags} ####################")
-    
-    tmppath = PHOTO_CONFIG['download_tmp_path'] + '/' + SecureRandom.uuid.to_s
-    deleteall(tmppath) if FileTest.exist?(tmppath)
-    FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
-
-    tmpfullpath = tmppath + "/" + @original_filename
-
-    File.open(tmpfullpath, 'wb') do |newfile|
-      newfile.write(@read)
-    end
-
-    additions = []
-    
-    begin
-      
-      case checkfiletype(tmpfullpath)
-      when /Zip\sarchive\sdata/        
-        ## uploaded as zip
-        store_zip(tmpfullpath, tmppath, tags, additions)
-      when /JPEG\simage\sdata/
-        ## uploaded as jpg
-        store_jpg(tmpfullpath, tmppath, tags, additions)
-      else
-        raise InvalidFileFormat, "JPGかZIPファイル以外は指定しないでください"
+  ##
+  ## Drag and Drop upload
+  ##
+  def ddupload
+    logger.debug("********************* ddupload ********************")
+    if params[:file].respond_to?(:each_value)
+      params[:file].each_value do |uploadfile|
+        accept_upload_file(uploadfile)
       end
-
-      redirect_to :back, 
-                 notice: "アップロード完了 #{additions.size}個のファイルを追加"
-      
-    rescue => e
-      additions.each{|path, id|
-        File.delete(path)
-      }
-      redirect_to :back, 
-                  alert: ('トランザクションエラー ' + e.to_s)
-    ensure
-      deleteall(tmppath)
+    else
+      uploadfile = params[:file]
+      accept_upload_file(uploadfile)
     end
-    
+  end
+
+  ##
+  ## file form upload
+  ##
+  def upload
+    accept_upload_file(params[:target_file_upload])
   end 
+
+
 
   def editdescription
     photodescription = params[:photodescription]
@@ -401,6 +369,78 @@ class PhotoController < ApplicationController
   ## private
   ##
   private
+  
+  
+  ##
+  ## accept upload file common routine
+  ##
+  def accept_upload_file(f)   
+    
+    raise InvalidFieldFormat, "アップロードするファイルを指定してください" unless f
+    
+    @original_filename = f.original_filename # filename
+    @content_type = f.content_type           # Content-Type
+    @size = f.size                           # filesize
+    @read = f.read                           # file content
+    tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
+    
+    logger.debug("#################### UPLOAD TAGS #{tags} ####################")
+    
+    tmppath = PHOTO_CONFIG['download_tmp_path'] + '/' + SecureRandom.uuid.to_s
+    deleteall(tmppath) if FileTest.exist?(tmppath)
+    FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
+
+    tmpfullpath = tmppath + "/" + @original_filename
+
+    File.open(tmpfullpath, 'wb') do |newfile|
+      newfile.write(@read)
+    end
+
+    additions = []
+    
+    begin
+      
+      case checkfiletype(tmpfullpath)
+      when /Zip\sarchive\sdata/        
+        ## uploaded as zip
+        store_zip(tmpfullpath, tmppath, tags, additions)
+      when /JPEG\simage\sdata/
+        ## uploaded as jpg
+        store_jpg(tmpfullpath, tmppath, tags, additions)
+      else
+        raise InvalidFileFormat, "JPGかZIPファイル以外は指定しないでください"
+      end
+
+      respond_to do |format|
+        format.html {
+          redirect_to :back, notice: "アップロード完了 #{additions.size}個のファイルを追加"
+        }
+        format.json { render :json => 
+          {:result   => 'success',  
+            :msg      => "" }
+        }
+      end
+      
+    rescue => e
+      additions.each{|path, id|
+        File.delete(path)
+      }   
+
+      respond_to do |format|
+        format.html {
+          redirect_to :back, alert: ('トランザクションエラー ' + e.to_s)
+        }
+        format.json { render :json => 
+          {:result   => 'error', 
+            :msg      => e.to_s }
+        }
+      end
+   
+    ensure
+      deleteall(tmppath)
+    end
+  end
+
   def set_and_save_photo_exif(newphoto, jpgpath)
     begin
       exif = EXIFR::JPEG.new(jpgpath)

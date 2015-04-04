@@ -21,6 +21,7 @@
 //= require d3.layout.cloud
 //= require pinterest-grid-plugin
 //= require jquery.qtip.min
+//= require dropzone
 //= require_tree .
 
 var ready = function () {

@@ -10,6 +10,33 @@ var ready = function() {
 
     var windowWidth = $(window).width();
 
+    var dropzonecounter = 0;
+    
+    Dropzone.autoDiscover = false;
+    $("#dduploadzone").dropzone({
+        
+        uploadMultiple: false,
+        maxFilesize: 1024,
+        maxThumbnailFilesize: 1024,
+        acceptedFiles: '.jpg,.jpeg,.zip',
+        headers: {"X-CSRF-Token" : $('meta[name="csrf-token"]').attr('content')},
+        url: "/ddupload.json",
+    
+        success: function(file, response) {
+            if (response.result === 'success') {
+                file.previewElement.classList.add("dz-success");
+            } else {
+            }
+        },
+
+        complete: function(file) {
+            if (this.getUploadingFiles().length === 0 &&
+                this.getQueuedFiles().length === 0) {
+                location.reload(true);
+            }
+        }
+    });
+
     function edittag($this) {
         var selVal = $this.val().split(",");
         var id = $this.attr("data-photoid");
