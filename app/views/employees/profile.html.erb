@@ -18,7 +18,7 @@
               <% if @employee.existavatar %>
                 <%= image_tag(employee_avatar_url(@employee.id), class: "img-responsive") %>
               <% else %>
-                <%= image_tag @employee.image_url %>
+                <%= image_tag gsub_http_to_https(@employee.image_url) %>
               <% end %>
             </div>           
             <div class="col-md-6 col-lg-6"> 

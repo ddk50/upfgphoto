@@ -7,7 +7,7 @@
           <% if current_employee.existavatar %>
             <%= image_tag(employee_avatar_url(current_employee.id), class: "img-responsive") %>
           <% else %>
-            <%= image_tag current_employee.image_url %>
+            <%= image_tag gsub_http_to_https(current_employee.image_url) %>
           <% end %>
           <div class="description" style="padding: 10px;">
             <h4><%= current_employee.name %></h4>
@@ -38,7 +38,7 @@
             <div class="well well-sm">
               <div class="media">
                 <a class="thumbnail pull-left" href="#">
-                  <%= image_tag employee.image_url, class: "media-object" %>
+                  <%= image_tag gsub_http_to_https(employee.image_url), class: "media-object" %>
                 </a>
                 <div class="media-body">
                   <h4 class="media-heading"><%= employee.nickname %> <%= employee.name %></h4>  
