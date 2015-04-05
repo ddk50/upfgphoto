@@ -353,10 +353,15 @@ body {
               </div>
             </div>
 
-            <div class="inner cover">
-              <h1 class="cover-heading">うpルンですへようこそ</h1>
+            <% flash.each do |name, msg| %>
+              <% status = ((name == "notice") ? "success" : "danger") %>
+              <%= content_tag :div, msg, class: "alert alert-#{status}" %>
+            <% end %>
 
-              <p class="lead">
+            <div class="inner cover">
+              <h1 class="cover-heading" style="color: #000000;">うpルンですへようこそ</h1>
+
+              <p class="lead" style="color: #000000;">
                 upfg構成員のupfg構成員によるupfg構成員のための写真共有サイト
                 
                 <small>    <br> 諸君　撮るのもいいがちゃんと整理もしよう！</small>
