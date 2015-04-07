@@ -9,8 +9,10 @@ class InvalidFieldFormat < StandardError; end
 class InvalidRequest < StandardError; end
 
 class PhotoController < ApplicationController
+  include Upload
 
-  before_action :authenticate_user!, except: :index 
+  before_action :authenticate_user!, except: :index
+  before_action :authenticate_guest!, except: [:index, :show, :view, :thumbnail]
 
   def index
     @recent_photos = Photo.select("Photos.id, count(activities.target_photo_id) as count")
@@ -49,7 +51,7 @@ class PhotoController < ApplicationController
     page = params[:page] == nil ? 0 : params[:page].to_i
     perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
     
-    rel  = Photo.employee_photo(id)      
+    rel  = Photo.default_includes().employee_photo(id)
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
@@ -71,7 +73,7 @@ class PhotoController < ApplicationController
     @photo      = Photo.find_by_id(@photoid)
 
     if @photo == nil
-      redirect_to root_path, alert: "この写真は存在しません"
+      redirect_to :back, alert: "この写真は存在しません"
       return
     end
 
@@ -80,12 +82,29 @@ class PhotoController < ApplicationController
   end
   
   def show
+    
     photoid = params[:id]
-    send_data(
-              File.read("#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg"),
-              type: "image/jpeg",
-              filename: "#{photoid}.jpg"
-              )
+    photo = Photo.find_by_id(photoid)
+
+    if photo.nil?
+      redirect_to :back, alert: "この写真は存在しません"
+      return
+    end
+
+    if authenticate_photo?(photo)
+      send_data(
+                File.read("#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg"),
+                type: "image/jpeg",
+                filename: "#{photoid}.jpg"
+                )
+    else
+      send_file(
+                "#{Rails.root}/public/images/unauthorized.jpg",
+                type: "image/jpeg",
+                filename: "unauthorized.jpg"
+                )
+    end
+    
   end
 
   def edit
@@ -118,6 +137,17 @@ class PhotoController < ApplicationController
     original_path = PHOTO_CONFIG['spool_dir'] + "/" + "#{photoid}.jpg"
     thumbnail_path = nil
 
+    photo = Photo.find_by_id(photoid)
+
+    if not authenticate_photo?(photo)
+      send_file(
+                "#{Rails.root}/public/images/unauthorized.jpg",
+                type: "image/jpeg",
+                filename: "unauthorized.jpg"
+                )
+      return
+    end
+
     case type
     when 'large'
       thumbnail_path = PHOTO_CONFIG['thumbnail_large_dir'] + "/thumbnail_#{photoid}.jpg"
@@ -144,11 +174,11 @@ class PhotoController < ApplicationController
     
     begin
       if not (photo.employee_id == current_employee.id)
-        redirect_to employees_url(current_employee.id), alert: "他人の写真は削除できません"
+        redirect_to :back, alert: "他人の写真は削除できません"
       else
         photo.destroy
         destroyed = true
-        redirect_to employees_url(current_employee.id), notice: "写真#{photoid}を削除"
+        redirect_to :back, notice: "写真#{photoid}を削除"
       end    
     ensure
       if destroyed
@@ -277,14 +307,34 @@ class PhotoController < ApplicationController
   ## Drag and Drop upload
   ##
   def ddupload
-    logger.debug("********************* ddupload ********************")
-    if params[:file].respond_to?(:each_value)
-      params[:file].each_value do |uploadfile|
-        accept_upload_file(uploadfile)
+
+    if not params[:tags].nil?
+      params[:tags] = params[:tags].split(",")
+    end
+    
+    file = ensure_uploaded_file(params[:target_file_upload]) if params[:target_file_upload].present?
+    file = ensure_uploaded_file(params[:file]) if params[:file].present?
+    
+    if file.respond_to?(:each_value)
+      file.each_value do |uploadfile|
+        accept_upload_file(uploadfile) {|newphotoid|
+          ##
+          ## Activityを更新
+          ##
+          new_act = Activity.new(employee_id: current_employee.id,
+                             target_photo_id: newphotoid,
+                             action_type: :upload_photo)
+          new_act.save!
+        }
       end
     else
-      uploadfile = params[:file]
-      accept_upload_file(uploadfile)
+      uploadfile = file
+      accept_upload_file(uploadfile) {|newphotoid|
+        new_act = Activity.new(employee_id: current_employee.id,
+                               target_photo_id: newphotoid,
+                               action_type: :upload_photo)
+        new_act.save!        
+      }
     end
   end
 
@@ -292,7 +342,16 @@ class PhotoController < ApplicationController
   ## file form upload
   ##
   def upload
-    accept_upload_file(params[:target_file_upload])
+    file = ensure_uploaded_file(params[:target_file_upload])
+    accept_upload_file(file) {|newphotoid|
+      ##
+      ## Activityを更新
+      ##
+      new_act = Activity.new(employee_id: current_employee.id,
+                         target_photo_id: newphotoid,
+                         action_type: :upload_photo)
+      new_act.save!
+    }
   end 
 
 
@@ -364,179 +423,9 @@ class PhotoController < ApplicationController
 
   end
 
-  
   ##
-  ## private
+  ## public
   ##
-  private
-  
-  
-  ##
-  ## accept upload file common routine
-  ##
-  def accept_upload_file(f)   
-    
-    raise InvalidFieldFormat, "アップロードするファイルを指定してください" unless f
-    
-    @original_filename = f.original_filename # filename
-    @content_type = f.content_type           # Content-Type
-    @size = f.size                           # filesize
-    @read = f.read                           # file content
-    tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
-    
-    logger.debug("#################### UPLOAD TAGS #{tags} ####################")
-    
-    tmppath = PHOTO_CONFIG['download_tmp_path'] + '/' + SecureRandom.uuid.to_s
-    deleteall(tmppath) if FileTest.exist?(tmppath)
-    FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
-
-    tmpfullpath = tmppath + "/" + @original_filename
-
-    File.open(tmpfullpath, 'wb') do |newfile|
-      newfile.write(@read)
-    end
-
-    additions = []
-    
-    begin
-      
-      case checkfiletype(tmpfullpath)
-      when /Zip\sarchive\sdata/        
-        ## uploaded as zip
-        store_zip(tmpfullpath, tmppath, tags, additions)
-      when /JPEG\simage\sdata/
-        ## uploaded as jpg
-        store_jpg(tmpfullpath, tmppath, tags, additions)
-      else
-        raise InvalidFileFormat, "JPGかZIPファイル以外は指定しないでください"
-      end
-
-      respond_to do |format|
-        format.html {
-          redirect_to :back, notice: "アップロード完了 #{additions.size}個のファイルを追加"
-        }
-        format.json { render :json => 
-          {:result   => 'success',  
-            :msg      => "" }
-        }
-      end
-      
-    rescue => e
-      additions.each{|path, id|
-        File.delete(path)
-      }   
-
-      respond_to do |format|
-        format.html {
-          redirect_to :back, alert: ('トランザクションエラー ' + e.to_s)
-        }
-        format.json { render :json => 
-          {:result   => 'error', 
-            :msg      => e.to_s }
-        }
-      end
-   
-    ensure
-      deleteall(tmppath)
-    end
-  end
-
-  def set_and_save_photo_exif(newphoto, jpgpath)
-    begin
-      exif = EXIFR::JPEG.new(jpgpath)
-      newphoto.shotdate      = exif.date_time_original != nil ? exif.date_time_original.to_datetime : nil
-      newphoto.model         = exif.model
-      newphoto.exposure_time = exif.exposure_time.to_s
-      newphoto.f_number      = exif.f_number.to_f.to_s
-      newphoto.focal_length  = exif.focal_length.to_i
-      newphoto.focal_length_in_35mm_film = exif.focal_length_in_35mm_film.to_i
-      newphoto.iso_speed_ratings = exif.iso_speed_ratings
-      newphoto.update_date_time = exif.date_time != nil ? exif.date_time.to_datetime : nil
-    rescue EXIFR::MalformedJPEG
-      newphoto.shotdate      = nil
-      newphoto.model         = nil
-      newphoto.exposure_time = nil
-      newphoto.f_number      = nil
-      newphoto.focal_length  = nil
-      newphoto.focal_length_in_35mm_film = nil
-      newphoto.iso_speed_ratings = nil
-      newphoto.update_date_time = nil
-    end
-      
-    newphoto.save!
-  end
-
-  def store_zip(tmpfullpath, tmppath, tags, additions)    
-    extract(tmpfullpath, tmppath)    
-    ActiveRecord::Base.transaction do
-      Dir.glob(tmppath + "/*").each {|file|
-        
-        next if not checkfiletype(file.to_s) =~ /JPEG\simage\sdata/
-        
-        newphoto = Photo.new(employee_id: current_employee.id)
-        newphoto.save!
-        
-        spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
-        
-        set_and_save_photo_exif(newphoto, file.to_s)
-
-        FileUtils.mv(file.to_s, spool_path)
-        additions << [spool_path, newphoto.id]
-
-        tags.each{|tagname|
-          tagid = Tag.update_or_create_tag(tagname)
-          t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
-          t.save!
-        }            
-      }
-    end ## transaction end
-  end
-
-  def store_jpg(tmpfullpath, tmppath, tags, additions)    
-    ActiveRecord::Base.transaction do
-      newphoto = Photo.new(employee_id: current_employee.id)
-      newphoto.save!
-
-      spool_path = PHOTO_CONFIG['spool_dir'] + "/" + newphoto.id.to_s + ".jpg"
-
-      set_and_save_photo_exif(newphoto, tmpfullpath)
-
-      tags.each{|tagname|
-        tagid = Tag.update_or_create_tag(tagname)
-        t = Tag2photo.new(photo_id: newphoto.id, tag_id: tagid)
-        t.save!
-      }
-
-      FileUtils.mv(tmpfullpath, spool_path)
-      additions << [spool_path, newphoto.id]
-    end ## transaction end
-  end
-
-  #output_path:: 展開先ディレクトリ 
-  def extract(src_path, output_path)
-##    Zip.unicode_names = true
-    extract_root_dir = output_path
-    Zip::File.open(src_path) do |zip_file|
-      # Handle entries one by one
-      zip_file.each do |entry|
-        # Extract to file/directory/symlink
-        entry.extract("#{extract_root_dir}/#{entry.name}")
-      end
-    end
-  end
-
-  def deleteall(delthem)
-    if FileTest.directory?(delthem) then 
-      Dir.foreach( delthem ) do |file|
-        next if /^\.+$/ =~ file
-        deleteall( delthem.sub(/\/+$/,"") + "/" + file )
-      end
-      Dir.rmdir(delthem) rescue ""
-    else
-      File.delete(delthem)
-    end
-  end
-
   public
   def gen_thumbnail(original_path, photoid, type)
     
@@ -593,8 +482,58 @@ class PhotoController < ApplicationController
     File.delete(PHOTO_CONFIG['spool_dir'] + "/#{photoid}.jpg")
   end
 
-  def checkfiletype(filepath)
-    `file #{filepath}`
+  private
+  def authenticate_photo?(photo)
+
+    ##
+    ## 写真がゲストモードであれば問答無用で公開する
+    ##
+    if photo.guest
+      return true
+    end
+
+    ##
+    ## 貴方がゲストだったらこれ以上見せてはいけない
+    ##
+    if current_employee.guest?
+      return false
+    end
+
+    ##
+    ## この写真はボードに所属してない．したがってアクセスコントロールの必要なし．見せても良い
+    ##
+    if photo.board.nil?
+      return true
+    end
+
+    ##
+    ## この写真はボードに所属しており，ボードはパブリックであるか．ボードメンバーに貴方は
+    ## 入っている．したがって写真を見せても良い
+    ##
+    if photo.board.public || 
+        photo.board.employees.any?{|employee| employee.id == current_employee.id }
+      return true
+    end
+
+    ##
+    ## 見せてはいけない
+    ##
+    return false
+  end
+
+  # Nginx upload module経由で受信した"tempfile"パラメータを参照し、
+  # 手動でActionDispatch::Http::UploadedFileを作成する。
+  #
+  # Nginx設定をしなくても低速ながら動作するように、ifチェックを入れておく
+  def ensure_uploaded_file(file_or_hash)
+    if file_or_hash.is_a?(Hash) && file_or_hash[:tempfile]
+      # Nginx upload module経由の場合
+      file_or_hash[:tempfile] = File.new(file_or_hash[:tempfile])
+      ActionDispatch::Http::UploadedFile.new(file_or_hash)
+    else
+      # 通常の場合
+      file_or_hash
+    end
   end
   
 end

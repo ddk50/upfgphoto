@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :logged_in?, :current_employee
   helper_method :authenticate_user!, :unmarked_activities
+  helper_method :authenticate_guest!, :authenticate_admin!
   
   private
   def current_employee
@@ -24,6 +25,19 @@ class ApplicationController < ActionController::Base
   def authenticate_user!    
     if current_user == nil
       redirect_to root_path
+    end
+  end
+
+  def authenticate_guest!
+    if current_employee.guest?
+      redirect_to boards_index_url(), alert: "権限がありません"
+    end
+  end
+
+  def authenticate_admin!
+    if (not current_employee.supervisor?) &&
+        (not current_employee.supervisor_and_boardmember?)
+      redirect_to root_path, alert: "権限がありません"
     end
   end
 

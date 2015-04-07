@@ -1,186 +1,191 @@
-<div class="container">
-  <div class="row">
-    <div class="col-md-5  toppad  pull-right col-md-offset-3 ">
-      <% if @employee.id == current_employee.id %>
-        <a data-original-title="Edit this user" data-toggle="modal" data-target="#edituser">プロファイルを編集</a>
-      <% end %>
-      <br>
-      <p class=" text-info">最終ログイン: <%= @employee.updated_at.strftime("%Y-%m-%d %H:%M:%S") %></p>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" >
-      <div class="panel panel-info">
-        <div class="panel-heading">
-          <h3 class="panel-title"><%= @employee.nickname %> <%= @employee.name %></h3>
-        </div>
-        <div class="panel-body">
-          <div class="row">
-            <div class="col-md-6 col-lg-6" align="center"> 
-              <% if @employee.existavatar %>
-                <%= image_tag(employee_avatar_url(@employee.id), class: "img-responsive") %>
-              <% else %>
-                <%= image_tag gsub_http_to_https(@employee.image_url) %>
-              <% end %>
-            </div>           
-            <div class="col-md-6 col-lg-6"> 
-              <table class="table table-user-information">
-                <tbody>
-                  <tr>
-                    <td>支店長名</td>
-                    <td><%= @employee.branch %></td>
-                  </tr>
-                  <tr>
-                    <td>役職</td>
-                    <td><%= @employee.position %></td>
-                  </tr>
-                  <tr>
-                    <td>加入日</td>
-                    <td>06/23/2013</td>
-                  </tr>
-                  <tr>
-                    <td>誕生日</td>
-                    <td>01/24/1988</td>
-                  </tr>                  
-                  <tr>
-                    <td>住んでるところ</td>
-                    <td><%= @employee.address %></td>
-                  </tr>
-                  <tr>
-                    <td>Email</td>
-                    <td><a href="<%= @employee.email %>"><%= @employee.email %></a></td>
-                  </tr>
-                  <tr>
-                    <td>緊急連絡先</td>
-                    <td><%= @employee.phone %></td>
-                  </tr>
-                  <tr>
-                    <td>自己紹介</td>
-                    <td><%= gsub_enter(@employee.description) %></td>
-                  </tr>
-                  
-                </tbody>
-              </table>                      
-            </div>
-          </div>
-        </div>
-        <% if current_employee.id == @employee.id %>
-          <div class="panel-footer">
-            <a data-original-title="Edit this user" data-toggle="modal" data-target="#edituser" type="button" class="btn btn-sm btn-warning"><i class="glyphicon glyphicon-edit"></i></a>
-        <% end %>
-        </div>
-        
-      </div>
-    </div>
+<div class="col-md-5  toppad  pull-right col-md-offset-3 ">
+  <% if @employee.id == current_employee.id %>
+    <a data-original-title="Edit this user" data-toggle="modal" data-target="#edituser">プロフィールを編集</a>
+  <% end %>
+  <br>
+  <p class=" text-info">最終ログイン: <%= @employee.updated_at.strftime("%Y-%m-%d %H:%M:%S") %></p>
+</div>
 
-
-    <div class="modal fade" id="edituser" tabindex="-1" role="dialog" aria-labelledby="contactLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="panel-title" id="contactLabel"><span class="glyphicon glyphicon-info-sign"></span> プロファイルページを編集</h4>
-          </div>
-                    
-          <%= form_tag(employee_edit_path(id: @employee.id), method: "POST", multipart: true) do |f| %>
-            <div class="modal-body" style="padding: 5px;">
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="employeename" class="control-label">名前</label>
-                  <input name="name" type="text" class="form-control" value="<%= @employee.name %>" required />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="branchname" class="control-label">支店名</label>
-                  <input class="form-control" name="branch" placeholder="支店名" value="<%= @employee.branch %>" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="position" class="control-label">役職名</label>
-                  <input class="form-control" name="position" placeholder="役職名" value="<%= @employee.position %>" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
-                  <label for="hiredate" class="control-label">UPFG加入日</label>
-                  <input class="form-control" name="hiredate" placeholder="役職名" type="text" />
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
-                  <label for="birthdate" class="control-label">誕生日</label>
-                  <input class="form-control" name="birthdate" placeholder="役職名" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="address" class="control-label">住んでるところ</label>
-                  <input value="<%= @employee.address %>" class="form-control" name="address" placeholder="住所" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="phone" class="control-label">緊急連絡先</label>
-                  <input value="<%= @employee.phone %>" class="form-control" name="phone" placeholder="緊急連絡先" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-                  <label for="email" class="control-label">E-mail</label>
-                  <input value="<%= @employee.email %>" class="form-control" name="email" placeholder="E-mail" type="text" />
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
-                  <label for="avatar" class="control-label">顔写真</label>
-                  <input type="file" id="target_file_avatar" name="target_file_avatar" style="display: none;">
-                  <div class="input-group">
-	            <span class="input-group-btn">
-	              <button class="btn btn-default" type="button" onclick="$('#target_file_avatar').click();">
-	                <i class="glyphicon glyphicon-folder-open"></i>
-	              </button>
-	            </span>
-	            <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
-                  </div>
-                  <script type="text/javascript">
-	            $(function(){
-	            $('#target_file_avatar').change(function() {
-                    $('#dummy_file').val($(this).val());
-	            });
-	            });
-                  </script>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
-                </div>
-
-              </div>
-              
-              <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12">
-                  <label for="comment" class="control-label">自己紹介文</label>
-                  <textarea style="resize:vertical;" name="description" class="form-control" placeholder="Description" rows="6" required /><%= @employee.description %></textarea>
-                </div>
-              </div>
-              
-            </div>  
-            <div class="panel-footer" style="margin-bottom:-14px;">
-              <input type="submit" class="btn btn-success" value="Send"/>
-              <!--<span class="glyphicon glyphicon-ok"></span>-->
-              <input type="reset" class="btn btn-danger" value="Clear" />
-              <!--<span class="glyphicon glyphicon-remove"></span>-->
-              <button style="float: right;" type="button" class="btn btn-default btn-close" data-dismiss="modal">Close</button>
-            </div>
-          <% end %>
-        </div>
-      </div>
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" >
+  <div class="panel panel-info">
+    
+    <div class="panel-heading">
+      <h3 class="panel-title"><%= @employee.nickname %> <%= @employee.name %></h3>
     </div>
     
-  </div>  
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-6 col-lg-6" align="center"> 
+          <% if @employee.existavatar %>
+            <%= image_tag(employee_avatar_url(@employee.id), class: "img-responsive") %>
+          <% else %>
+            <%= image_tag gsub_http_to_https(@employee.image_url) %>
+          <% end %>
+        </div>           
+        <div class="col-md-6 col-lg-6"> 
+          <table class="table table-user-information">
+            <tbody>
+              <tr>
+                <td>支店長名</td>
+                <td><%= @employee.branch %></td>
+              </tr>
+              <tr>
+                <td>役職</td>
+                <td><%= @employee.position %></td>
+              </tr>
+              <tr>
+                <td>加入日</td>
+                <td>06/23/2013</td>
+              </tr>
+              <tr>
+                <td>誕生日</td>
+                <td>01/24/1988</td>
+              </tr>                  
+              <tr>
+                <td>住んでるところ</td>
+                <td><%= @employee.address %></td>
+              </tr>
+              <tr>
+                <td>Email</td>
+                <td><a href="<%= @employee.email %>"><%= @employee.email %></a></td>
+              </tr>
+              <tr>
+                <td>緊急連絡先</td>
+                <td><%= @employee.phone %></td>
+              </tr>
+              <tr>
+                <td>自己紹介</td>
+                <td><%= gsub_enter(@employee.description) %></td>
+              </tr>
+              
+            </tbody>
+          </table>                      
+        </div>
+      </div>
+    </div>
+    <% if current_employee.id == @employee.id %>
+      <div class="panel-footer">
+        <a data-original-title="Edit this user" data-toggle="modal" data-target="#edituser" type="button" class="btn btn-sm btn-warning"><i class="glyphicon glyphicon-edit"> プロフィールを編集</i></a>
+      </div>
+    <% end %>
+    </div>
+  </div>
 </div>
+
+
+<div class="modal fade" id="edituser" tabindex="-1" role="dialog" aria-labelledby="contactLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="panel panel-primary">
+      
+      <div class="panel-heading">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="panel-title" id="contactLabel"><span class="glyphicon glyphicon-info-sign"></span> プロファイルページを編集</h4>
+      </div>
+      
+      <%= form_tag(employee_edit_path(id: @employee.id), method: "POST", multipart: true) do |f| %>
+	
+        <div class="modal-body" style="padding: 5px;">	      
+	  
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="employeename" class="control-label">名前</label>
+              <input name="name" type="text" class="form-control" value="<%= @employee.name %>" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="branchname" class="control-label">支店名</label>
+              <input class="form-control" name="branch" placeholder="支店名" value="<%= @employee.branch %>" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="position" class="control-label">役職名</label>
+              <input class="form-control" name="position" placeholder="役職名" value="<%= @employee.position %>" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
+              <label for="hiredate" class="control-label">UPFG加入日</label>
+              <input class="form-control" name="hiredate" placeholder="役職名" type="text" />
+            </div>
+
+            <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
+              <label for="birthdate" class="control-label">誕生日</label>
+              <input class="form-control" name="birthdate" placeholder="役職名" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="address" class="control-label">住んでるところ</label>
+              <input value="<%= @employee.address %>" class="form-control" name="address" placeholder="住所" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="phone" class="control-label">緊急連絡先</label>
+              <input value="<%= @employee.phone %>" class="form-control" name="phone" placeholder="緊急連絡先" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+              <label for="email" class="control-label">E-mail</label>
+              <input value="<%= @employee.email %>" class="form-control" name="email" placeholder="E-mail" type="text" />
+            </div>
+          </div>
+
+          <div class="row">
+
+            <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
+              <label for="avatar" class="control-label">顔写真</label>
+              <input type="file" id="target_file_avatar" name="target_file_avatar" style="display: none;">
+              <div class="input-group">
+	        <span class="input-group-btn">
+	          <button class="btn btn-default" type="button" onclick="$('#target_file_avatar').click();">
+	            <i class="glyphicon glyphicon-folder-open"></i>
+	          </button>
+	        </span>
+	        <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+              </div>
+              <script type="text/javascript">
+	        $(function(){
+	        $('#target_file_avatar').change(function() {
+                $('#dummy_file').val($(this).val());
+	        });
+	        });
+              </script>
+            </div>
+
+            <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
+            </div>
+
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+              <label for="comment" class="control-label">自己紹介文</label>
+              <textarea style="resize:vertical;" name="description" class="form-control" placeholder="Description" rows="6" required><%= @employee.description %></textarea>
+            </div>
+          </div>
+          
+        </div>  <!-- modal body -->
+	
+        <div class="panel-footer" style="margin-bottom:-14px;">
+          <input type="submit" class="btn btn-success" value="Send" />
+          <!--<span class="glyphicon glyphicon-ok"></span>-->
+          <input type="reset" class="btn btn-danger" value="Clear" />
+          <!--<span class="glyphicon glyphicon-remove"></span>-->
+          <button style="float: right;" type="button" class="btn btn-default btn-close" data-dismiss="modal">Close</button>
+        </div>
+	
+      <% end %>
+    </div>
+  </div>
+</div>
+

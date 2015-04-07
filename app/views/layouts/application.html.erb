@@ -9,133 +9,223 @@
       <%= javascript_include_tag "application" %>
       <%= csrf_meta_tags %>
     </head>
-    <body>
-      
-      <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container-fluid">
-          <!-- Brand and toggle get grouped for better mobile display -->
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-9">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">UprunDesu</a>
-          </div>
-
-          <!-- Collect the nav links, forms, and other content for toggling -->
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-9">
-
-            <ul class="nav nabvar-nav navbar-right">
-              <% if logged_in? %>
-                <li class="dropdown">
-                  <%= link_to('#', class: "dropdown-toggle", :"data-toggle" => 'dropdown', :"aria-haspopup" => "true", :"role" => "button", :"aria-expanded" => "false") do %> 
-                    <%= current_employee.nickname %>
-                    <%= image_tag gsub_http_to_https(current_employee.image_url), width: 28, height: 28 %> 
-                    <span class="caret"></span>
-                  <% end %>
-                  <ul class="dropdown-menu" role="menu">
-
-                    <li>
-                      <%= link_to(employee_profile_url(id: current_employee.id)) do %>
-                        <span class="glyphicon glyphicon-home" aria-hidden="true"></span> Home
-                      <% end %>
-                    </li>
-
-                    <li class="divider"></li>
-
-                    <li>
-                      <%= link_to(logout_path) do %>
-                        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout
-                      <% end %>
-                    </li>
-
-                  </ul>
-                </li>
-              <% else %>
-                <li><%= link_to 'Login as Twitter', '/auth/twitter' %></li>
-              <% end %>
-            </ul>          
-
-            <div id="navbarleft">
-              <ul class="nav navbar-nav">
-                <% if logged_in? %>
-                  <li>
+    <body class="modal-open">
+      <div class="wrapper">
+        <div class="box">
+	  
+	  <div class="row row-offcanvas row-offcanvas-left">
+            
+            <!-- sidebar -->
+            <div class="column col-sm-2 col-xs-1 sidebar-offcanvas" id="sidebar">
+              
+              <ul class="nav">
+		<li><a href="#" data-toggle="offcanvas" class="visible-xs text-center"><i class="glyphicon glyphicon-chevron-right"></i></a></li>
+              </ul>
+	      
+              <ul class="nav hidden-xs" id="lg-menu">
+		
+		<% if not current_employee.guest? %>
+		  <li>
                     <%= link_to(employees_show_url) do %>
-                      <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                      <i class="glyphicon glyphicon-user" aria-hidden="true"></i>
                       Members
                     <% end %>
-                  </li>
-                  <li>
-                    <%= link_to(photo_panel_url) do %>
-                      <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
-                      Upload
-                    <% end %>
-                  </li>
-                  <li>
-                    <%= link_to(edit_panel_url) do %>
-                      <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                      Edit
-                    <% end %>
-                  </li>
-                  <li class="dropdown">                
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                      <span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
-                      Info 
-                      <% if unmarked_activities.size > 0 %>
-                        <span class="label label-danger label-as-badge"><%= unmarked_activities.size %></span>
-                      <% end %>                      
-                      <span class="caret"></span>
-                    </a>
+		  </li>
+		<% end %>
 
-                    <ul class="dropdown-menu" role="menu">
 
+		<% if not current_employee.guest? %>
+		  <li>
+		    <%= link_to(tagphoto_index_url) do %>
+		      <i class="glyphicon glyphicon-list"></i> Tags
+		    <% end %>
+		  </li>
+		<% end %>
+		
+		
+		<li>
+		  <%= link_to(boards_index_url) do %>
+		    <i class="glyphicon glyphicon-paperclip"></i> 
+		    Boards
+		  <% end %>
+		</li>
+		
+		<% if not current_employee.guest? %>
+		  <li>
+		    <%= link_to(activities_index_url) do %>
+		      <i class="glyphicon glyphicon-info-sign"></i> Activities
+		    <% end %>
+		  </li>
+		<% end %>
+		
+              </ul>
+
+              <ul class="list-unstyled hidden-xs" id="sidebar-footer">
+		<li>		  
+                  <a href="/"><%= image_tag("/images/uprundesu_logo.png") %><br>
+		    <i class="glyphicon glyphicon-heart-empty"></i> UPFG is watching you</a>
+		</li>
+              </ul>           
+              
+              <!-- tiny only nav-->
+              <ul class="nav visible-xs" id="xs-menu">
+		
+		<% if not current_employee.guest? %>
+		  <li>
+                    <%= link_to(employees_show_url, class: "text-center") do %>
+                      <i class="glyphicon glyphicon-user"></i>
+                    <% end %>
+		  </li>
+		<% end %>
+
+		<% if not current_employee.guest? %>
+		  <li>
+		    <%= link_to(tagphoto_index_url, class: "text-center") do %>
+		      <i class="glyphicon glyphicon-list"></i>
+		    <% end %>
+		  </li>
+		<% end %>
+		
+		<li>
+		  <%= link_to(boards_index_url, class: "text-center") do %>
+		    <i class="glyphicon glyphicon-paperclip"></i>
+		  <% end %>
+		</li>
+		
+		<% if not current_employee.guest? %>
+		  <li>
+		    <%= link_to(activities_index_url, class: "text-center") do %>
+		      <i class="glyphicon glyphicon-info-sign"></i>
+		    <% end %>
+		  </li>
+		<% end %>
+		
+              </ul>
+              
+            </div>
+            <!-- /sidebar -->
+            
+            <!-- main right col -->
+            <div class="column col-sm-10 col-xs-11" id="main">
+              
+              <!-- top nav -->
+              <div class="navbar navbar-blue navbar-static-top">  
+		<div class="navbar-header">
+                  <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a href="/" class="navbar-brand logo">U</a>
+		</div>
+		<nav class="collapse navbar-collapse" role="navigation">
+
+		  <% if not current_employee.guest? %>
+                    <form class="navbar-form navbar-left">
+
+                      <div id="bloodhoundphototop"> <!-- <div id="bloodhoundjpg"> -->
+			<div class="input-group input-group-sm" style="max-width:400px;">
+
+			  <input id="bloodhoundtextboxphototop" type="text" class="form-control"> <!-- <input id="bloodhoundtextboxjpg" type="text" class="form-control"> -->
+			  <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">
+                              <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                            </button>
+			  </span> 
+			</div>
+                      </div>
+                    </form>
+		  <% end %>
+
+                  <ul class="nav navbar-nav">
+
+		    <% if not current_employee.guest? %>
                       <li>
-                        <%= link_to('お知らせをクリア', activities_clearfeeds_url, method: :post) %>
+			<%= link_to(employees_url(current_employee.id)) do  %>
+			  <i class="glyphicon glyphicon-th"></i>
+			  My Gallery
+			<% end %>                    
                       </li>
 
-                      <li class="divider"></li>
-                      
-                      <% if unmarked_activities.size > 0 %>                      
-                        <% unmarked_activities.each do |act| %>
-                          <div class="dropdownmenu-wrapper">
-                            <div class="media">
-                              <%= link_to(employee_profile_url(act.employee.id), class: "thumbnail pull-left") do %>
-                                <%= image_tag gsub_http_to_https(act.employee.image_url), class: "media-object" %>
-                              <% end %>
-                              <div class="media-body">
-                                <p>
-                                  <%= act.feed %>
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        <% end %>
-                      <% else %>
-                        <li>
-                          <%=link_to('(お知らせ) ないです', '#', style: "color: #848484") %>
-                        </li>
-                      <% end %>                      
+		      <%= yield(:postform) %>
 
-                    </ul>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
+                      <li>
+			<%= link_to(edit_panel_url) do %>
+			  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+			  Edit
+			<% end %>
+                      </li>
+		    <% end %>
+                    
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li>
+		      <% if current_employee.supervisor? || current_employee.supervisor_and_boardmember? %>
+			<%= link_to(admin_index_url) do %>
+			  <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+			  User Admin
+			<% end %>
+		      <% end %>
+                    </li>
 
-          </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-      </nav>
+                    <li class="dropdown">
+                      <%= link_to('#', 
+				  class: "dropdown-toggle", 
+				    :"data-toggle" => 'dropdown', 
+				    :"aria-haspopup" => "true", 
+				    :"role" => "button", 
+				    :"aria-expanded" => "false", 
+				    style: "padding-top: 10px; padding-bottom: 10px;") do %> 
+			<% if not current_employee.guest? %>
+			  <%= image_tag("/images/rank_1.png", height: 25) %>
+			<% end %>
+		        <%= current_employee.nickname %> <%= "(guest)" if current_employee.guest? %>
+			
+                        <%= image_tag gsub_http_to_https(current_employee.image_url), width: 28, height: 28 %> 
+                        <span class="caret"></span>
+                      <% end %>
+                      <ul class="dropdown-menu">
+			<li>
+                          <%= link_to(employee_profile_url(id: current_employee.id)) do %>
+                            <span class="glyphicon glyphicon-home" aria-hidden="true"></span> Home
+                          <% end %>
+			</li>
 
-      <div class="container">
-        <% flash.each do |name, msg| %>
-          <% status = ((name == "notice") ? "success" : "danger") %>
-          <%= content_tag :div, msg, class: "alert alert-#{status}" %>
-        <% end %>
-        
-        <%= yield %>
-      </div>
+			<li class="divider"></li>
+
+			<li>
+                          <%= link_to(logout_path) do %>
+                            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout
+                          <% end %>
+			</li>
+                      </ul>
+                    </li>
+                  </ul>
+		</nav>
+              </div>
+              <!-- /top nav -->
+              
+	      <div class="padding">
+		<div class="full col-sm-9">
+                  
+                  <!-- main content -->
+                  <!-- <div class="row"> -->
+
+                  <% flash.each do |name, msg| %>
+		    <% status = ((name == "notice") ? "success" : "danger") %>
+		    <%= content_tag :div, msg, class: "alert alert-#{status}" %>
+                  <% end %>
+                  
+                  <%= yield %>
+		</div>
+              </div>
+	      
+	    </div><!-- /padding -->	    
+          </div>           
+        </div> <!-- box -->
+      </div> <!-- wrapper -->
+
     </body>
   </html>
 <% else %>
@@ -147,200 +237,200 @@
       <%= stylesheet_link_tag    "cover", media: "all" %>
       <%= csrf_meta_tags %>
       <style type="text/css">
-a,
-a:focus,
-a:hover {
-  color: #fff;
-}
+        a,
+        a:focus,
+        a:hover {
+        color: #fff;
+        }
 
-/* Custom default button */
-.btn-default,
-.btn-default:hover,
-.btn-default:focus {
-  color: #333;
-  text-shadow: none; /* Prevent inheritence from `body` */
-  background-color: #fff;
-  border: 1px solid #fff;
-}
-
-
-/*
- * Base structure
- */
-
-html,
-body {
-/*css for full size background image*/
-  background: url(/images/cover.jpg) no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  
-  height: 100%;
-  background-color: #060;
-  color: #fff;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,.5);
- 
-}
-
-/* Extra markup and styles for table-esque vertical and horizontal centering */
-.site-wrapper {
-  display: table;
-  width: 100%;
-  height: 100%; /* For at least Firefox */
-  min-height: 100%;
-  -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
-          box-shadow: inset 0 0 100px rgba(0,0,0,.5);
-}
-.site-wrapper-inner {
-  display: table-cell;
-  vertical-align: top;
-}
-.cover-container {
-  margin-right: auto;
-  margin-left: auto;
-}
-
-/* Padding for spacing */
-.inner {
-  padding: 30px;
-}
-
-/* cyrillic */
-@font-face {
-    font-family: 'Lobster';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Lobster'), local('Lobster-Regular'), url(/fonts/c28rH3kclCLEuIsGhOg7evY6323mHUZFJMgTvxaG2iE.woff2) format('woff2');
-    unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* latin-ext */
-@font-face {
-    font-family: 'Lobster';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Lobster'), local('Lobster-Regular'), url(/fonts/9NqNYV_LP7zlAF8jHr7f1vY6323mHUZFJMgTvxaG2iE.woff2) format('woff2');
-    unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-    font-family: 'Lobster';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Lobster'), local('Lobster-Regular'), url(/fonts/cycBf3mfbGkh66G5NhszPQ.woff2) format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
-}
+        /* Custom default button */
+        .btn-default,
+        .btn-default:hover,
+        .btn-default:focus {
+        color: #333;
+        text-shadow: none; /* Prevent inheritence from `body` */
+        background-color: #fff;
+        border: 1px solid #fff;
+        }
 
 
-/*
- * Header
- */
-.masthead-brand {
-  color: #C44741;
-  font-family: Lobster;
-  font-size: 24px;
-  text-shadow: 1px 1px 0px #222222;
+        /*
+        * Base structure
+        */
 
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
+        html,
+        body {
+        /*css for full size background image*/
+        background: url(/images/cover.jpg) no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        
+        height: 100%;
+        background-color: #060;
+        color: #fff;
+        text-align: center;
+        text-shadow: 0 1px 3px rgba(0,0,0,.5);
+        
+        }
 
-.masthead-nav > li {
-  display: inline-block;
-}
-.masthead-nav > li + li {
-  margin-left: 20px;
-}
-.masthead-nav > li > a {
-  padding-right: 0;
-  padding-left: 0;
-  font-size: 16px;
-  font-weight: bold;
-  color: #fff; /* IE8 proofing */
-  color: rgba(255,255,255,.95);
-  border-bottom: 2px solid transparent;
-}
-.masthead-nav > li > a:hover,
-.masthead-nav > li > a:focus {
-  background-color: transparent;
-  border-bottom-color: #a9a9a9;
-  border-bottom-color: rgba(255,255,255,.25);
-}
-.masthead-nav > .active > a,
-.masthead-nav > .active > a:hover,
-.masthead-nav > .active > a:focus {
-  color: #fff;
-  border-bottom-color: #fff;
-}
+        /* Extra markup and styles for table-esque vertical and horizontal centering */
+        .site-wrapper {
+        display: table;
+        width: 100%;
+        height: 100%; /* For at least Firefox */
+        min-height: 100%;
+        -webkit-box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+        box-shadow: inset 0 0 100px rgba(0,0,0,.5);
+        }
+        .site-wrapper-inner {
+        display: table-cell;
+        vertical-align: top;
+        }
+        .cover-container {
+        margin-right: auto;
+        margin-left: auto;
+        }
 
-@media (min-width: 768px) {
-  .masthead-brand {
-    float: left;
-  }
-  .masthead-nav {
-    float: right;
-  }
-}
+        /* Padding for spacing */
+        .inner {
+        padding: 30px;
+        }
 
-
-/*
- * Cover
- */
-
-.cover {
-  padding: 0 20px;
-}
-.cover .btn-lg {
-  padding: 10px 20px;
-  font-weight: bold;
-}
-
-
-/*
- * Footer
- */
-
-.mastfoot {
-  color: #999; /* IE8 proofing */
-  color: rgba(255,255,255,.5);
-}
+        /* cyrillic */
+        @font-face {
+        font-family: 'Lobster';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Lobster'), local('Lobster-Regular'), url(/fonts/c28rH3kclCLEuIsGhOg7evY6323mHUZFJMgTvxaG2iE.woff2) format('woff2');
+        unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        /* latin-ext */
+        @font-face {
+        font-family: 'Lobster';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Lobster'), local('Lobster-Regular'), url(/fonts/9NqNYV_LP7zlAF8jHr7f1vY6323mHUZFJMgTvxaG2iE.woff2) format('woff2');
+        unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+        }
+        /* latin */
+        @font-face {
+        font-family: 'Lobster';
+        font-style: normal;
+        font-weight: 400;
+        src: local('Lobster'), local('Lobster-Regular'), url(/fonts/cycBf3mfbGkh66G5NhszPQ.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+        }
 
 
-/*
- * Affix and center
- */
+        /*
+        * Header
+        */
+        .masthead-brand {
+        color: #C44741;
+        font-family: Lobster;
+        font-size: 24px;
+        text-shadow: 1px 1px 0px #222222;
 
-@media (min-width: 768px) {
-  /* Pull out the header and footer */
-  .masthead {
-    position: fixed;
-    top: 0;
-  }
-  .mastfoot {
-    position: fixed;
-    bottom: 0;
-  }
-  /* Start the vertical centering */
-  .site-wrapper-inner {
-    vertical-align: middle;
-  }
-  /* Handle the widths */
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 100%; /* Must be percentage or pixels for horizontal alignment */
-  }
-}
+        margin-top: 10px;
+        margin-bottom: 10px;
+        }
 
-@media (min-width: 992px) {
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 700px;
-  }
-}        
+        .masthead-nav > li {
+        display: inline-block;
+        }
+        .masthead-nav > li + li {
+        margin-left: 20px;
+        }
+        .masthead-nav > li > a {
+        padding-right: 0;
+        padding-left: 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff; /* IE8 proofing */
+        color: rgba(255,255,255,.95);
+        border-bottom: 2px solid transparent;
+        }
+        .masthead-nav > li > a:hover,
+        .masthead-nav > li > a:focus {
+        background-color: transparent;
+        border-bottom-color: #a9a9a9;
+        border-bottom-color: rgba(255,255,255,.25);
+        }
+        .masthead-nav > .active > a,
+        .masthead-nav > .active > a:hover,
+        .masthead-nav > .active > a:focus {
+        color: #fff;
+        border-bottom-color: #fff;
+        }
+
+        @media (min-width: 768px) {
+        .masthead-brand {
+        float: left;
+        }
+        .masthead-nav {
+        float: right;
+        }
+        }
+
+
+        /*
+        * Cover
+        */
+
+        .cover {
+        padding: 0 20px;
+        }
+        .cover .btn-lg {
+        padding: 10px 20px;
+        font-weight: bold;
+        }
+
+
+        /*
+        * Footer
+        */
+
+        .mastfoot {
+        color: #999; /* IE8 proofing */
+        color: rgba(255,255,255,.5);
+        }
+
+
+        /*
+        * Affix and center
+        */
+
+        @media (min-width: 768px) {
+        /* Pull out the header and footer */
+        .masthead {
+        position: fixed;
+        top: 0;
+        }
+        .mastfoot {
+        position: fixed;
+        bottom: 0;
+        }
+        /* Start the vertical centering */
+        .site-wrapper-inner {
+        vertical-align: middle;
+        }
+        /* Handle the widths */
+        .masthead,
+        .mastfoot,
+        .cover-container {
+        width: 100%; /* Must be percentage or pixels for horizontal alignment */
+        }
+        }
+
+        @media (min-width: 992px) {
+        .masthead,
+        .mastfoot,
+        .cover-container {
+        width: 700px;
+        }
+        }        
       </style>
     </head>
     <body>
@@ -349,7 +439,8 @@ body {
           <div class="cover-container">
             <div class="masthead clearfix">
               <div class="inner">
-                <h3 class="masthead-brand">UprunDesu</h3>
+		<%= image_tag("/images/uprundesu_logo.png", class: "masthead-brand") %>
+<!--                <h3 class="masthead-brand">UprunDesu</h3> -->
               </div>
             </div>
 

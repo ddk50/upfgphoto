@@ -1,0 +1,48 @@
+<div id="legend">
+  <legend class="">Recent Activities</legend>
+</div>
+
+<div id="recentactivities">  
+  <div class="qa-message-list" id="wallmessages">  
+    
+    <% @activities.each_with_index do |(key, value), i| %>
+      <div class="message-item" id="<%= sprintf("wm%d", i) %>">
+	<div class="message-inner">
+	  <div class="message-head clearfix">
+
+	    <div class="user-detail">
+	      <h5 class="handle" style="color: #bbb;">
+		<span class="glyphicon glyphicon-time"></span>
+		<%= value.first.created_at.strftime("%Y-%m-%d %a")%> の出来事</h5>
+	      <div class="post-meta">
+		<div class="asker-meta">
+		  <span class="qa-message-what"><%= value.size %>件のアクティビティがあります</span>
+		</div>
+	      </div>
+	    </div>	    
+	    
+	    <hr style="margin-top: 10px;">
+	    
+	    <div class="avatar">
+	      <ul>
+		<% value.each do |act| %>		
+		  <li>
+		    <%= put_glyphicon(act) %>
+		    <%= link_to(employees_url(id: act.employee.id)) do %>
+		      <%= image_tag gsub_http_to_https(act.employee.image_url), class: "", style: "margin: 3px;" %>
+		    <% end %>
+		    <%= pprint_action_type(act) %>
+<!--		    <hr style="margin: 3px;"/> -->
+		  </li>
+		<% end %>
+	      </ul>
+	    </div>
+	    
+	  </div>	 
+	  
+	</div>
+      </div>
+    <% end %>
+    
+  </div>
+</div>

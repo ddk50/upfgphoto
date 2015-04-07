@@ -1,78 +1,73 @@
 <% if logged_in? %>
+
+  <div id="legend">
+    <legend class="">UPFG社員の皆様</legend>
+  </div>
   
   <div class="row" style="margin-top: 10px;">
-    <div class="col-md-3" id="leftCol">
-      <div id="myprofile" class="shadow" style="margin-bottom: 10px;">        
-        <div class="user-wrapper">
-          <% if current_employee.existavatar %>
-            <%= image_tag(employee_avatar_url(current_employee.id), class: "img-responsive") %>
-          <% else %>
-            <%= image_tag gsub_http_to_https(current_employee.image_url) %>
-          <% end %>
-          <div class="description" style="padding: 10px;">
-            <h4><%= current_employee.name %></h4>
-            <h5> <strong> <%= current_employee.branch %> </strong></h5>
-            <p>
-              <%= gsub_enter(current_employee.description) %>
-            </p>
-            <hr>
-            <div class="form-inline form-group">
-              <%= link_to(employee_profile_url(current_employee.id), class: "btn btn-danger btn-sm") do %>
-                <i class="fa fa-user-plus"></i> &nbsp;Edit Profile + 
-              <% end %>
-              <%= link_to(employees_url(current_employee.id), class: "btn btn-primary btn-sm") do %>
-                &nbsp;View Photos
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     
-    <div class="col-md-9 shadow">
+    <div class="col-md-12 shadow">
 
       <% @employees.each do |employee| %>
-        <% next if employee.id == current_employee.id %>
-        <div class="row">
-          <div class="col-md-12 col-xs-12 col-lg-12 col-sm-12">
-            <div class="well well-sm">
-              <div class="media">
-                <a class="thumbnail pull-left" href="#">
-                  <%= image_tag gsub_http_to_https(employee.image_url), class: "media-object" %>
-                </a>
-                <div class="media-body">
-                  <h4 class="media-heading"><%= employee.nickname %> <%= employee.name %></h4>  
-                  <p><%= employee.description %></p>
-                  <p>
-                    <%= link_to(employees_url(id: employee.id)) do %>
-                      <span class="label label-info"><%= employee.photos.size %> photos</span>
-                    <% end %>
-                  </p>
-                  <p>
-                    <% if current_employee.id != employee.id %>
-                      <%= link_to(activities_poke_url(employee_id: employee.id), class: "btn btn-xs btn-default", method: :post) do %>
-                        <span class="glyphicon glyphicon-comment"></span> Poke
+	<% if not current_employee.guest? %>
+          <% next if employee.id == current_employee.id %>
+          <div class="row">
+            <div class="col-md-12 col-xs-12 col-lg-12 col-sm-12">
+              <div class="well well-sm">
+		<div class="media">
+                  <a class="thumbnail pull-left" href="#">
+                    <%= image_tag gsub_http_to_https(employee.image_url), class: "media-object" %>
+                  </a>
+                  <div class="media-body">
+                    <h4 class="media-heading"><%= employee.nickname %> <%= employee.name %></h4>  
+                    <p><%= employee.description %></p>
+                    <p>
+                      <%= link_to(employees_url(id: employee.id)) do %>
+			<span class="label label-info"><%= employee.photos.size %> photos</span>
                       <% end %>
-                      
-                      <%= link_to(employee_profile_url(id: employee.id), class: "btn btn-xs btn-default") do %>
-                        <span class="glyphicon glyphicon-user"></span> View Profile
+                    </p>
+                    <p>
+                      <% if current_employee.id != employee.id %>
+			<%= link_to(activities_poke_url(employee_id: employee.id), class: "btn btn-xs btn-default", method: :post) do %>
+                          <span class="glyphicon glyphicon-comment"></span> Poke
+			<% end %>
+			
+			<%= link_to(employee_profile_url(id: employee.id), class: "btn btn-xs btn-default") do %>
+                          <span class="glyphicon glyphicon-user"></span> View Profile
+			<% end %>
+                      <% else %>
+			<%= link_to(employee_profile_url(id: employee.id), class: "btn btn-xs btn-default") do %>
+                          <span class="glyphicon glyphicon-user"></span> View & Edit Profile
+			<% end %>                    
                       <% end %>
-                    <% else %>
-                      <%= link_to(employee_profile_url(id: employee.id), class: "btn btn-xs btn-default") do %>
-                        <span class="glyphicon glyphicon-user"></span> View & Edit Profile
-                      <% end %>                    
+                    </p>
+                    <% if employee.id == current_employee.id %>
+                      <div style="font-size: 20px">
+			<span class="label label-warning">THIS IS YOU</span>
+                      </div>
                     <% end %>
-                  </p>
-                  <% if employee.id == current_employee.id %>
-                    <div style="font-size: 20px">
-                      <span class="label label-warning">THIS IS YOU</span>
-                    </div>
-                  <% end %>
-                </div>
+                  </div>
+		</div>
               </div>
             </div>
           </div>
-        </div>
+	<% else %>
+          <div class="row">
+            <div class="col-md-12 col-xs-12 col-lg-12 col-sm-12">
+              <div class="well well-sm">
+		<div class="media">
+                  <a class="thumbnail pull-left" href="#">
+                    <%= image_tag '/images/anonymouse.png', height: '50px', width: '50px', class: "media-object" %>
+                  </a>
+                  <div class="media-body">
+                    <h4 class="media-heading">We are anonymous</h4>  
+                    <p>We are anonymous</p>
+                  </div>
+		</div>
+              </div>
+            </div>
+          </div>	  
+	<% end %>
       <% end %>
     </div>
   </div>

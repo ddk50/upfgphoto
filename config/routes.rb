@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
 
-  get 'search/index' => 'search#index', as: :search_index
+  get 'admin/index' => 'admin#index', as: :admin_index
+  post 'admin/:id/useredit' => 'admin#user_edit', as: :admin_useredit
+  post 'admin/:id/authorityedit' => 'admin#authority_edit', as: :admin_authorityedit
+  delete 'admin/:id' => 'admin#delete', as: :admin_delete
+  post 'admin/new' => 'admin#new', as: :admin_new
 
   # get 'photo/index'
 
@@ -24,7 +28,6 @@ Rails.application.routes.draw do
 
   get 'd3cloudtags' => 'photo#d3cloudtags', as: :d3cloudtags
   
-  post 'photo' => 'photo#upload', as: :photo_upload
   get 'uploadpanel' => 'photo#uploadpanel', as: :photo_panel
   get 'editpanel' => 'photo#editpanel', as: :edit_panel
   post 'ddupload' => 'photo#ddupload', as: :ddphoto_upload
@@ -47,12 +50,27 @@ Rails.application.routes.draw do
   post 'editdescription' => 'photo#editdescription'
   post 'editcaption' => 'photo#editcaption'
 
+  get 'tags/index' => 'tags#index', as: :tagphoto_index
   get 'tags/:tag' => 'tags#show', as: :tagphoto
 
+  get 'activities/index' => 'activities#index', as: :activities_index
   post 'activities/poke/:employee_id' => 'activities#poke', as: :activities_poke
   post 'activities/viewphoto/:photo_id' => 'activities#viewphoto', as: :activities_viewphoto
   post 'activities/likephoto/:photo_id' => 'activities#likephoto', as: :activities_likephoto
   post 'activities/clearfeeds' => 'activities#clearfeeds', as: :activities_clearfeeds
+
+  get 'boards/index' => 'boards#index'
+  get 'boards/new' => 'boards#addboardpanel', as: :board_addboardpanel
+  post 'boards/new' => 'boards#new', as: :board_new
+  
+  get 'boards/:id' => 'boards#show', as: :boards_show
+  post 'boards/:id' => 'boards#edit', as: :boards_edit
+
+  post 'boards/:id/admin' => 'boards#update_member_auth', as: :board_admin_post
+  post 'boards/:id/ddupload' => 'boards#ddupload', as: :board_ddupload  
+  get 'boards/:id/admin' => 'boards#adminboard', as: :board_admin  
+
+  get 'search/index' => 'search#index', as: :search_index
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

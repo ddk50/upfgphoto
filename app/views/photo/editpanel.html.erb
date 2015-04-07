@@ -1,7 +1,7 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="page-header"><%= current_employee.nickname %>'s Image Gallery <span class="badge"><%= current_employee.photos.size %></span></h2>
+    <h2 class="page-header">貴方がアップロードした写真<span class="badge"><%= current_employee.photos.size %></span></h2>
   </div>
 </div>
 
@@ -11,19 +11,7 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <%= form_tag(ddphoto_upload_path(format: :json),
-                 method: :post, 
-                 class: "dropzone dz-clickable", 
-                 id: "dduploadzone",
-                 multipart: true) do %>
-      <div class="dz-message">
-        <%= image_tag("/images/icn-upload.png") %>
-        <h3>ドラッグアンドドロップでアップロードできます</h3>
-        <h4>ここにファイル(zip, jpeg)をドラッグアンドドロップしてください</h4>
-        <br>
-        <span class="note">いいよ！来いよ！</span>
-      </div>
-    <% end %>
+    
   </div>
 </div>
 
@@ -36,6 +24,7 @@
         <th>タグ</th>
         <th>タイトル</th>
         <th>説明</th>
+	<th>ボード</th>
       </tr>
     </thead>
     <tbody>
@@ -53,7 +42,7 @@
               <% end %>
             </td>
             <td>
-              <input class="edittagbox form-control" name="tags" type="text" value="<%= p.tag2photos.each_tags(p.id).map{|t| t.name }.join(",") %>" data-photoid="<%=p.id%>"/>
+              <input class="edittagbox form-control" name="tags" type="text" value="<%= p.tags.map{|t| t.name }.join(",") %>" data-photoid="<%=p.id%>" placeholder="タグを入力してください" />
             </td>
             <td>
               <input class="photocaption form-control" name="photocaption" type="text" value="<%= p.caption %>" onKeyPress="submitStop(event)" data-photoid="<%=p.id%>">
@@ -61,6 +50,11 @@
             <td>
               <textarea class="photodescription form-control" name="photodescription" rows="3" data-photoid="<%=p.id%>"><%= p.description %></textarea>
             </td>
+	    <td>
+	      <% if p.board %>
+		<%= link_to(boards_show_url(p.board.id), style: "padding: 4px 4px 4px 4px;") do %><span class="label label-danger"> <%= p.board.caption %> </span> <% end %>
+	      <% end %>	      
+	    </td>
           </tr>
       <% end %>
     </tbody>

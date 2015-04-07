@@ -3,12 +3,18 @@
 class TagsController < ApplicationController
 
   before_action :authenticate_user!
+  before_action :authenticate_guest!, except: [:gettags, :hottags]
+
+  def index
+    tags = Tag.includes(:photos).all
+    @tags = tags.sort {|x, y| -(x.photos.size <=> y.photos.size) }
+  end
 
   def show
     tagname = params[:tag]
-    page = params[:page] == nil ? 0 : params[:page].to_i    
+    page = params[:page] == nil ? 0 : params[:page].to_i
     
-    tag_id = Tag.find_by_name(tagname);
+    tag_id = Tag.find_by_name(tagname)
     
     @tagname = tagname
     rel = Tag2photo.where(tag_id: tag_id)

@@ -1,19 +1,26 @@
 
-require 'search_module'
-
 class Photo < ActiveRecord::Base
 
   include Search
 
   belongs_to :employee 
+  
   has_many :tag2photos, dependent: :destroy
   has_many :tags, through: :tag2photos
+  
+  has_one  :board2photo, dependent: :destroy
+  has_one  :board, through: :board2photo
+  
   has_many :activities, class_name: "Activity", foreign_key: :target_photo_id
   has_many :likecount, lambda { where(action_type: Activity.action_types[:like_photo]) }, class_name: "Activity", foreign_key: :target_photo_id
 
-  default_scope { includes(:tags) }
-##  default_scope { includes(:activities) } 
-  default_scope { includes(:likecount) } 
+##  default_scope { includes(:likecount) } 
+  
+##  default_scope { includes(:tags) }
+##  default_scope { includes(:tag2photos) } 
+  
+##  default_scope { includes(:board) } 
+##  default_scope { includes(:board2photo) }   
 
   def like!(current_employee)
     new = Activity.new(employee_id: current_employee.id,
@@ -30,6 +37,10 @@ class Photo < ActiveRecord::Base
                        action_type: :view_photo)
     new.save!    
   end
+
+  def self.default_includes
+    includes(:likecount, :tags, :tag2photos, :board, :board2photo)
+  end
  
   def self.like_tag(param)
     if not param.nil? and not param.to_s == ""
@@ -43,7 +54,7 @@ class Photo < ActiveRecord::Base
       begin
         return where(shotdate: DateTime.parse(startdate.to_s)..DateTime.parse(enddate.to_s))
       rescue ArgumentError
-      end        
+      end
     end
     all
   end
@@ -64,6 +75,11 @@ class Photo < ActiveRecord::Base
       return limit(param.to_i)
     end
     all
+  end
+
+  def self.omit_boarding_photos()
+    ## omit photos that are submitted on boards
+    includes(:board2photo).where(board2photos: {id: nil})
   end
   
 end

@@ -3,16 +3,13 @@
 class EmployeesController < ApplicationController
   
   before_action :authenticate_user!
+  before_action :authenticate_guest!, except: :index
 
   def index    
-    employees = Employee.includes(:photos).all
-
-
-
     ##
     ## [FIXME] Can it write in SQL?
     ##
-    @employees = employees.sort {|x, y| y.photos.size <=> x.photos.size}
+    @employees = Employee.includes(:photos).all.sort {|x, y| y.photos.size <=> x.photos.size}
   end
 
   def profile
@@ -81,10 +78,11 @@ class EmployeesController < ApplicationController
 
     @employee = Employee.find_by_id(id)
 
-    rel = Photo.employee_photo(id)
+    rel = Photo.default_includes().employee_photo(id)
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
-      .photo_order(params[:sort])
+      .photo_order(params[:sort]) 
+      .omit_boarding_photos()
     
     @photos = rel.offset(page * perpage).limit(perpage)
     

@@ -15,6 +15,7 @@
 //= require bootstrap.min
 //= require bootstrap-datepicker
 //= require bootstrap-tagsinput.min
+//= require bootstrap-select.min
 //= require typeahead.bundle
 //= require jquery.lazyload.min
 //= require d3.min
@@ -31,13 +32,33 @@ var ready = function () {
         padding_x: 10,
         padding_y: 10,
         margin_bottom: 200,
-        single_column_breakpoint: 700
+        single_column_breakpoint: 700,
+	target_container: '#main'
     });
 
     $("img.img-lazy-responsive").lazyload({
         effect: "fadeIn",
-        failure_limit: 999
+        failure_limit: 999,
+	threshold: 400
+    });
+
+    $("#main").scroll(function(){
+	$("img.img-lazy-responsive").show().lazyload();
     });    
+
+    $('[data-toggle=offcanvas]').click(function() {
+	$(this).toggleClass('visible-xs text-center');
+	$(this).find('i').toggleClass('glyphicon-chevron-right glyphicon-chevron-left');
+	$('.row-offcanvas').toggleClass('active');
+	$('#lg-menu').toggleClass('hidden-xs').toggleClass('visible-xs');
+	$('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
+	$('#btnShow').toggle();
+    });
+
+//     var interval = setInterval(function(){
+// 	$("img.img-lazy-responsive").lazyload();
+// //	clearInterval(interval);
+//     },500);
 
     // $('#date-pickere-container .input-daterange').datepicker({
     //     format: 'yyyy-mm-dd'
@@ -46,6 +67,10 @@ var ready = function () {
     $('.input-daterange').datepicker({
         format: 'yyyy-mm-dd'
     });
+
+    $('.datepicker').datepicker({
+	format: 'yyyy-mm-dd'
+    })
 
     $('i.glyphicon-thumbs-up, i.glyphicon-thumbs-down').click(function(){
         
@@ -82,6 +107,10 @@ var ready = function () {
     });
 
     $('.photocheckAll').on('change', function() {
+        $('.' + this.id).prop('checked', this.checked);
+    });
+
+    $('.boardcheckAll').on('change', function() {
         $('.' + this.id).prop('checked', this.checked);
     });
 }

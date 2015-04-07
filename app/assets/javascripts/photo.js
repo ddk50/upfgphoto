@@ -14,13 +14,16 @@ var ready = function() {
     
     Dropzone.autoDiscover = false;
     $("#dduploadzone").dropzone({
-        
+        acceptedFiles: "image/*,capture=camera,.jpg,.jpeg,.zip",
         uploadMultiple: false,
         maxFilesize: 1024,
         maxThumbnailFilesize: 1024,
         acceptedFiles: '.jpg,.jpeg,.zip',
         headers: {"X-CSRF-Token" : $('meta[name="csrf-token"]').attr('content')},
-        url: "/ddupload.json",
+
+	sending: function(file, xhr, formData) {
+	    formData.append("tags", $("#postformforgalleryModal").find(".edittagbox.form-control").val());
+	},
     
         success: function(file, response) {
             if (response.result === 'success') {
@@ -40,23 +43,25 @@ var ready = function() {
     function edittag($this) {
         var selVal = $this.val().split(",");
         var id = $this.attr("data-photoid");
-        $.ajax({
-            url: '/edittags.json',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                'photoid': id,
-                'tags': selVal
-            },
-            success: function(response) {
-                if (response.status == 'error') {
-                    alert('書き換えエラー ' + response.msg);
-                }
-            },
-            error: function(response) {
-                alert('通信エラー');
-            }
-        });
+	if (id != null) {
+            $.ajax({
+		url: '/edittags.json',
+		type: 'POST',
+		dataType: 'json',
+		data: {
+                    'photoid': id,
+                    'tags': selVal
+		},
+		success: function(response) {
+                    if (response.status == 'error') {
+			alert('書き換えエラー ' + response.msg);
+                    }
+		},
+		error: function(response) {
+                    alert('通信エラー');
+		}
+            });
+	}
     }
 
     function editdescription($this) {
@@ -128,25 +133,25 @@ var ready = function() {
         $('body,html').animate({scrollTop:0},1000);
     })
 
-    $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
-        position: {
-            my: 'bottom center',
-            at: 'top center',
-            target: $('#bloodhoundtextboxzip')
-        },
-        show: {
-            event: 'focus'
-        },
-        hide: {
-           event: 'blur'
-        },
-        content: {
-            text: 'Enterキーを押すか, 「タグを追加」ボタンを押して確定してください'
-        },
-        style: {
-            classes: 'tipsStyle'
-        }
-    });
+    // $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
+    //     position: {
+    //         my: 'bottom center',
+    //         at: 'top center',
+    //         target: $('#bloodhoundtextboxzip')
+    //     },
+    //     show: {
+    //         event: 'focus'
+    //     },
+    //     hide: {
+    //        event: 'blur'
+    //     },
+    //     content: {
+    //         text: 'Enterキーを押すか, 「タグを追加」ボタンを押して確定してください'
+    //     },
+    //     style: {
+    //         classes: 'tipsStyle'
+    //     }
+    // });
 
     $('#photos img').on('click', function(){
         var src = $(this).attr('data-original2');
@@ -283,7 +288,7 @@ var ready = function() {
 	$("#bloodhoundphototop" + ' :button').click(function() {
             var val = $("#bloodhoundphototop :input[type=text]")[1].value;
             if (val != "" ) {
-                window.location = "search/index?tag=" + val;
+                window.location = "/search/index?tag=" + val;
             }
 	});
 	$("#bloodhoundphototop :input[type=text]").keypress(function(ev) {
@@ -291,7 +296,7 @@ var ready = function() {
 		(ev.keyCode && ev.keyCode === 13)) {
                 var val = $("#bloodhoundphototop :input[type=text]")[1].value;
                 if (val != "") {
-                    window.location = "search/index?tag=" + val;
+                    window.location = "/search/index?tag=" + val;
                 }
 		return false;
             } else {

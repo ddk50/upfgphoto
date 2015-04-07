@@ -2,8 +2,11 @@
 class Tag < ActiveRecord::Base
   has_many :tag2photos
   has_many :photos, through: :tag2photos
-##  has_many :photo, through: tag2photos
+  
   validate :name, :uniqueness => true
+
+##  default_scope { includes(:tag2photos) }
+## default_scope { includes(:photos) }
 
   def self.counts
     Tag.select("Tags.name, count(tag2photos.tag_id) as count")

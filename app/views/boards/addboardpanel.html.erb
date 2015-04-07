@@ -1,0 +1,48 @@
+<%= form_tag(board_new_path(), :method => :post) do %>
+  <fieldset>
+    <div id="legend">
+      <legend class="">新しいボード（画像掲示板）の作成</legend>
+    </div>
+    <div class="control-group">
+      <!-- Board Caption -->
+      <label class="control-label" for="caption">ボードのキャプション</label>
+      <div class="controls">
+        <input type="text" name="caption" class="input-xxlarge" required>
+        <p class="help-block">ボード（画像掲示板）のタイトルです．全ての文字が使えます</p>
+      </div>
+    </div>
+ 
+    <div class="control-group">
+      <!-- Board Description -->
+      <label class="control-label" for="description">ボードの説明文</label>
+      <div class="controls">
+        <textarea name="description" class="input-xlarge" style="width: 500px;" rows="6" required></textarea>
+        <p class="help-block">ボードの説明文を入力してください</p>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+	<input type="checkbox" name="public" value="checked"> Publicボードにする
+        <p class="help-block">ボードをPublicにすると．掲示板の内容はUPFG構成員全てに公開されます</p>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+	<input type="checkbox" name="guest" value="checked"> ゲストモードにする
+        <p class="help-block", style="color: #ff0000;">注意：ゲストモードにすると，UPFGの正規職員以外の人々もボードを見ることができます</p>
+      </div>
+    </div>
+ 
+    <div class="control-group">
+      <!-- Button -->
+      <div class="controls">
+        <%= submit_tag("ボードを作成する", 
+		       :data => {:disable_with => "送信中..."}, 
+		       :class => "btn btn-success") %>
+      </div>
+    </div>
+  </fieldset>
+<% end %>
+

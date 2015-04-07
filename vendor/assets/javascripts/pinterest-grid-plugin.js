@@ -30,10 +30,14 @@
         padding_y: 10,
         no_columns: 4,
         margin_bottom: 50,
-        single_column_breakpoint: 700
+        single_column_breakpoint: 700,
+	//
+	// kazushi few addition
+	//
+	target_container: null
     },
     columns,
-    $article,
+    $article,    
     article_width;
 
     function Plugin(element, options) {
@@ -47,6 +51,7 @@
     Plugin.prototype.init = function () {
         var self = this;
         var resize_finish = false;
+	var scroll_finish = false;
 
         $(window).resize(function() {
             if (resize_finish !== false) {
@@ -56,7 +61,19 @@
                 self.make_layout_change(self);
             }, 500);
         });
-
+	
+	//
+	// kazushi few addition
+	//
+	$(self.options.target_container).scroll(function(){
+	    if (scroll_finish !== false) {
+		clearTimeout(scroll_finish)
+	    }
+	    scroll_finish = setTimeout( function() {
+		self.make_layout_change(self);
+	    }, 500);
+	});
+	
         self.make_layout_change(self);
 
         // setTimeout(function() {
@@ -128,7 +145,7 @@
         });
 
         this.tallest($container, single_column_mode);
-        $(window).resize();
+//        $(window).resize();
     };
 
     Plugin.prototype.tallest = function (_container, single_column_mode) {

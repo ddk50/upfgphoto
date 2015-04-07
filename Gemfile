@@ -70,3 +70,10 @@ gem 'dalli'
 
 gem 'unicorn'
 gem 'rb-readline'
+
+group :development, :test do
+  gem 'rails-erd'
+end
+
+gem 'nokogiri'
+

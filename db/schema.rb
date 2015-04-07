@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150226232334) do
+ActiveRecord::Schema.define(version: 20150529054242) do
 
   create_table "activities", force: true do |t|
     t.integer  "employee_id",                        null: false
@@ -21,12 +21,49 @@ ActiveRecord::Schema.define(version: 20150226232334) do
     t.boolean  "checked",            default: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "description"
   end
 
   add_index "activities", ["checked"], name: "index_activities_on_checked"
   add_index "activities", ["employee_id"], name: "index_activities_on_employee_id"
   add_index "activities", ["target_employee_id"], name: "index_activities_on_target_employee_id"
   add_index "activities", ["target_photo_id"], name: "index_activities_on_target_photo_id"
+
+  create_table "board2employees", force: true do |t|
+    t.integer  "employee_id",    null: false
+    t.integer  "board_id",       null: false
+    t.integer  "transaction_id", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "board2employees", ["board_id"], name: "index_board2employees_on_board_id"
+  add_index "board2employees", ["employee_id"], name: "index_board2employees_on_employee_id"
+  add_index "board2employees", ["transaction_id"], name: "index_board2employees_on_transaction_id"
+
+  create_table "board2photos", force: true do |t|
+    t.integer  "photo_id",   null: false
+    t.integer  "board_id",   null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "board2photos", ["board_id"], name: "index_board2photos_on_board_id"
+  add_index "board2photos", ["photo_id"], name: "index_board2photos_on_photo_id", unique: true
+
+  create_table "boards", force: true do |t|
+    t.integer  "employee_id",                 null: false
+    t.string   "caption",                     null: false
+    t.text     "description"
+    t.boolean  "specialized", default: false, null: false
+    t.boolean  "public",      default: false, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "guest",       default: false, null: false
+  end
+
+  add_index "boards", ["caption"], name: "index_boards_on_caption", unique: true
+  add_index "boards", ["employee_id"], name: "index_boards_on_employee_id"
 
   create_table "employees", force: true do |t|
     t.string   "nickname"
@@ -46,12 +83,13 @@ ActiveRecord::Schema.define(version: 20150226232334) do
     t.string   "email"
     t.boolean  "existavatar", default: false
     t.boolean  "edited",      default: false
+    t.integer  "rank",        default: 5,     null: false
   end
 
   add_index "employees", ["provider", "uid"], name: "index_employees_on_provider_and_uid", unique: true
 
   create_table "photos", force: true do |t|
-    t.integer  "employee_id",               null: false
+    t.integer  "employee_id",                               null: false
     t.datetime "shotdate"
     t.string   "model"
     t.string   "exposure_time"
@@ -64,6 +102,8 @@ ActiveRecord::Schema.define(version: 20150226232334) do
     t.datetime "updated_at"
     t.string   "caption"
     t.text     "description"
+    t.boolean  "censored",                  default: false, null: false
+    t.boolean  "guest",                     default: false, null: false
   end
 
   add_index "photos", ["employee_id"], name: "index_photos_on_employee_id"
@@ -86,6 +126,19 @@ ActiveRecord::Schema.define(version: 20150226232334) do
 
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true
 
+  create_table "transactions", force: true do |t|
+    t.integer  "from_id",    null: false
+    t.integer  "to_id",      null: false
+    t.string   "uri_hash",   null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "status"
+  end
+
+  add_index "transactions", ["from_id"], name: "index_transactions_on_from_id"
+  add_index "transactions", ["to_id"], name: "index_transactions_on_to_id"
+  add_index "transactions", ["uri_hash"], name: "index_transactions_on_uri_hash"
+
   create_table "users", force: true do |t|
     t.string   "provider",    null: false
     t.string   "uid",         null: false
@@ -98,5 +151,16 @@ ActiveRecord::Schema.define(version: 20150226232334) do
   end
 
   add_index "users", ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+
+  create_table "whitelists", force: true do |t|
+    t.string   "nickname",    null: false
+    t.datetime "expires_at"
+    t.text     "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "status"
+  end
+
+  add_index "whitelists", ["nickname"], name: "index_whitelists_on_nickname", unique: true
 
 end

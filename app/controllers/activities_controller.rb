@@ -3,6 +3,13 @@
 class InvalidFieldFormat < StandardError; end
 
 class ActivitiesController < ApplicationController
+
+  before_action :authenticate_user!
+  before_action :authenticate_guest!
+
+  def index
+    @activities = Activity.recent_acts(50)
+  end
   
   def poke
     begin

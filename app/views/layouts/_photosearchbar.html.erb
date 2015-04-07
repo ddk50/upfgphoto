@@ -12,7 +12,7 @@
             </select>                                
           </div> <!-- form group [rows] -->
           
-          <div class="form-group">
+          <div id="photosearchtag" class="form-group">
             <label class="control-label" for="pref-search">タグ:</label>
             <input id="bloodhoundsearchbar" class="form-control input-sm" type="text" id="pref-search" name="tag" data-provide="typeahead" />
 
@@ -23,12 +23,12 @@
             <select id="pref-orderby" class="form-control">
               <option>昇順</option>
               <option>降順</option>
-            </select>            
+            </select>
           </div> <!-- form group [order by] --> 
           
           <div class="form-group">
 	    <div id="date-pickere-container">
-              <label class="filter-col" style="margin-right:0;" for="pref-dateby">日付:</label>
+              <label class="filter-col" style="margin-right:0;" for="pref-dateby">撮影日付:</label>
 	      <div class="input-daterange input-group" id="datepicker">
 	        <input type="text" class="input-sm form-control" name="start" id="start" value="" />
 	        <span class="input-group-addon"> to </span>

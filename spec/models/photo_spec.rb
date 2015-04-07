@@ -37,3 +37,26 @@ describe Tag2photo do
     end
   end
 end
+
+describe Board2photo do
+  describe '#name' do
+    context '写真をボードに貼り付ける時' do
+      let(:board2photo) { create(:board2photo) }
+
+      it 'ボードがvalidであること' do
+        board2photo.valid?
+      end
+
+      it '写真を消した時，ボードと写真の関係が消えること' do
+        photo = board2photo.photo
+        expect { photo.destroy }.to change(Board2photo, :count).by(-1)
+      end
+
+      it 'ボード自身は消えないこと' do
+        photo = board2photo.photo
+        expect { photo.destroy }.to change(Board, :count).by(0)
+      end
+      
+    end
+  end
+end

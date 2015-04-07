@@ -5,7 +5,10 @@
     <article class="white-panel">
 
       <ul class="nav nav-pills">
-        <% p.tag2photos.each_tags(p.id) do |tag| %>
+	<% if p.board %>
+	  <li> <%= link_to(boards_show_url(p.board.id), style: "padding: 4px 4px 4px 4px;") do %><span class="label label-danger"> <%= p.board.caption %> </span> <% end %></li>
+	<% end %>
+        <% p.tags.each do |tag| %>
           <li><%= link_to(tagphoto_url(tag: tag.name), style: "padding: 4px 4px 4px 4px;") do %> <span class="label label-primary"> <%= tag.name %> </span> <% end %></li>
         <% end %>
       </ul>

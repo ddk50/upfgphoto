@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 class SessionsController < ApplicationController
-  def create
-    
+  
+  def create    
     granted = false
+    nickname = request.env['omniauth.auth'][:info][:nickname].to_s
 
-    logger.debug("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb #{request.env['omniauth.auth'][:info][:nickname]}")    
-
-    WHITE_LIST.each{|val|
-      if val.to_s == request.env['omniauth.auth'][:info][:nickname].to_s
-        granted = true
-        break
-      end      
-    }
+    ret = Whitelist.where(['nickname like ?', nickname])    
+    if ret.present? 
+      granted = check_user(ret.first)
+    end
     
     if not granted
       redirect_to root_path, alert: 'メンバーではありません．管理人に連絡して追加してもらってください'
@@ -46,4 +43,22 @@ class SessionsController < ApplicationController
     reset_session
     redirect_to root_path, notice: 'ログアウトしました'
   end
+
+  private
+  def check_user(user)
+    if user.accepted? 
+      if user.expires_at.present?
+        if user.expires_at > Time.now
+          return true
+        else
+          return false
+        end
+      else
+        return true
+      end
+    else
+      return false
+    end    
+  end
+  
 end
