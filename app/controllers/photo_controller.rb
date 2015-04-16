@@ -7,6 +7,7 @@
 class InvalidFileFormat < StandardError; end
 class InvalidFieldFormat < StandardError; end
 class InvalidRequest < StandardError; end
+class InternalIOError < StandardError; end
 
 class PhotoController < ApplicationController
 
@@ -81,10 +82,11 @@ class PhotoController < ApplicationController
   
   def show
     photoid = params[:id]
-    send_data(
-              File.read("#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg"),
+    send_file(
+              "#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg",
               type: "image/jpeg",
-              filename: "#{photoid}.jpg"
+              filename: "#{photoid}.jpg",
+              disposition: 'inline'
               )
   end
 
@@ -130,10 +132,11 @@ class PhotoController < ApplicationController
       gen_thumbnail(original_path, photoid, :small) if not FileTest.exist?(thumbnail_path)
     end
 
-    send_data(
-              File.read(thumbnail_path),
+    send_file(
+              thumbnail_path,
               type: "image/jpeg",
-              filename: "thumbnail_#{photoid}.jpg"
+              filename: "thumbnail_#{photoid}.jpg",
+              disposition: 'inline'
               )    
   end
 
@@ -220,11 +223,11 @@ class PhotoController < ApplicationController
       zipfilename = params[:fname]
       zipfile_fullpath = PHOTO_CONFIG['download_tmp_path'] + '/' + zipfilename + '.zip'
       logger.debug(sprintf("############### GET_ZIP (%s) ###############", zipfile_fullpath))
-      send_data(File.read(zipfile_fullpath), 
+      send_file(zipfile_fullpath,
                 :type => 'application/zip', 
                 :filename => File.basename(zipfile_fullpath))
     ensure
-      File.delete(zipfile_fullpath) if File.exist?(zipfile_fullpath)
+##      File.delete(zipfile_fullpath) if File.exist?(zipfile_fullpath)
     end
   end
 
@@ -233,8 +236,6 @@ class PhotoController < ApplicationController
   ##
   def get_multiple_items
     photos = params[:items_ids]
-
-    logger.debug("############## DOWNLOAD ##################")
     
     begin      
       zip_temp_path = PHOTO_CONFIG['download_tmp_path'] + 
@@ -244,6 +245,10 @@ class PhotoController < ApplicationController
       if ret.size <= 0
         raise InvalidFieldFormat, "ひとつ以上のファイルを選択してください"
       end
+
+      Zip.default_compression = Zlib::NO_COMPRESSION
+
+      logger.debug("############## GET_MULTIPLE_ITEMS #{zip_temp_path} ##################")
 
       Zip::File.open(zip_temp_path, Zip::File::CREATE) {|zip|
         ret.each{|p|
@@ -292,7 +297,8 @@ class PhotoController < ApplicationController
   ## file form upload
   ##
   def upload
-    accept_upload_file(params[:target_file_upload])
+    file = ensure_uploaded_file(params[:target_file_upload])
+    accept_upload_file(file)
   end 
 
 
@@ -368,8 +374,22 @@ class PhotoController < ApplicationController
   ##
   ## private
   ##
-  private
+  private  
   
+  # Nginx upload module経由で受信した"tempfile"パラメータを参照し、
+  # 手動でActionDispatch::Http::UploadedFileを作成する。
+  #
+  # Nginx設定をしなくても低速ながら動作するように、ifチェックを入れておく
+  def ensure_uploaded_file(file_or_hash)
+    if file_or_hash.is_a?(Hash) && file_or_hash[:tempfile]
+      # Nginx upload module経由の場合
+      file_or_hash[:tempfile] = File.new(file_or_hash[:tempfile])
+      ActionDispatch::Http::UploadedFile.new(file_or_hash)
+    else
+      # 通常の場合
+      file_or_hash
+    end
+  end
   
   ##
   ## accept upload file common routine
@@ -381,7 +401,6 @@ class PhotoController < ApplicationController
     @original_filename = f.original_filename # filename
     @content_type = f.content_type           # Content-Type
     @size = f.size                           # filesize
-    @read = f.read                           # file content
     tags = (params[:tags] == nil) ? [] : params[:tags]  # tag
     
     logger.debug("#################### UPLOAD TAGS #{tags} ####################")
@@ -390,15 +409,17 @@ class PhotoController < ApplicationController
     deleteall(tmppath) if FileTest.exist?(tmppath)
     FileUtils.mkdir_p(tmppath) unless FileTest.exist?(tmppath)
 
-    tmpfullpath = tmppath + "/" + @original_filename
-
-    File.open(tmpfullpath, 'wb') do |newfile|
-      newfile.write(@read)
+    if @original_filename.nil?
+      @original_filename = SecureRandom.uuid.to_s
     end
 
+    tmpfullpath = tmppath + "/" + @original_filename
+
     additions = []
-    
+
     begin
+      
+      FileUtils.mv(f.path, tmpfullpath)
       
       case checkfiletype(tmpfullpath)
       when /Zip\sarchive\sdata/        

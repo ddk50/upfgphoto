@@ -18,7 +18,7 @@ var ready = function() {
         uploadMultiple: false,
         maxFilesize: 1024,
         maxThumbnailFilesize: 1024,
-        acceptedFiles: '.jpg,.jpeg,.zip',
+        acceptedFiles: '.jpg,.jpeg',
         headers: {"X-CSRF-Token" : $('meta[name="csrf-token"]').attr('content')},
         url: "/ddupload.json",
     

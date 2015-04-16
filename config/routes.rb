@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  get 'explorers/index'
+
   get 'search/index' => 'search#index', as: :search_index
 
   # get 'photo/index'
@@ -53,6 +55,8 @@ Rails.application.routes.draw do
   post 'activities/viewphoto/:photo_id' => 'activities#viewphoto', as: :activities_viewphoto
   post 'activities/likephoto/:photo_id' => 'activities#likephoto', as: :activities_likephoto
   post 'activities/clearfeeds' => 'activities#clearfeeds', as: :activities_clearfeeds
+
+  get 'explorers/index' => 'explorers#index'
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
