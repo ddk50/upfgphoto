@@ -6,7 +6,9 @@ application up and running.
 Things you may want to cover:
 
 * Ruby version
-- ruby 2.1.x
+
+ruby 2.1.x
+
 * System dependencies
 
 * Configuration
@@ -16,6 +18,7 @@ Things you may want to cover:
 * Database initialization
 
 * How to run the test suite
+
 ```sh
 rake spec
 ```
@@ -26,11 +29,13 @@ rake spec
 
 Use NGINX web-server. upfgphoto is optimized to NGINX with nginx-upload-module, and ngx_small_light.
 In order to enable these module, use configure option as follows:
+
 ```sh
 ./configure --with-http_gzip_static_module --with-http_ssl_module --add-module=/home/kazushi/repos/nginx-1.6.3/modules/nginx-upload-module-2.2.0 --add-module=/home/kazushi/repos/nginx-1.6.3/modules/nginx-upload-progress-module-0.9.1 --add-module=/home/kazushi/repos/nginx-1.6.3/modules/ngx_small_light-0.6.7
 ```
 
 Next, add a following line into your nginx.conf
+
 ```
 location @unicorn {
     sendfile          on;
@@ -57,9 +62,6 @@ location ~ ^/photo$ {
     }
 }
 ```
-
-* ...
-
 
 Please feel free to use a different markup language if you do not plan to run
 <tt>rake doc:app</tt>.
