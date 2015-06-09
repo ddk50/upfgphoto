@@ -21,7 +21,7 @@ class Activity < ActiveRecord::Base
   def self.recent_acts(limit)        
     day = 7
     begin  
-      f = includes(:target_photo, :target_employee, :employee).where('created_at > ?', day.days.ago)
+      f = includes(:target_photo, :target_employee, :employee).where('created_at > ?', day.days.ago).order('created_at desc')
       day += 7
     end while f.size <= 0
     return f.group_by{|act| act.created_at.to_date}.take(limit)
