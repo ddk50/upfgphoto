@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-require 'search_module'
-
 class Tag2photo < ActiveRecord::Base
 ##
 ## tagとの参照関係はのこってるけど、photoとの参照関係が

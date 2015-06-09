@@ -137,7 +137,8 @@ class PhotoController < ApplicationController
               type: "image/jpeg",
               filename: "thumbnail_#{photoid}.jpg",
               disposition: 'inline'
-              )    
+              )
+    
   end
 
   def delete
@@ -221,7 +222,7 @@ class PhotoController < ApplicationController
   def get_zip
     begin
       zipfilename = params[:fname]
-      zipfile_fullpath = PHOTO_CONFIG['download_tmp_path'] + '/' + zipfilename + '.zip'
+      zipfile_fullpath = PHOTO_CONFIG['upload_tmp_path'] + '/' + zipfilename + '.zip'
       logger.debug(sprintf("############### GET_ZIP (%s) ###############", zipfile_fullpath))
       send_file(zipfile_fullpath,
                 :type => 'application/zip', 
@@ -238,7 +239,7 @@ class PhotoController < ApplicationController
     photos = params[:items_ids]
     
     begin      
-      zip_temp_path = PHOTO_CONFIG['download_tmp_path'] + 
+      zip_temp_path = PHOTO_CONFIG['upload_tmp_path'] + 
         '/' + SecureRandom.uuid.to_s + '.zip'      
       ret       = Photo.where(id: photos)
 
@@ -445,7 +446,10 @@ class PhotoController < ApplicationController
     rescue => e
       additions.each{|path, id|
         File.delete(path)
-      }   
+      }  
+
+      logger.fatal "[FATAL] 例外が発生しました"
+      logger.fatal e.backtrace.join("\n")      
 
       respond_to do |format|
         format.html {
@@ -454,7 +458,7 @@ class PhotoController < ApplicationController
         format.json { render :json => 
           {:result   => 'error', 
             :msg      => e.to_s }
-        }
+        }        
       end
    
     ensure
@@ -465,14 +469,14 @@ class PhotoController < ApplicationController
   def set_and_save_photo_exif(newphoto, jpgpath)
     begin
       exif = EXIFR::JPEG.new(jpgpath)
-      newphoto.shotdate      = exif.date_time_original != nil ? exif.date_time_original.to_datetime : nil
+      newphoto.shotdate      = format_date_time(exif.date_time_original)
       newphoto.model         = exif.model
       newphoto.exposure_time = exif.exposure_time.to_s
       newphoto.f_number      = exif.f_number.to_f.to_s
       newphoto.focal_length  = exif.focal_length.to_i
       newphoto.focal_length_in_35mm_film = exif.focal_length_in_35mm_film.to_i
-      newphoto.iso_speed_ratings = exif.iso_speed_ratings
-      newphoto.update_date_time = exif.date_time != nil ? exif.date_time.to_datetime : nil
+      newphoto.iso_speed_ratings = exif.iso_speed_ratings      
+      newphoto.update_date_time = format_date_time(exif.date_time)
     rescue EXIFR::MalformedJPEG
       newphoto.shotdate      = nil
       newphoto.model         = nil
@@ -616,6 +620,21 @@ class PhotoController < ApplicationController
 
   def checkfiletype(filepath)
     `file #{filepath}`
+  end
+
+  def format_date_time(str)
+    begin
+      if str && str.present?
+        ret = str.to_datetime
+        return ret
+      end
+    rescue ArgumentError
+      logger.debug("##################### #{str} がパースできません} #################")
+      return nil
+    rescue => e 
+      logger.debug("##################### 不明なエラーです #################")
+    end
+    return nil
   end
   
 end

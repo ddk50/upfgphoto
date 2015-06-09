@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   post 'photo/:id' => 'photo#edit', as: :photo_edit
 
   get 'photo/:id/thumbnail/:type' => 'photo#thumbnail', as: :photo_thumbnail
+  ##get 'photo/thumbnail/thumbnail_(:id)_(:type).jpg' => 'photo#thumbnail', as: :photo_thumbnail
   get 'photo/:id/view' => 'photo#view', as: :photo_view
   get 'photo/:id/download' => 'photo#download', as: :photo_download
 

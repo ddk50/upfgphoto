@@ -21,7 +21,10 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">UprunDesu</a>
+            <!-- <a class="navbar-brand" href="/">UprunDesu</a> -->
+            <%= link_to("/") do %>
+              <%= image_tag("uprundesu_logo.png", style: "padding-top: 9px;") %>
+            <% end %>
           </div>
 
           <!-- Collect the nav links, forms, and other content for toggling -->
@@ -349,7 +352,7 @@ body {
           <div class="cover-container">
             <div class="masthead clearfix">
               <div class="inner">
-                <h3 class="masthead-brand">UprunDesu</h3>
+                <%= image_tag("uprundesu_logo.png", class: "masthead-brand") %>
               </div>
             </div>
 
@@ -359,9 +362,9 @@ body {
             <% end %>
 
             <div class="inner cover">
-              <h1 class="cover-heading" style="color: #000000;">うpルンですへようこそ</h1>
+              <h1 class="cover-heading" style="color: #DCDCDC;">うpルンですへようこそ</h1>
 
-              <p class="lead" style="color: #000000;">
+              <p class="lead" style="color: #DCDCDC;">
                 upfg構成員のupfg構成員によるupfg構成員のための写真共有サイト
                 
                 <small>    <br> 諸君　撮るのもいいがちゃんと整理もしよう！</small>

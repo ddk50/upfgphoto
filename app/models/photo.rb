@@ -1,6 +1,3 @@
-
-require 'search_module'
-
 class Photo < ActiveRecord::Base
 
   include Search
@@ -12,6 +9,7 @@ class Photo < ActiveRecord::Base
   has_many :likecount, lambda { where(action_type: Activity.action_types[:like_photo]) }, class_name: "Activity", foreign_key: :target_photo_id
 
   default_scope { includes(:tags) }
+  
 ##  default_scope { includes(:activities) } 
   default_scope { includes(:likecount) } 
 

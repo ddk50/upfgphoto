@@ -5,14 +5,13 @@ class EmployeesController < ApplicationController
   before_action :authenticate_user!
 
   def index    
-    employees = Employee.includes(:photos).all
-
-
+    ## @employees = Employee.joins('LEFT OUTER JOIN photos ON employees.id = photos.employee_id').group("photos.employee_id").order("count(photos.id) desc")
+    @employees = Employee.all
 
     ##
     ## [FIXME] Can it write in SQL?
     ##
-    @employees = employees.sort {|x, y| y.photos.size <=> x.photos.size}
+    ##@employees = employees.sort {|x, y| y.photos.size <=> x.photos.size}
   end
 
   def profile
