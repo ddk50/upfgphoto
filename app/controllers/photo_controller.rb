@@ -92,8 +92,8 @@ class PhotoController < ApplicationController
     end
 
     if authenticate_photo?(photo)
-      send_data(
-                File.read("#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg"),
+      send_file(
+                "#{PHOTO_CONFIG['spool_dir']}/#{photoid}.jpg",
                 type: "image/jpeg",
                 filename: "#{photoid}.jpg"
                 )
@@ -160,8 +160,8 @@ class PhotoController < ApplicationController
       gen_thumbnail(original_path, photoid, :small) if not FileTest.exist?(thumbnail_path)
     end
 
-    send_data(
-              File.read(thumbnail_path),
+    send_file(
+              thumbnail_path,
               type: "image/jpeg",
               filename: "thumbnail_#{photoid}.jpg"
               )    
@@ -250,7 +250,7 @@ class PhotoController < ApplicationController
       zipfilename = params[:fname]
       zipfile_fullpath = PHOTO_CONFIG['download_tmp_path'] + '/' + zipfilename + '.zip'
       logger.debug(sprintf("############### GET_ZIP (%s) ###############", zipfile_fullpath))
-      send_data(File.read(zipfile_fullpath), 
+      send_file(zipfile_fullpath,
                 :type => 'application/zip', 
                 :filename => File.basename(zipfile_fullpath))
     ensure
@@ -314,6 +314,8 @@ class PhotoController < ApplicationController
     
     file = ensure_uploaded_file(params[:target_file_upload]) if params[:target_file_upload].present?
     file = ensure_uploaded_file(params[:file]) if params[:file].present?
+
+    logger.debug("#################### #{file} ##################")
     
     if file.respond_to?(:each_value)
       file.each_value do |uploadfile|

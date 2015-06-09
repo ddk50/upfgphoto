@@ -108,8 +108,11 @@ class BoardsController < ApplicationController
       params[:tags] = params[:tags].split(",")
     end
 
-    if params[:file].respond_to?(:each_value)
-      params[:file].each_value do |uploadfile|        
+    file = ensure_uploaded_file(params[:target_file_upload]) if params[:target_file_upload].present?
+    file = ensure_uploaded_file(params[:file]) if params[:file].present?
+
+    if file.respond_to?(:each_value)
+      file.each_value do |uploadfile|        
         accept_upload_file(uploadfile, board.guest) {|newphotoid|
 
           ##
@@ -129,7 +132,7 @@ class BoardsController < ApplicationController
         }
       end
     else
-      uploadfile = params[:file]
+      uploadfile = file
       boardid = params[:id].to_i
       accept_upload_file(uploadfile, board.guest) {|newphotoid|
 
@@ -395,6 +398,22 @@ class BoardsController < ApplicationController
 
   def gsub_http_to_https(url)
     url.gsub(/http:\/\//, 'https://')
+  end
+
+  private
+  # Nginx upload module経由で受信した"tempfile"パラメータを参照し、
+  # 手動でActionDispatch::Http::UploadedFileを作成する。
+  #
+  # Nginx設定をしなくても低速ながら動作するように、ifチェックを入れておく
+  def ensure_uploaded_file(file_or_hash)
+    if file_or_hash.is_a?(Hash) && file_or_hash[:tempfile]
+      # Nginx upload module経由の場合
+      file_or_hash[:tempfile] = File.new(file_or_hash[:tempfile])
+      ActionDispatch::Http::UploadedFile.new(file_or_hash)
+    else
+      # 通常の場合
+      file_or_hash
+    end
   end
   
 end

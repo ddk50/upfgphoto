@@ -19,7 +19,7 @@ class EmployeesController < ApplicationController
   
   def avatar
     employee_id = params[:id]
-    send_data(File.read("#{PHOTO_CONFIG['avatar_dir']}/#{employee_id}.jpg"),
+    send_file("#{PHOTO_CONFIG['avatar_dir']}/#{employee_id}.jpg",
               type: "image/jpeg",
               filename: "#{employee_id}.jpg");
   end
