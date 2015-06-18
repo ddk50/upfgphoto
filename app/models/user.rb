@@ -1,3 +1,4 @@
+
 class User < ActiveRecord::Base
   def self.find_or_create_from_auth_hash(auth_hash)
     provider  = auth_hash[:provider]
@@ -7,11 +8,16 @@ class User < ActiveRecord::Base
     description = auth_hash[:info][:description]
     name        = auth_hash[:info][:name]
 
-    User.find_or_create_by(provider: provider, uid: uid) do |user|
+    ret = User.find_or_create_by(provider: provider, uid: uid) do |user|
       user.nickname    = nickname
       user.image_url   = image_url
       user.description = description
       user.name        = name
     end
+
+    ret.image_url = image_url
+    ret.save!
+
+    return ret
   end
 end

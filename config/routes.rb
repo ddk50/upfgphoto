@@ -25,10 +25,7 @@ Rails.application.routes.draw do
 
   get '/auth/:provider/callback' => 'sessions#create'
   get '/logout' => 'sessions#destroy', as: :logout
-
-  get 'd3cloudtags' => 'photo#d3cloudtags', as: :d3cloudtags
   
-  get 'uploadpanel' => 'photo#uploadpanel', as: :photo_panel
   get 'editpanel' => 'photo#editpanel', as: :edit_panel
   post 'ddupload' => 'photo#ddupload', as: :ddphoto_upload
 

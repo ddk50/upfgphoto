@@ -24,28 +24,6 @@ class PhotoController < ApplicationController
     
   end
 
-  def d3cloudtags
-    max_font_size = 20.0
-    tags = Tag.counts
-    max = tags.sort_by(&:count).last    
-    freq_list = tags.map{|val|
-      { key: val.name, 
-        value: (val.count.to_f / max.count * (max_font_size - 1.0)).round,
-        url: tagphoto_url(val.name) 
-      }
-    }
-    
-    respond_to do |format|
-      format.json { render :json => 
-        {:result   => 'success',
-         :msg      => freq_list }
-      }
-    end
-  end
-
-  def uploadpanel    
-  end
-
   def editpanel
     id = current_employee.id
     page = params[:page] == nil ? 0 : params[:page].to_i
@@ -254,7 +232,7 @@ class PhotoController < ApplicationController
                 :type => 'application/zip', 
                 :filename => File.basename(zipfile_fullpath))
     ensure
-      File.delete(zipfile_fullpath) if File.exist?(zipfile_fullpath)
+##      File.delete(zipfile_fullpath) if File.exist?(zipfile_fullpath)
     end
   end
 

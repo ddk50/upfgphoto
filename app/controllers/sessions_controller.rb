@@ -32,8 +32,9 @@ class SessionsController < ApplicationController
                                   description: user.description,
                                   name: user.name)
     else
+      employee.update_attributes!(image_url: user.image_url)
       employee.touch
-      employee.save
+      employee.save!
     end
     
     redirect_to root_path, notice: 'ログインしました'

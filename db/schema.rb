@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150529054242) do
+ActiveRecord::Schema.define(version: 20150617050136) do
 
   create_table "activities", force: true do |t|
     t.integer  "employee_id",                        null: false
@@ -116,7 +116,8 @@ ActiveRecord::Schema.define(version: 20150529054242) do
     t.datetime "updated_at"
   end
 
-  add_index "tag2photos", ["photo_id", "tag_id"], name: "index_tag2photos_on_photo_id_and_tag_id"
+  add_index "tag2photos", ["photo_id"], name: "index_tag2photos_on_photo_id"
+  add_index "tag2photos", ["tag_id"], name: "index_tag2photos_on_tag_id"
 
   create_table "tags", force: true do |t|
     t.string   "name",       null: false

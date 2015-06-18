@@ -52,7 +52,7 @@
 	      </td>
 	      
 	      <td>	    
-		<input type="text" class="form-control datepicker input-mini" name="date" value="<%= user.expires_at.present? ? user.strftime("%Y-%m-%d") : "indefinitely" %>" />
+		<input type="text" class="form-control datepicker input-mini" name="date" value="<%= user.expires_at.present? ? user.expires_at.strftime("%Y-%m-%d") : "indefinitely" %>" />
 	      </td>
 	      
 	      <td class="text-center">

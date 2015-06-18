@@ -6,8 +6,7 @@ class TagsController < ApplicationController
   before_action :authenticate_guest!, except: [:gettags, :hottags]
 
   def index
-    tags = Tag.includes(:photos).all
-    @tags = tags.sort {|x, y| -(x.photos.size <=> y.photos.size) }
+    @tags = Tag.includes(:photos, :tag2photos).all.sort {|x, y| -(x.photos.size <=> y.photos.size) }
   end
 
   def show
@@ -47,7 +46,7 @@ class TagsController < ApplicationController
 
   def gettags
     array = getrecentusetags(500)
-    logger.debug("################### GETTAGS #{array.to_json} ##################")
+    ##    logger.debug("################### GETTAGS #{array.to_json} ##################")
     
     respond_to do |format|
       format.json {render :json => array.to_json }
@@ -56,7 +55,7 @@ class TagsController < ApplicationController
 
   def hottags
     array = getrecentusetags(20)
-    logger.debug("################### GETHOTTAGS #{array.to_json} ##################")
+    ##    logger.debug("################### GETHOTTAGS #{array.to_json} ##################")
     
     respond_to do |format|
       format.json {render :json => array.to_json }
