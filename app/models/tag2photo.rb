@@ -16,19 +16,4 @@ class Tag2photo < ActiveRecord::Base
     joins(:tag).where(['tags.name like ?', "%#{tag_name}%"]).select(:photo_id)
   end
 
-  def self.each_tags(photo_id)
-    tags = Tag2photo.where(photo_id: photo_id)    
-    tags.map{|t|
-      if block_given?
-        yield t.tag 
-      else
-        t.tag
-      end
-    }
-  end
-
-  # def self.photo_order(param)
-  #   Search::photo_order(param)
-  # end
-
 end

@@ -36,7 +36,7 @@ class BoardsController < ApplicationController
     end
 
     if not authenticate_board!(@board)
-      redirect_to boards_index_url(), alert: "貴方にはこのボードの閲覧権限がありません．"
+      redirect_to boards_index_url(), alert: "貴方にはこのアルバムの閲覧権限がありません．"
       return
     end
     
@@ -62,12 +62,12 @@ class BoardsController < ApplicationController
 
     begin
 
-      raise InvalidFieldFormat, "ボード番号を指定してください" if boardid.nil?
+      raise InvalidFieldFormat, "アルバム番号を指定してください" if boardid.nil?
       raise InvalidFieldFormat, "1文字以上のキャプションを入力してください" if caption.to_s.size <= 0
 
       board = Board.find_by_id(boardid)
       if board.nil?
-        raise InvalidFieldFormat, "ボード番号が不正です"
+        raise InvalidFieldFormat, "アルバム番号が不正です"
       end
 
       board.caption = caption
@@ -83,7 +83,7 @@ class BoardsController < ApplicationController
       respond_to do |format|
         format.json { render :json => 
           { :status   => 'error',
-            :msg => 'ボードのキャプションはユニークでなければなりません' }
+            :msg => 'アルバムのキャプションはユニークでなければなりません' }
         }      
       end
     rescue StandardError => e
@@ -116,7 +116,7 @@ class BoardsController < ApplicationController
         accept_upload_file(uploadfile, board.guest) {|newphotoid|
 
           ##
-          ## ボードに所属させる
+          ## アルバムに所属させる
           ##
           board = Board.find_by_id(boardid)
           t = Board2photo.new(photo_id: newphotoid, board_id: board.id)
@@ -137,7 +137,7 @@ class BoardsController < ApplicationController
       accept_upload_file(uploadfile, board.guest) {|newphotoid|
 
         ##
-        ## ボードに所属させる
+        ## アルバムに所属させる
         ##
         board = Board.find_by_id(boardid)
         t = Board2photo.new(photo_id: newphotoid, board_id: board.id)
@@ -182,7 +182,7 @@ class BoardsController < ApplicationController
         board.addnewmember(current_employee.id, current_employee.id)
       end
       
-      redirect_to boards_index_url(), notice: "新たなボード #{caption} を作成しました"
+      redirect_to boards_index_url(), notice: "新たなアルバム #{caption} を作成しました"
       
     rescue => e
       redirect_to :back, alert: e.to_s
@@ -201,12 +201,12 @@ class BoardsController < ApplicationController
     @board = Board.find_by_id(board_id)
 
     if @board.public
-      redirect_to boards_index_url(), alert: "Publicボードに閲覧権限を付与することは出来ません"
+      redirect_to boards_index_url(), alert: "Publicアルバムに閲覧権限を付与することは出来ません"
       return
     end
 
     if not @board.employees.any?{|employee| employee.id == current_employee.id }
-      redirect_to boards_index_url(), alert: "貴方にはこのボードのメンバーではありません"
+      redirect_to boards_index_url(), alert: "貴方にはこのアルバムのメンバーではありません"
       return
     end
 
@@ -257,21 +257,21 @@ class BoardsController < ApplicationController
 
 
     ##
-    ## ボードがパブリックかspecializedであるのでUPFG正規職員は問答無用で見れる
+    ## アルバムがパブリックかspecializedであるのでUPFG正規職員は問答無用で見れる
     ##
     if board.public || board.specialized
       return true
     end
 
     ##
-    ## ボードメンバーであれば見せる
+    ## アルバムメンバーであれば見せる
     ##
     if board.employees.any?{|employee| employee.id == current_employee.id}
       return true
     end
 
     ##
-    ## それ以外はボードを見せない
+    ## それ以外はアルバムを見せない
     ##
     return false    
   end
@@ -364,7 +364,7 @@ class BoardsController < ApplicationController
         m.div({:style => "text-align: center; margin-top: 50px;"}) do
           m.a({:href => board_addboardpanel_url, :class => "btn btn-success btn-sm btn-block", :role => "button"}) do
             m.span({:class => "glyphicon glyphicon-new-window"})
-            m.print " 新しいボードの作成"
+            m.print " 新しいアルバムの作成"
           end
         end
       end
@@ -380,11 +380,11 @@ class BoardsController < ApplicationController
 
   def board_permission_badge(m, board)
     if board.guest
-      m.span({:class => "badge alert-danger", :style => "margin-left: 10px;"}, "ゲストボード")
+      m.span({:class => "badge alert-danger", :style => "margin-left: 10px;"}, "ゲストアルバム")
       return
     end
     if board.public
-      m.span({:class => "badge alert-warning", :style => "margin-left: 10px;"}, "Publicボード")
+      m.span({:class => "badge alert-warning", :style => "margin-left: 10px;"}, "Publicアルバム")
       return
     end
 

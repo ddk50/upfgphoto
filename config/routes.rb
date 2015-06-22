@@ -48,7 +48,6 @@ Rails.application.routes.draw do
   post 'editcaption' => 'photo#editcaption'
 
   get 'tags/index' => 'tags#index', as: :tagphoto_index
-  get 'tags/:tag' => 'tags#show', as: :tagphoto
 
   get 'activities/index' => 'activities#index', as: :activities_index
   post 'activities/poke/:employee_id' => 'activities#poke', as: :activities_poke
@@ -56,16 +55,16 @@ Rails.application.routes.draw do
   post 'activities/likephoto/:photo_id' => 'activities#likephoto', as: :activities_likephoto
   post 'activities/clearfeeds' => 'activities#clearfeeds', as: :activities_clearfeeds
 
-  get 'boards/index' => 'boards#index'
-  get 'boards/new' => 'boards#addboardpanel', as: :board_addboardpanel
-  post 'boards/new' => 'boards#new', as: :board_new
+  get 'albums/index' => 'boards#index', as: :boards_index
+  get 'albums/new' => 'boards#addboardpanel', as: :board_addboardpanel
+  post 'albums/new' => 'boards#new', as: :board_new
   
-  get 'boards/:id' => 'boards#show', as: :boards_show
-  post 'boards/:id' => 'boards#edit', as: :boards_edit
+  get 'albums/:id' => 'boards#show', as: :boards_show
+  post 'albums/:id' => 'boards#edit', as: :boards_edit
 
-  post 'boards/:id/admin' => 'boards#update_member_auth', as: :board_admin_post
-  post 'boards/:id/ddupload' => 'boards#ddupload', as: :board_ddupload  
-  get 'boards/:id/admin' => 'boards#adminboard', as: :board_admin  
+  post 'albums/:id/admin' => 'boards#update_member_auth', as: :board_admin_post
+  post 'albums/:id/ddupload' => 'boards#ddupload', as: :board_ddupload  
+  get 'albums/:id/admin' => 'boards#adminboard', as: :board_admin
 
   get 'search/index' => 'search#index', as: :search_index
   

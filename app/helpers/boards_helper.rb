@@ -7,11 +7,11 @@ module BoardsHelper
 
   def board_permission_badge(board)
     if board.guest
-      return "<span class='badge alert-danger'>ゲストボード</span>".html_safe
+      return "<span class='badge alert-danger'>ゲストアルバム</span>".html_safe
     end
 
     if board.public
-      return "<span class='badge alert-warning'>Publicボード</span>".html_safe
+      return "<span class='badge alert-warning'>Publicアルバム</span>".html_safe
     end
 
     if board.specialized || subscribed?(board)

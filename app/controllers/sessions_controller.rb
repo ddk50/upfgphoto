@@ -36,6 +36,8 @@ class SessionsController < ApplicationController
       employee.touch
       employee.save!
     end
+
+    logger.debug("**************************** BACK_URL #{back_to} *********************************")
     
     redirect_to root_path, notice: 'ログインしました'
   end
@@ -60,6 +62,18 @@ class SessionsController < ApplicationController
     else
       return false
     end    
+  end
+
+  def back_to
+    begin
+      if request.env['omniauth.origin'].present? && back_url = CGI.unescape(request.env['omniauth.origin'].to_s)
+        uri = URI.parse(back_url)
+        return uri if uri.relative? || uri.host == request.host
+      end
+      return root_path
+    rescue
+      return root_path
+    end
   end
   
 end

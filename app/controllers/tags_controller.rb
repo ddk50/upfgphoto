@@ -12,41 +12,6 @@ class TagsController < ApplicationController
       .order("count DESC")    
   end
 
-  def show
-    tagname = params[:tag]
-    page = params[:page] == nil ? 0 : params[:page].to_i
-    
-    tag_id = Tag.find_by_name(tagname)
-    
-    @tagname = tagname
-    rel = Tag2photo.where(tag_id: tag_id)
-
-    @photos = rel
-      .offset(page * PHOTO_CONFIG['page_window_size'])
-      .limit(PHOTO_CONFIG['page_window_size'])
-      .photo_order(params[:sort])
-    
-    @photo_count = rel.size
-
-    # ##
-    # ## tagとの参照関係はのこってるけど、photoとの参照関係が    
-    # ## 切れた時Tag2Photoのエントリが残りますのでなんとかしましょう
-    # ##
-    # ## [FIXME] Tag2Photoのエントリが残る!!
-    # ##
-    # @photos = []
-    # photos.each{|p| 
-    #   if not p.photo == nil
-    #     @photos << p
-    #   end
-    # }
-    
-    @current_page = page
-    @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
-                   ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
-                   @photo_count / PHOTO_CONFIG['page_window_size']
-  end
-
   def gettags
     array = getrecentusetags(500)
     ##    logger.debug("################### GETTAGS #{array.to_json} ##################")

@@ -24,7 +24,11 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!    
     if current_user == nil
-      redirect_to root_path
+      if params[:back_to].blank?
+        redirect_to root_path, alert: "ログインしてください"
+      else
+        redirect_to '/auth/twitter?origin=' + params[:back_to]
+      end
     end
   end
 

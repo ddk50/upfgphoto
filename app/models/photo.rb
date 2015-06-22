@@ -59,10 +59,6 @@ class Photo < ActiveRecord::Base
     all
   end
 
-  # def self.photo_order(param)
-  #   Search::photo_order(param)
-  # end
-
   def photo_limit(param)
     if !param.nil? and !param.to_s == ""
       return limit(param.to_i)

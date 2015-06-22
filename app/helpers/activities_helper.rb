@@ -21,7 +21,7 @@ EOS
 EOS
       return ret.html_safe
     when "create_board"
-      "#{act.employee.name} さんが 新しいボードを作成しました".html_safe
+      "#{act.employee.name} さんが 新しいアルバムを作成しました".html_safe
     else
       "#{act.action_type}".html_safe
     end
