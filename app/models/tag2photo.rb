@@ -12,8 +12,9 @@ class Tag2photo < ActiveRecord::Base
 
   validates_uniqueness_of :photo_id, :scope => [:tag_id]
 
-  default_scope { includes(:photo) }
-  default_scope { includes(:tag) }
+  def self.tag2photo_ids_for_tag(tag_name)
+    joins(:tag).where(['tags.name like ?', "%#{tag_name}%"]).select(:photo_id)
+  end
 
   def self.each_tags(photo_id)
     tags = Tag2photo.where(photo_id: photo_id)    

@@ -13,14 +13,7 @@ class Photo < ActiveRecord::Base
   
   has_many :activities, class_name: "Activity", foreign_key: :target_photo_id
   has_many :likecount, lambda { where(action_type: Activity.action_types[:like_photo]) }, class_name: "Activity", foreign_key: :target_photo_id
-
-##  default_scope { includes(:likecount) } 
   
-##  default_scope { includes(:tags) }
-##  default_scope { includes(:tag2photos) } 
-  
-##  default_scope { includes(:board) } 
-##  default_scope { includes(:board2photo) }   
 
   def like!(current_employee)
     new = Activity.new(employee_id: current_employee.id,
@@ -43,8 +36,8 @@ class Photo < ActiveRecord::Base
   end
  
   def self.like_tag(param)
-    if not param.nil? and not param.to_s == ""
-      return joins(:tags).where(['tags.name like ?', "%#{param}%"])
+    if param.present?
+      return where("photos.id IN ( #{Tag2photo.tag2photo_ids_for_tag(param).to_sql} )")
     end
     all
   end
