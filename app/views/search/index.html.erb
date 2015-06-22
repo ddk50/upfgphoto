@@ -1,6 +1,53 @@
+
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="page-header">'<%= @keyword %>' が含まれる写真 <span class="badge"><%= @photo_count %></span></h2>
+    <h2 class="page-header"><i class="glyphicon glyphicon-book"></i> '<%= @keyword %>' が含まれるアルバム <span class="badge"><%= @boards.size %></span></h2>
+  </div>
+</div>
+
+<div class="row">
+  <% @boards.each do |board| %>
+    
+    <div class="col-xs-18 col-sm-6 col-md-3">
+      <div class="thumbnail">
+        <%= link_to(boards_show_url(board.id)) do %>
+          <% if board.photos.first.present? %>
+            <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: board.photos.first.id, type: 'small')}, class: "img-lazy-responsive", width: 400, height: 300) %>          
+          <% else %>
+            <%= image_tag("/images/no_image.png", class: "img-responsive", width: 400, height: 300) %>
+          <% end %>
+        <% end %>
+        <div class="caption">
+          <%= link_to(boards_show_url(board.id)) do %>
+            <h4><%= board.caption %></h4>
+          <% end %>
+          <p>
+            <%= board.description %>
+          </p>
+          <p>
+            <%= link_to(boards_show_url(board.id)) do %>
+              View more
+            <% end %>
+          </p>
+          
+          <p style="font-size: 12px;">
+            <i class="glyphicon glyphicon-user"></i> by <a href="#"><%= board.employee.name %></a> <br/>
+            <i class="glyphicon glyphicon-calendar"></i> <%= board.created_at.strftime("%Y-%m-%d") %>
+          </p>
+
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="row">
+  <div class="col-lg-12"></div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <h2 class="page-header"><i class="glyphicon glyphicon-camera"></i> '<%= @keyword %>' が含まれる写真 <span class="badge"><%= @photo_count %></span></h2>
   </div>
 </div>
 
@@ -18,12 +65,6 @@
       </div>
 
     </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-lg-12">
-    <hr>
   </div>
 </div>
 

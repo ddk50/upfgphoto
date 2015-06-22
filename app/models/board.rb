@@ -29,6 +29,13 @@ class Board < ActiveRecord::Base
     return true
   end
 
+  def self.like_tag(param)
+    if param.present?
+      return where(['caption like ?', "%#{param}%"])
+    end
+    all
+  end  
+
   def self.delete_member_all_but_not_owner(board_id)
     board = Board.find_by_id(board_id)    
     if not board.nil?
