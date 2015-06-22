@@ -4,12 +4,10 @@
 
 <ul class="list-group row">
   <% @tags.each do |tag| %>
-    <% if tag.photos.size > 0 %>
-      <li class="list-group-item col-xs-4" style="border: 0px;"><%= tag.name %> 
-	<%= link_to(search_index_path(tag: tag.name)) do %>
-	  (<%= tag.photos.size %>)
-	<% end %>
-      </li>
-    <% end %>
+    <li class="list-group-item col-xs-4" style="border: 0px;"><%= tag.name %> 
+      <%= link_to(search_index_path(tag: tag.name)) do %>
+	(<%= tag.count %>)
+      <% end %>
+    </li>
   <% end %>
 </ul>

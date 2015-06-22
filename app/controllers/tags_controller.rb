@@ -6,7 +6,10 @@ class TagsController < ApplicationController
   before_action :authenticate_guest!, except: [:gettags, :hottags]
 
   def index
-    @tags = Tag.includes(:photos, :tag2photos).all.sort {|x, y| -(x.photos.size <=> y.photos.size) }
+    @tags = Tag.select("Tags.id, Tags.name, count(tag2photos.tag_id) as count")
+      .joins(:tag2photos)
+      .group("tag2photos.tag_id")
+      .order("count DESC")    
   end
 
   def show
