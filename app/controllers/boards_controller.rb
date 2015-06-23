@@ -14,7 +14,7 @@ class BoardsController < ApplicationController
   before_action :authenticate_guest!, except: [:index, :show]
   
   def index
-    @boards = Board.all.order('caption asc')
+    @boards = Board.includes(:board2photos, :photos).all.order('caption asc')
 
     treehash = {}
     @boards.each{|board|
@@ -296,6 +296,14 @@ class BoardsController < ApplicationController
   def authenticate_board!(board)
 
     ##
+    ## 貴方がスーパーユーザであった場合は見せる
+    ##
+    if current_employee.supervisor? ||
+        current_employee.supervisor_and_boardmember?
+      return true
+    end
+
+    ##
     ## ゲストモードであれば問答無用で全員に見せる
     ##
     if board.guest
@@ -378,7 +386,7 @@ class BoardsController < ApplicationController
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               
               m.img({:src => gsub_http_to_https(val.employee.image_url), :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
-              m.a({:href => boards_show_url(val.id), :class => "caption-link"}, key)
+              m.a({:href => boards_show_url(val.id), :class => "caption-link"}, "#{key} (#{val.photos.size})")
               
               board_permission_badge(m, val)
 
