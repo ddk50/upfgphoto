@@ -108,6 +108,50 @@ var ready = function() {
         });        
     }
 
+    $(".movephoto").on('click', function(event){
+	
+	var boardid  = $(this).attr("data-boardid");
+	var boardcap = $(this).attr("data-boardcaption");
+        var photoids = new Array();
+	
+        event.preventDefault();
+        event.stopPropagation();
+
+        $("[name='photo_id[]']:checked").each(function() {
+            photoids.push(this.value);
+        });
+
+	ret = confirm("本当に" + photoids.length + "個の写真を " + boardcap + " に移動しますか？");
+	
+	if (!ret) {
+	    return;
+	}
+
+        $.ajax({
+            url: '/albums/movephoto',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'boardid': boardid,
+                'items_ids': photoids
+            },
+            success: function(response) {
+                if (response.status == 'error') {
+                    alert('移動する際にエラーが発生しました ' + response.msg);
+                } else {
+		    window.location = response.redirect;
+                    location.reload();
+		}
+            },
+            error: function(response) {
+                alert('通信エラー');
+            }
+        });        
+
+	
+	return false;
+    });
+
     $(".photodescription").change(function(event) {
         editdescription($(this));
     });

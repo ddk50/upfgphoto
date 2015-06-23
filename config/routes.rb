@@ -58,13 +58,14 @@ Rails.application.routes.draw do
   get 'albums/index' => 'boards#index', as: :boards_index
   get 'albums/new' => 'boards#addboardpanel', as: :board_addboardpanel
   post 'albums/new' => 'boards#new', as: :board_new
+  post 'albums/movephoto' => 'boards#movephoto', as: :board_move
   
   get 'albums/:id' => 'boards#show', as: :boards_show
   post 'albums/:id' => 'boards#edit', as: :boards_edit
 
   post 'albums/:id/admin' => 'boards#update_member_auth', as: :board_admin_post
   post 'albums/:id/ddupload' => 'boards#ddupload', as: :board_ddupload  
-  get 'albums/:id/admin' => 'boards#adminboard', as: :board_admin
+  get 'albums/:id/admin' => 'boards#adminboard', as: :board_admin 
 
   get 'search/index' => 'search#index', as: :search_index
   

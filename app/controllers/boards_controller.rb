@@ -213,6 +213,60 @@ class BoardsController < ApplicationController
     @employees = Employee.all
   end
 
+
+  def movephoto
+    photos = params[:items_ids]
+    boardid = params[:boardid]
+
+    result = 'error'
+    msg = ""
+
+    begin
+
+      unless current_employee.supervisor? or
+          current_employee.supervisor_and_boardmember?
+        raise InvalidRequest, "この操作は管理人にしか許可されていません"
+      end
+
+      if photos.blank? ||
+          boardid.blank?
+        raise InvalidFieldFormat, "1つ以上の写真を指定し，かつ，アルバムIDを指定してください"
+      end
+
+      ActiveRecord::Base.transaction do
+
+        ##
+        ## first, clean up board2photos
+        ##
+        t = Board2photo.where(photo_id: photos)
+        t.delete_all()
+
+        ##
+        ## アルバムに所属させる
+        ##        
+        board = Board.find_by_id(boardid)
+        photos.each do |p|
+          n = Board2photo.new(photo_id: p, board_id: board.id)
+          n.save!
+        end
+        msg = "#{photos.size}個の写真を #{board.caption} (#{board.id}) に移動しました"
+        result = 'success'
+      end
+    rescue => e
+      msg = e.to_s
+    end
+
+    respond_to do |format|
+      format.html { redirect_to :back, notice: msg }
+      format.json { 
+        render :json => 
+        {:result   => result,
+          :redirect => (session[:return_to] ||= request.referer),
+          :msg      => msg }
+      }
+    end
+    
+  end
   
   def update_member_auth
     board_id     = params[:id].to_i

@@ -62,7 +62,10 @@
 <div class="row">
   <div class="col-lg-12">
     <div class="form-inline form-group">
-      <%= submit_tag("ダウンロード", :class => "btn btn-success", :id => "downloadall") %>
+      <%= submit_tag("ダウンロード", :class => "btn btn-success", :id => "downloadall") %>     
+      <% if current_employee.supervisor? or current_employee.supervisor_and_boardmember? %>
+	<%= render 'layouts/movephoto', locals: {boards: @boards} %>
+      <% end %>
       
       <div class="checkbox" style="margin-left:10px; margin-right:10px;">
         <label><input type="checkbox" id="photo_check_group" class="photocheckAll"> 全てにチェックを入れる</label>
