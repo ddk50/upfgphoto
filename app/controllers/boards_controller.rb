@@ -385,7 +385,7 @@ class BoardsController < ApplicationController
               
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               
-              m.img({:src => gsub_http_to_https(val.employee.image_url), :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
+              m.img({:src => "/images/folder.png", :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
               m.a({:href => boards_show_url(val.id), :class => "caption-link"}, "#{key} (#{val.photos.size})")
               
               board_permission_badge(m, val)
