@@ -26,6 +26,11 @@
       <p><%= p.description %></p>
 
       <div class="panel-footer">
+
+        <span class="pull-left">
+          by <a style="font-size: 12px;" href="#"><%= p.employee.name %></a>
+        </span>
+
         <span class="pull-right">
           <% @likecount = p.likecount.size %>
           <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
