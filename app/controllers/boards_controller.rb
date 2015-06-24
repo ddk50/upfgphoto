@@ -6,6 +6,33 @@ class InvalidFileFormat < StandardError; end
 class InvalidFieldFormat < StandardError; end
 class InvalidRequest < StandardError; end
 
+class Dir
+  attr_accessor :name
+  def initialize(name)
+    @name = name
+  end
+
+  def eql?(other)
+    if other.class == Dir
+      return @name == other.name
+    end
+    super eql?(other)
+  end
+
+  def hash
+    @name.hash
+  end
+
+end
+
+class Album
+  attr_accessor :value, :name
+  def initialize(name, value)
+    @name = name
+    @value = value
+  end  
+end
+
 class BoardsController < ApplicationController
 
   include Upload
@@ -338,27 +365,27 @@ class BoardsController < ApplicationController
     return false    
   end
 
-  
+
   def insert_tree(hash, splited_title, value)
-    ## captions = ["うどん/2014", "うどん/2013", "うどん/2012", "そうめん/2012/aaa", "そうめん/2012/bbb", "そうめん/2012/ccc"]
 
     return if splited_title.size <= 0
 
     new_node = splited_title.first
+    val = hash[Dir.new(new_node)]
 
-    val = hash[new_node]
     if not val.nil?
       insert_tree(val, splited_title.drop(1), value)
     else
-      if splited_title.drop(1).size <= 0
-        hash[new_node] = value
+      name = splited_title.drop(1)
+      if name.size <= 0
+        hash[Album.new(new_node, value)] = {}
       else
-        hash[new_node] = {}
+        hash[Dir.new(new_node)] = {}
       end
-      insert_tree(hash[new_node], splited_title.drop(1), value)
+      insert_tree(hash[Dir.new(new_node)], splited_title.drop(1), value)
     end
   end
-
+  
   
   def markup
     root = Nokogiri::HTML::DocumentFragment.parse('')
@@ -373,38 +400,38 @@ class BoardsController < ApplicationController
     attr = top_level ? {:class => "board-nav board-nav-list"} : {:class => "board-nav board-nav-list tree"}
     m.ul(attr) do
       hash.each_pair{|key, val|
-        if val.kind_of?(Hash)
+        if key.kind_of?(Dir)
           m.li do
             m.span({:class => "tree-toggler glyphicon glyphicon-minus", :style => "color: #999999;"})
-            m.label({:class => "board-nav-header"}, key)
+            m.label({:class => "board-nav-header"}, key.name)
             do_build_html_tree(m, val, false)
           end
-        else
+        elsif key.kind_of?(Album)
           m.li({:class => "board-caption"}) do
             m.div({:class => "wrapper"}) do              
               
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               
               m.img({:src => "/images/folder.png", :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
-              m.a({:href => boards_show_url(val.id), :class => "caption-link"}, "#{key} (#{val.photos.size})")
+              m.a({:href => boards_show_url(key.value.id), :class => "caption-link"}, "#{key.name} (#{key.value.photos.size})")
               
-              board_permission_badge(m, val)
+              board_permission_badge(m, key.value)
 
-              if subscribed?(val) && (not val.public) && (not val.guest)
+              if subscribed?(key.value) && (not key.value.public) && (not key.value.guest)
                 m.div({:class => "pull-right"}) do
-                  m.a({:class => "caption-link", :href => board_admin_url(val.id)}) do
+                  m.a({:class => "caption-link", :href => board_admin_url(key.value.id)}) do
                     m.span({:class => "glyphicon glyphicon-cog"}, "ユーザ管理")
                   end
                 end
               end
 
               m.div({:class => "mic-info"}, "By: ") do
-                m.a({:class => "caption-link", :href => employees_url(val.employee.id)}, val.employee.name)
-                m.print " on #{val.created_at.strftime("%Y-%m-%d")}"
+                m.a({:class => "caption-link", :href => employees_url(key.value.employee.id)}, key.value.employee.name)
+                m.print " on #{key.value.created_at.strftime("%Y-%m-%d")}"
               end
 
               m.div({:class => "comment-text"}) do
-                m.print val.description
+                m.print key.value.description
               end
 
             end
