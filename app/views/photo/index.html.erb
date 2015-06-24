@@ -99,17 +99,7 @@
     <div class="row">
       <div class="col-lg-12">
 
-        <script type="text/javascript">
-          (function() {
-          var ss = document.createElement('script'); ss.type = 'text/javascript'; ss.async = true;
-          ss.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'seal.ssls.com/script.js?cn=' + window.location.host;
-          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ss, s);
-          })();
-        </script>
-        <!-- Do not alter for the seal to work properly -->
-        <div id="sslsSiteSeal">
-          seal by <a href="https://ssls.com/">SSLs.com</a>
-        </div>
+        <%= image_tag("/images/RapidSSL_SEAL-90x50.gif") %>
 
         <ul style="list-style:none;">
           <li>© <%= Time.now.strftime("%G") %> <a href="https://twitter.com/upfg">UPFG 電通省</a></li>
