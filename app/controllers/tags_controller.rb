@@ -6,10 +6,24 @@ class TagsController < ApplicationController
   before_action :authenticate_guest!, except: [:gettags, :hottags]
 
   def index
+    order = params[:sort]
+    sql = nil
+
+    case order
+    when /tag_count_desc/
+      sql = "count DESC"
+    when /tag_created_at_desc/
+      sql = "tags.created_at desc"
+    when /tag_updated_at_desc/
+      sql = "tags.updated_at desc"
+    else
+      sql = "count DESC"
+    end
+
     @tags = Tag.select("Tags.id, Tags.name, count(tag2photos.tag_id) as count")
       .joins(:tag2photos)
       .group("tag2photos.tag_id")
-      .order("count DESC")    
+      .order(sql)
   end
 
   def gettags
@@ -56,7 +70,7 @@ class TagsController < ApplicationController
           newt = Tag2photo.new(photo_id: photoid, tag_id: tag_id)
           newt.save!
         }
-      end      
+      end
     rescue => e
       err = true
     end
