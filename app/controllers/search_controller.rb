@@ -10,7 +10,7 @@ class SearchController < ApplicationController
 
     @boards = Board.like_tag(params[:tag])
 
-    rel = Photo.default_includes()    
+    rel = Photo.default_includes()
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])

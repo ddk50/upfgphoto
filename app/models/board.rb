@@ -34,7 +34,24 @@ class Board < ActiveRecord::Base
       return where(['caption like ?', "%#{param}%"])
     end
     all
-  end  
+  end
+
+  def self.between_date(startdate, enddate)    
+    if !startdate.nil? and !enddate.nil? 
+      begin
+        return where(created_at: DateTime.parse(startdate.to_s)..DateTime.parse(enddate.to_s))
+      rescue ArgumentError
+      end
+    end
+    all
+  end
+
+  def self.employee_board(param)
+    if param.present? and (id = param.to_i)
+      return where(employee_id: id)
+    end
+    all
+  end
 
   def self.delete_member_all_but_not_owner(board_id)
     board = Board.find_by_id(board_id)    

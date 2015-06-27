@@ -77,13 +77,11 @@ class EmployeesController < ApplicationController
                params[:perpage] == "") ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
 
     @employee = Employee.find_by_id(id)
-    @boards = Board.all
 
     rel = Photo.default_includes().employee_photo(id)
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort]) 
-      .omit_boarding_photos()
     
     @photos = rel.offset(page * perpage).limit(perpage)
     

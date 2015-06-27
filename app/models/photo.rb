@@ -53,7 +53,7 @@ class Photo < ActiveRecord::Base
   end
 
   def self.employee_photo(param)
-    if !param.nil? and (id = param.to_i)
+    if param.present? and (id = param.to_i)
       return where(employee_id: id)
     end
     all

@@ -22,6 +22,11 @@
                     <h4 class="media-heading"><%= employee.nickname %> <%= employee.name %></h4>  
                     <p><%= employee.description %></p>
                     <p>
+                      <%= link_to(employees_url(id: employee.id)) do %>
+			<span class="label label-info"><%= employee.photos.size %> photos</span>
+                      <% end %>
+                    </p>
+                    <p>
                       <% if current_employee.id != employee.id %>
 			<%= link_to(activities_poke_url(employee_id: employee.id), class: "btn btn-xs btn-default", method: :post) do %>
                           <span class="glyphicon glyphicon-comment"></span> Poke

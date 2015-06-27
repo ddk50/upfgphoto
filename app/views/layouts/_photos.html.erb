@@ -28,7 +28,12 @@
       <div class="panel-footer">
 
         <span class="pull-left">
-          by <a style="font-size: 12px;" href="#"><%= p.employee.name %></a>
+	  <p style="font-size: 9px;">
+            by 
+            <%= link_to(employees_url(id: p.employee.id)) do %>
+	      <%= p.employee.name %>
+            <% end %>
+	  </p>
         </span>
 
         <span class="pull-right">
