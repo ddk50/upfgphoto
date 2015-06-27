@@ -466,6 +466,14 @@ class PhotoController < ApplicationController
   def authenticate_photo?(photo)
 
     ##
+    ## 貴方がスーパーバイザーだったら問答無用で全て公開する
+    ## 
+    if current_employee.supervisor? ||
+        current_employee.supervisor_and_boardmember?
+      return true
+    end    
+
+    ##
     ## 写真がゲストモードであれば問答無用で公開する
     ##
     if photo.guest
