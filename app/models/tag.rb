@@ -19,8 +19,8 @@ class Tag < ActiveRecord::Base
   def self.update_or_create_tag(tagname)
     tag = Tag.find_or_initialize_by(name: tagname)
     tag.name = tagname
-    tag.touch
     tag.save!
+    tag.touch
     return tag.id
   end
 
