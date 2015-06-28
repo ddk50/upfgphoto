@@ -15,12 +15,12 @@ class PhotoController < ApplicationController
   before_action :authenticate_guest!, except: [:index, :show, :view, :thumbnail]
 
   def index
-    @recent_photos = Photo.select("Photos.id, count(activities.target_photo_id) as count")
+    @recent_photos = Photo.select("photos.id, count(activities.target_photo_id) as count")
       .joins(:activities)
       .group("activities.target_photo_id")
       .where(activities: {action_type: Activity.action_types[:like_photo]})
       .order('count DESC')
-      .limit(40)
+      .limit(50)
     
   end
 
