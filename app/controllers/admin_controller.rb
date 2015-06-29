@@ -104,22 +104,6 @@ class AdminController < ApplicationController
     else
       redirect_to :back, notice: "ユーザIDが不正です"
     end
-  end
-  
-  private
-  def format_date_time(str)
-    begin
-      if str && str.present?
-        ret = str.to_datetime
-        return ret
-      end
-    rescue ArgumentError
-      logger.debug("##################### #{str} がパースできません} #################")
-      return nil
-    rescue => e
-      logger.debug("##################### 不明なエラーです #################")
-    end
-    return nil
-  end
+  end 
   
 end

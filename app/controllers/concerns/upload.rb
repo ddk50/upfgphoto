@@ -179,21 +179,6 @@ module Upload
     def checkfiletype(filepath)
       `file #{filepath}`
     end
-
-    def format_date_time(str)
-      begin
-        if str && str.present?
-          ret = str.to_datetime
-          return ret
-        end
-      rescue ArgumentError
-        logger.debug("##################### #{str} がパースできません} #################")
-        return nil
-      rescue => e
-        logger.debug("##################### 不明なエラーです #################")
-      end
-      return nil
-    end
-
+    
   end ## included  
 end

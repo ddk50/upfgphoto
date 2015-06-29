@@ -30,10 +30,8 @@ class EmployeesController < ApplicationController
     branch = params[:branch]
     email = params[:email]
     position = params[:position]
-    hiredate = params[:hiredate]
-    hiredate &&= Time.zone.parse(params[:hiredate])
-    birthdate = params[:birthdate]
-    birthdate &&= Time.zone.parse(params[:birthdate])
+    hiredate = format_date_time(params[:hiredate])
+    birthdate = format_date_time(params[:birthdate])
     address = params[:address]
     phone = params[:phone]
     avatar = params[:target_file_avatar]

@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   helper_method :current_user, :logged_in?, :current_employee
   helper_method :authenticate_user!, :unmarked_activities
   helper_method :authenticate_guest!, :authenticate_admin!
+
+  helper_method :format_date_time
   
   private
   def current_employee
@@ -47,6 +49,21 @@ class ApplicationController < ActionController::Base
 
   def unmarked_activities
     current_employee.unmarked_activities
+  end
+
+  def format_date_time(str)
+    begin
+      if str && str.present?
+        ret = str.to_datetime
+        return ret
+      end
+    rescue ArgumentError
+      logger.debug("##################### #{str} がパースできません} #################")
+      return nil
+    rescue => e
+      logger.debug("##################### 不明なエラーです #################")
+    end
+    return nil
   end
   
 end

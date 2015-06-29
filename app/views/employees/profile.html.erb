@@ -35,12 +35,12 @@
               </tr>
               <tr>
                 <td>加入日</td>
-                <td>06/23/2013</td>
+                <td><%= @employee.hiredate.present? ? @employee.hiredate.strftime("%Y-%m-%d") : "N/A" %></td>
               </tr>
               <tr>
                 <td>誕生日</td>
-                <td>01/24/1988</td>
-              </tr>                  
+                <td><%= @employee.birthdate.present? ? @employee.birthdate.strftime("%Y-%m-%d") : "N/A" %></td>
+              </tr>
               <tr>
                 <td>住んでるところ</td>
                 <td><%= @employee.address %></td>
@@ -110,12 +110,12 @@
           <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
               <label for="hiredate" class="control-label">UPFG加入日</label>
-              <input class="form-control" name="hiredate" placeholder="役職名" type="text" />
+              <input class="form-control datepicker" name="hiredate" placeholder="" type="text" value="<%= @employee.hiredate.present? ? @employee.hiredate.strftime("%Y-%m-%d") : ""%>"/>
             </div>
 
             <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
               <label for="birthdate" class="control-label">誕生日</label>
-              <input class="form-control" name="birthdate" placeholder="役職名" type="text" />
+              <input class="form-control datepicker" name="birthdate" placeholder="" type="text" value="<%= @employee.birthdate.present? ? @employee.birthdate.strftime("%Y-%m-%d") : ""%>"/>
             </div>
           </div>
 
