@@ -41,7 +41,11 @@ class BoardsController < ApplicationController
   before_action :authenticate_guest!, except: [:index, :show]
   
   def index
-    @boards = Board.includes(:board2photos, :photos).all.order('caption asc')
+    if current_employee.guest?
+      @boards = Board.includes(:board2photos, :photos).where(boards: {guest: true}).order('caption asc')
+    else
+      @boards = Board.includes(:board2photos, :photos).all.order('caption asc')
+    end
 
     treehash = {}
     @boards.each{|board|
