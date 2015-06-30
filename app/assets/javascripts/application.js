@@ -18,8 +18,6 @@
 //= require bootstrap-select.min
 //= require typeahead.bundle
 //= require jquery.lazyload.min
-//= require d3.min
-//= require d3.layout.cloud
 //= require pinterest-grid-plugin
 //= require jquery.qtip.min
 //= require dropzone
