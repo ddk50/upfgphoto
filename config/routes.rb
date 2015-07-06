@@ -27,7 +27,6 @@ Rails.application.routes.draw do
   get '/logout' => 'sessions#destroy', as: :logout
   
   get 'editpanel' => 'photo#editpanel', as: :edit_panel
-  post 'ddupload' => 'photo#ddupload', as: :ddphoto_upload
 
   get 'photo/:id' => 'photo#show', as: :photo_show
   delete 'photo/:id' => 'photo#delete', as: :photo_delete
@@ -64,7 +63,7 @@ Rails.application.routes.draw do
   post 'albums/:id' => 'boards#edit', as: :boards_edit
 
   post 'albums/:id/admin' => 'boards#update_member_auth', as: :board_admin_post
-  post 'albums/:id/ddupload' => 'boards#ddupload', as: :board_ddupload  
+  post 'albums/:id/ddupload' => 'boards#ddupload', as: :board_ddupload
   get 'albums/:id/admin' => 'boards#adminboard', as: :board_admin 
 
   get 'search/index' => 'search#index', as: :search_index
