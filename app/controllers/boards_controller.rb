@@ -58,6 +58,7 @@ class BoardsController < ApplicationController
   def show
     board_id = params[:id].to_i
     page = params[:page] == nil ? 0 : params[:page].to_i
+    perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
 
     @board = Board.find_by_id(board_id)
 
@@ -74,16 +75,16 @@ class BoardsController < ApplicationController
     rel = @board.photos.default_includes()
 
     @photos = rel
-      .offset(page * PHOTO_CONFIG['page_window_size'])
-      .limit(PHOTO_CONFIG['page_window_size'])
+      .offset(page * perpage)
+      .limit(perpage)
       .photo_order(params[:sort])
       .like_tag(params[:tag])
 
     @photo_count = rel.size
     @current_page = page
-    @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
-                   ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
-                   @photo_count / PHOTO_CONFIG['page_window_size']
+    @pages_count = (@photo_count % perpage) > 0 ?
+                   ((@photo_count / perpage) + 1) :
+                   @photo_count / perpage
     
   end
 
