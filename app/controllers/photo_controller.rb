@@ -9,10 +9,9 @@ class InvalidFieldFormat < StandardError; end
 class InvalidRequest < StandardError; end
 
 class PhotoController < ApplicationController
-  include Upload
 
   before_action :authenticate_user!, except: :index
-  before_action :authenticate_guest!, except: [:index, :show, :view, :thumbnail]
+  before_action :authenticate_guest!, except: [:index, :show, :view, :thumbnail, :edit, :delete, :delete_multiple_items, :get_zip, :get_multiple_items, :editdescription, :editcaption, :editpanel]
 
   def index
     @recent_photos = Photo.select("photos.id, count(activities.target_photo_id) as count")
@@ -21,7 +20,6 @@ class PhotoController < ApplicationController
       .where(activities: {action_type: Activity.action_types[:like_photo]})
       .order('count DESC')
       .limit(50)
-    
   end
 
   def editpanel
@@ -279,63 +277,7 @@ class PhotoController < ApplicationController
       end
     end
   end
-
-
-  ##
-  ## Drag and Drop upload
-  ##
-  def ddupload
-
-    if not params[:tags].nil?
-      params[:tags] = params[:tags].split(",")
-    end
-    
-    file = ensure_uploaded_file(params[:target_file_upload]) if params[:target_file_upload].present?
-    file = ensure_uploaded_file(params[:file]) if params[:file].present?
-
-    logger.debug("#################### #{file} ##################")
-    
-    if file.respond_to?(:each_value)
-      file.each_value do |uploadfile|
-        accept_upload_file(uploadfile) {|newphotoid|
-          ##
-          ## Activityを更新
-          ##
-          new_act = Activity.new(employee_id: current_employee.id,
-                             target_photo_id: newphotoid,
-                             action_type: :upload_photo)
-          new_act.save!
-        }
-      end
-    else
-      uploadfile = file
-      accept_upload_file(uploadfile) {|newphotoid|
-        new_act = Activity.new(employee_id: current_employee.id,
-                               target_photo_id: newphotoid,
-                               action_type: :upload_photo)
-        new_act.save!        
-      }
-    end
-  end
-
-  ##
-  ## file form upload
-  ##
-  def upload
-    file = ensure_uploaded_file(params[:target_file_upload])
-    accept_upload_file(file) {|newphotoid|
-      ##
-      ## Activityを更新
-      ##
-      new_act = Activity.new(employee_id: current_employee.id,
-                         target_photo_id: newphotoid,
-                         action_type: :upload_photo)
-      new_act.save!
-    }
-  end 
-
-
-
+  
   def editdescription
     photodescription = params[:photodescription]
     photoid = params[:photoid]
@@ -507,21 +449,6 @@ class PhotoController < ApplicationController
     ## 見せてはいけない
     ##
     return false
-  end
-
-  # Nginx upload module経由で受信した"tempfile"パラメータを参照し、
-  # 手動でActionDispatch::Http::UploadedFileを作成する。
-  #
-  # Nginx設定をしなくても低速ながら動作するように、ifチェックを入れておく
-  def ensure_uploaded_file(file_or_hash)
-    if file_or_hash.is_a?(Hash) && file_or_hash[:tempfile]
-      # Nginx upload module経由の場合
-      file_or_hash[:tempfile] = File.new(file_or_hash[:tempfile])
-      ActionDispatch::Http::UploadedFile.new(file_or_hash)
-    else
-      # 通常の場合
-      file_or_hash
-    end
   end
   
 end

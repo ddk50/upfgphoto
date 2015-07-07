@@ -38,7 +38,7 @@ class BoardsController < ApplicationController
   include Upload
 
   before_action :authenticate_user!
-  before_action :authenticate_guest!, except: [:index, :show]
+  before_action :authenticate_guest!, except: [:index, :show, :ddupload]
   
   def index
     if current_employee.guest?
@@ -133,6 +133,11 @@ class BoardsController < ApplicationController
 
     board = Board.find_by_id(boardid)
     if board.nil?
+      return
+    end
+
+    if not authenticate_board!(board)
+      redirect_to :back, alert: "ゲストはこのアルバムにアップロードはできません"
       return
     end
 

@@ -3,7 +3,7 @@
 class TagsController < ApplicationController
 
   before_action :authenticate_user!
-  before_action :authenticate_guest!, except: [:gettags, :hottags]
+  before_action :authenticate_guest!, except: [:gettags, :hottags, :edittags]
 
   def index
     order = params[:sort]
