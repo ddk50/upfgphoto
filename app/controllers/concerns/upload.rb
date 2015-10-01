@@ -58,7 +58,9 @@ module Upload
       rescue => e
         additions.each{|path, id|
           File.delete(path)
-        }   
+        }
+
+        logger.fatal e.backtrace.join("\n")
 
         respond_to do |format|
           format.html {
@@ -133,8 +135,9 @@ module Upload
       Zip::File.open(src_path) do |zip_file|
         # Handle entries one by one
         zip_file.each do |entry|
+          new_fname = entry.name.toutf8
           # Extract to file/directory/symlink
-          entry.extract("#{extract_root_dir}/#{entry.name}")
+          entry.extract("#{extract_root_dir}/#{new_fname}")
         end
       end
     end

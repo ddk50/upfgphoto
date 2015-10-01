@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'nokogiri'
+require 'kconv'
 
 class InvalidFileFormat < StandardError; end
 class InvalidFieldFormat < StandardError; end
