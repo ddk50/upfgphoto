@@ -2,10 +2,10 @@
   <legend class="">今ホットなアルバム一覧</legend>
 </div>
 
-<div class="row">
+<div class="row masonry-container">
   <% @tops.each do |board| %>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-      
+    
+    <div class="masonry-item col-xs-12 col-sm-6 col-md-4 col-lg-3">
       <%= link_to(boards_show_url(board[:val].id), 
 		  style: "text-decoration: none; color: inherit;") do %>
 	<div class="offer offer-radius offer-<%= board[:cls] %>">
@@ -28,9 +28,9 @@
 	  </div>
 
 	</div>
-      <% end %>
-      
+      <% end %>      
     </div>
+    
   <% end %>
 </div>
 

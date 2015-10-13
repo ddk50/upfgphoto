@@ -19,8 +19,8 @@
 //= require typeahead.bundle
 //= require jquery.lazyload.min
 //= require pinterest-grid-plugin
-//= require jquery.qtip.min
 //= require dropzone
+//= require masonry.pkgd.min
 //= require_tree .
 
 var ready = function () {

@@ -1,5 +1,11 @@
 var ready = function () {
 
+    $('.masonry-container').masonry({
+        // options
+        itemSelector: '.masonry-item',
+        columnWidth: 50
+    });
+
     $('.tree-toggler').click(function () {
         $(this).parent().children('ul.tree').toggle(300);
 	if ($(this).hasClass('glyphicon-plus')) {
