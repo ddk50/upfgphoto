@@ -42,16 +42,15 @@ class BoardsController < ApplicationController
   
   def index
     if current_employee.guest?
-      @boards = Board.includes(:board2photos, :photos).where(boards: {guest: true}).order('caption asc')
+      @boards = Board.guestboards_with_count
     else
-      @boards = Board.includes(:board2photos, :photos).all.order('caption asc')
+      @boards = Board.all_with_count
     end
 
     treehash = {}
     @boards.each{|board|
       insert_tree(treehash, board.caption.split("/"), board)
     }    
-    logger.debug("########################## #{hash} #########################")    
     @html_content = build_html_tree(treehash)
   end
 
@@ -416,10 +415,10 @@ class BoardsController < ApplicationController
               
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               
-              m.a({:href => boards_show_url(key.value.id)}) do
+              m.a({:href => boards_show_url(key.value.photo_size)})  do
                 m.img({:src => "/images/folder.png", :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
               end
-              m.a({:href => boards_show_url(key.value.id), :class => "caption-link"}, "#{key.name} (#{key.value.photos.size})")
+              m.a({:href => boards_show_url(key.value.id), :class => "caption-link"}, "#{key.name} (#{key.value.photo_size})")
               
               board_permission_badge(m, key.value)
 

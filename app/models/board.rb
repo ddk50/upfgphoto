@@ -7,8 +7,8 @@ class Board < ActiveRecord::Base
   has_many :board2employees, dependent: :destroy
   has_many :employees, through: :board2employees
 
-  default_scope { includes(:employees) }  
-  default_scope { includes(:board2employees) }
+##  default_scope { includes(:employees) }
+##  default_scope { includes(:board2employees) }
 
   def addnewmember(from, to)
     begin
@@ -70,6 +70,23 @@ class Board < ActiveRecord::Base
       return true
     end
     return false
+  end
+
+  def self.all_with_count
+    Board.select("boards.*, COUNT(board2photos.photo_id) as photo_size")
+      .joins("LEFT OUTER JOIN board2photos ON (board2photos.board_id = boards.id)")
+      .group("boards.id")
+      .includes(:employees)
+      .order("boards.caption asc")
+  end
+
+  def self.guestboards_with_count
+    Board.select("boards.*, COUNT(board2photos.photo_id) as photo_size")
+      .joins("LEFT OUTER JOIN board2photos ON (board2photos.board_id = boards.id)")
+      .group("boards.id")
+      .having(boards: {guest: true})
+      .includes(:employees)
+      .order("boards.caption asc")
   end
   
 end
