@@ -82,19 +82,23 @@ module ActivitiesHelper
     end
   end
 
-  def put_glyphicon(act)
-    case act.action_type
-    when "upload_photo"
-      "<span class='glyphicon glyphicon-cloud-upload' style='color: #bbb;'></span>".html_safe
-    when "like_photo"
-      "<span class='glyphicon glyphicon-heart' style='color: #bbb;'></span>".html_safe
-    when "poke_employee"
-      "<span class='glyphicon glyphicon-star' style='color: #bbb;'></span>".html_safe
-    when "create_board"
-      "<span class='glyphicon glyphicon-paste' style='color: #bbb;'></span>".html_safe
-    else
-      "".html_safe
+  def put_cbp_tmcon(act)
+    root = Nokogiri::HTML::DocumentFragment.parse('')
+    Nokogiri::HTML::Builder.with(root) do |m|
+      case act.action_type
+      when "upload_photo"
+        m.div({:class => "cbp_tmicon cbp_tmicon-upload"})
+      when "like_photo"
+        m.div({:class => "cbp_tmicon cbp_tmicon-heart"})
+      when "poke_employee"
+        m.div({:class => "cbp_tmicon cbp_tmicon-star"})
+      when "create_board"
+        m.div({:class => "cbp_tmicon cbp_tmicon-paste"})
+      else
+        "".html_safe
+      end
     end
+    return root.to_html.html_safe
   end
   
 end

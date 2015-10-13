@@ -68,6 +68,7 @@
 }
 
 .cbp_tmtimeline > li .cbp_tmlabel h2 { 
+    font-size: 23px;
     margin-top: 0px;
     padding: 0 0 10px 0;
     border-bottom: 1px solid rgba(255,255,255,0.4);
@@ -95,7 +96,7 @@
 .cbp_tmtimeline > li .cbp_tmicon {
     width: 40px;
     height: 40px;
-    font-family: 'ecoico';
+    font-family: 'Glyphicons Halflings';
     speak: none;
     font-style: normal;
     font-weight: normal;
@@ -111,24 +112,24 @@
     box-shadow: 0 0 0 8px #afdcf8;
     text-align: center;
     left: 20%;
-    top: 0;
+/*    top: 0; */
     margin: 0 0 0 -25px;
 }
 
-.cbp_tmicon-phone:before {
-    content: "\e000";
+.cbp_tmicon-upload:before {
+    content: "\e198";
 }
 
-.cbp_tmicon-screen:before {
-    content: "\e001";
+.cbp_tmicon-heart:before {
+    content: "\e005";
 }
 
-.cbp_tmicon-mail:before {
-    content: "\e002";
+.cbp_tmicon-star:before {
+    content: "\e006";
 }
 
-.cbp_tmicon-earth:before {
-    content: "\e003";
+.cbp_tmicon-paste:before {
+    content: "\e206";
 }
 
 /* Example Media Queries */

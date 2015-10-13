@@ -1,4 +1,4 @@
-<div class="main" id="recent_activities">
+<div id="recent_activities">
   <ul class="cbp_tmtimeline">
     <% @activities.each_with_index do |(key, value), i| %>    
       <% value.group_by{|t| t.action_type }.each do |act_type, act| %>
@@ -6,7 +6,7 @@
 
 	<li>
 	  <time class="cbp_tmtime" datetime="<%= act.first.created_at.strftime("%Y-%m-%d %H:%M:%S")%>"><span><%= act.first.created_at.strftime("%Y-%m-%d")%></span> <span><%= act.first.created_at.strftime("%H:%M")%></span></time>
-	  <div class="cbp_tmicon cbp_tmicon-phone"></div>
+	  <%= put_cbp_tmcon(act.first) %>
 	  <div class="cbp_tmlabel">
 	    <h2><%= act.first.employee.name %></h2>
 	    <div><%= pprint_action_type(act_type, act) %></div>
