@@ -11,11 +11,13 @@ module ActivitiesHelper
       case action_type
       when "poke_employee"
         m.div do
-          m.print "#{values.size}の社員にポークしています"
+          m.print "#{values.size}人の社員にポークしています"
           m.div({:style => "margin-top: 10px;"}) do
-            m.a({:href => employee_profile_url(act.target_employee_id)}) do
-              m.img({:src => gsub_http_to_https(act.target_employee.image_url)})
-            end
+            values.each_with_index{|val, i|
+              m.a({:href => employee_profile_url(val.target_employee_id)}) do
+                m.img({:src => gsub_http_to_https(val.target_employee.image_url)})
+              end
+            }
           end
         end
         "#{act.employee.name} さんが <a href='#{employee_profile_url(act.target_employee_id)}'>#{act.target_employee.name}</a> さんにPokeしました".html_safe
