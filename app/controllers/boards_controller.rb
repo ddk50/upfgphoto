@@ -42,16 +42,30 @@ class BoardsController < ApplicationController
   before_action :authenticate_guest!, except: [:index, :show, :ddupload]
   
   def index
+
+    boards = nil
     if current_employee.guest?
-      @boards = Board.guestboards_with_count
+      boards = Board.guestboards_with_count
     else
-      @boards = Board.all_with_count
+      boards = Board.all_with_count
     end
+
+    tmp = boards.inject({top: [], below: []}) do |acc, val|
+      unless (t = val.caption.match(/^@\[(.*)\](.*)$/)).nil?
+        acc[:top] << {val: val, cls: t[1], title: t[2]}
+      else
+        acc[:below] << val
+      end
+      acc
+    end
+
+    @boards = tmp[:below]
+    @tops   = tmp[:top]
 
     treehash = {}
     @boards.each{|board|
       insert_tree(treehash, board.caption.split("/"), board)
-    }    
+    }
     @html_content = build_html_tree(treehash)
   end
 
