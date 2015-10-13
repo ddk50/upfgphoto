@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'nokogiri'
+require 'kconv'
 
 class InvalidFileFormat < StandardError; end
 class InvalidFieldFormat < StandardError; end
@@ -38,7 +39,7 @@ class BoardsController < ApplicationController
   include Upload
 
   before_action :authenticate_user!
-  before_action :authenticate_guest!, except: [:index, :show]
+  before_action :authenticate_guest!, except: [:index, :show, :ddupload]
   
   def index
     if current_employee.guest?
@@ -57,6 +58,7 @@ class BoardsController < ApplicationController
   def show
     board_id = params[:id].to_i
     page = params[:page] == nil ? 0 : params[:page].to_i
+    perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
 
     @board = Board.find_by_id(board_id)
 
@@ -73,16 +75,16 @@ class BoardsController < ApplicationController
     rel = @board.photos.default_includes()
 
     @photos = rel
-      .offset(page * PHOTO_CONFIG['page_window_size'])
-      .limit(PHOTO_CONFIG['page_window_size'])
+      .offset(page * perpage)
+      .limit(perpage)
       .photo_order(params[:sort])
       .like_tag(params[:tag])
 
     @photo_count = rel.size
     @current_page = page
-    @pages_count = (@photo_count % PHOTO_CONFIG['page_window_size']) > 0 ? 
-                   ((@photo_count / PHOTO_CONFIG['page_window_size']) + 1) : 
-                   @photo_count / PHOTO_CONFIG['page_window_size']
+    @pages_count = (@photo_count % perpage) > 0 ?
+                   ((@photo_count / perpage) + 1) :
+                   @photo_count / perpage
     
   end
 
@@ -131,6 +133,11 @@ class BoardsController < ApplicationController
 
     board = Board.find_by_id(boardid)
     if board.nil?
+      return
+    end
+
+    if not authenticate_board!(board)
+      redirect_to :back, alert: "ゲストはこのアルバムにアップロードはできません"
       return
     end
 

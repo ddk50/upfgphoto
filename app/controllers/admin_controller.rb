@@ -72,7 +72,7 @@ class AdminController < ApplicationController
         employee.guest!
       end
       employee.save!
-      redirect_to :back, notice: "構成員#{id}の権限を変更"
+      redirect_to :back, notice: "社員#{id}の権限を変更"
     else
       redirect_to :back, notice: "ユーザIDが不正です"
     end
