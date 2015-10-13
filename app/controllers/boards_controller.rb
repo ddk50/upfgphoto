@@ -432,7 +432,7 @@ class BoardsController < ApplicationController
           end
         elsif key.kind_of?(Album)
           m.li({:class => "board-caption"}) do
-            m.div({:class => "wrapper"}) do              
+            m.div({:class => "wrapper"}) do
               
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               

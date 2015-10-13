@@ -1,48 +1,20 @@
-<div id="legend">
-  <legend class="">Recent Activities</legend>
-</div>
+<div class="main" id="recent_activities">
+  <ul class="cbp_tmtimeline">
+    <% @activities.each_with_index do |(key, value), i| %>    
+      <% value.group_by{|t| t.action_type }.each do |act_type, act| %>
 
-<div id="recentactivities">  
-  <div class="qa-message-list" id="wallmessages">  
-    
-    <% @activities.each_with_index do |(key, value), i| %>
-      <div class="message-item" id="<%= sprintf("wm%d", i) %>">
-	<div class="message-inner">
-	  <div class="message-head clearfix">
 
-	    <div class="user-detail">
-	      <h5 class="handle" style="color: #bbb;">
-		<span class="glyphicon glyphicon-time"></span>
-		<%= value.first.created_at.strftime("%Y-%m-%d %a")%> の出来事</h5>
-	      <div class="post-meta">
-		<div class="asker-meta">
-		  <span class="qa-message-what"><%= value.size %>件のアクティビティがあります</span>
-		</div>
-	      </div>
-	    </div>	    
-	    
-	    <hr style="margin-top: 10px;">
-	    
-	    <div class="avatar">
-	      <ul>
-		<% value.each do |act| %>		
-		  <li>
-		    <%= put_glyphicon(act) %>
-		    <%= link_to(employees_url(id: act.employee.id)) do %>
-		      <%= image_tag gsub_http_to_https(act.employee.image_url), class: "", style: "margin: 3px;" %>
-		    <% end %>
-		    <%= pprint_action_type(act) %>
-<!--		    <hr style="margin: 3px;"/> -->
-		  </li>
-		<% end %>
-	      </ul>
-	    </div>
-	    
-	  </div>	 
-	  
-	</div>
-      </div>
+	<li>
+	  <time class="cbp_tmtime" datetime="<%= act.first.created_at.strftime("%Y-%m-%d %H:%M:%S")%>"><span><%= act.first.created_at.strftime("%Y-%m-%d")%></span> <span><%= act.first.created_at.strftime("%H:%M")%></span></time>
+	  <div class="cbp_tmicon cbp_tmicon-phone"></div>
+	  <div class="cbp_tmlabel">
+	    <h2><%= act.first.employee.name %></h2>
+	    <div><%= pprint_action_type(act_type, act) %></div>
+	  </div>
+	</li>
+
+
+      <% end %>
     <% end %>
-    
-  </div>
+ </ul>
 </div>
