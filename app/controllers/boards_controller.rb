@@ -436,7 +436,7 @@ class BoardsController < ApplicationController
               
 ##              m.span({:class => "glyphicon glyphicon-chevron-right", :style => "margin-right: 5px; color: #999999;"})          
               
-              m.a({:href => boards_show_url(key.value.photo_size)})  do
+              m.a({:href => boards_show_url(key.value.id)})  do
                 m.img({:src => "/images/folder.png", :width => "30px", :height => "30px", :style => "margin-right: 10px;"})
               end
               m.a({:href => boards_show_url(key.value.id), :class => "caption-link"}, "#{key.name} (#{key.value.photo_size})")
