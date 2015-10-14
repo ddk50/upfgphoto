@@ -5,45 +5,48 @@
   </li>
 <% end %>
 
-<!-- Post form -->
-<div id="postformforboardModal" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-	画像を <%= @board.caption %> に投稿
-      </div>
-      <div class="modal-body">
-        <form class="form center-block">
-	  <div class="form-group">
-	    <input class="edittagbox form-control" name="tags" type="text" value="" placeholder="タグを入力してください"/>
+
+<% content_for(:modalform) do %>
+  <!-- Post form -->
+  <div id="postformforboardModal" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+	<div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	  画像を <%= @board.caption %> に投稿
+	</div>
+	<div class="modal-body">
+          <form class="form center-block">
+	    <div class="form-group">
+	      <input class="edittagbox form-control" name="tags" type="text" value="" placeholder="タグを入力してください"/>
+	    </div>
+          </form>
+	</div>
+	<div class="modal-body">
+	  <%= form_tag(board_ddupload_path(id: params[:id].to_i, format: :json),
+                       method: :post, 
+                       class: "boardddupload dropzone dz-clickable", 
+			 multipart: true) do %>
+	    <div class="dz-message">
+              <%= image_tag("/images/icn-upload.png") %>
+              <h3>ドラッグアンドドロップでアップロードできます</h3>
+              <h4>ここにファイル(zip, jpeg)をドラッグアンドドロップしてください</h4>
+              <br>
+              <span class="note">いいよ！来いよ！</span>
+	    </div>
+	  <% end %>
+	</div>
+	<div class="modal-footer">
+          <div>
+	    <button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">投稿する</button>
+	    <ul class="pull-left list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li><li><a href=""><i class="glyphicon glyphicon-camera"></i></a></li><li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li></ul>
 	  </div>
-        </form>
-      </div>
-      <div class="modal-body">
-	<%= form_tag(board_ddupload_path(id: params[:id].to_i, format: :json),
-                     method: :post, 
-                     class: "boardddupload dropzone dz-clickable", 
-                     multipart: true) do %>
-	  <div class="dz-message">
-            <%= image_tag("/images/icn-upload.png") %>
-            <h3>ドラッグアンドドロップでアップロードできます</h3>
-            <h4>ここにファイル(zip, jpeg)をドラッグアンドドロップしてください</h4>
-            <br>
-            <span class="note">いいよ！来いよ！</span>
-	  </div>
-	<% end %>
-      </div>
-      <div class="modal-footer">
-        <div>
-	  <button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">投稿する</button>
-	  <ul class="pull-left list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li><li><a href=""><i class="glyphicon glyphicon-camera"></i></a></li><li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li></ul>
 	</div>
       </div>
     </div>
   </div>
-</div>
-<!-- End of Post form -->
+  <!-- End of Post form -->
+<% end %>
 
 <% if @board.public %>
   <div class="row">
