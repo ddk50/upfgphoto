@@ -305,6 +305,10 @@ span.tags
   max-width: 100%;
   height: auto;
 }
+.linebutton img {
+    width: 82px;
+    height: 20px;
+}
 /*
 stylize any heading tags withing white-panel below
 */

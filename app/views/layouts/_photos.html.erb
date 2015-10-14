@@ -40,12 +40,18 @@
           <% @likecount = p.likecount.size %>
           <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
           <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%=p.id%>-bs3"></div>
-        </span>
-
-        <span class="pull-left">
-          <script type="text/javascript">
-            new media_line_me.LineButton({"pc":false,"lang":"ja","type":"a","text":"この写真を見ています","withUrl":true});
-          </script>
+          <div class="linebutton">
+            <script type="text/javascript">
+              new media_line_me.LineButton({"pc"   : true,
+                                            "lang" : "ja",
+                                            "type" : "a",
+                                            "text" : "この写真を見ています <%= photo_view_url(p.id) %> photo by <%= p.employee.name %>",
+                                            "withUrl" : false,
+                                            "width"   : 82, 
+                                            "height"  : 20});
+            </script>
+          </div>
+          
         </span>
       </div>
 
