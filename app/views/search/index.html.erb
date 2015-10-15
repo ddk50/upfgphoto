@@ -5,10 +5,10 @@
   </div>
 </div>
 
-<div class="row">
+<div class="row masonry-container">
   <% @boards.each do |board| %>
     
-    <div class="col-xs-18 col-sm-6 col-md-3">
+    <div class="masonry-item col-xs-18 col-sm-6 col-md-3">
       <div class="thumbnail">
         <%= link_to(boards_show_url(board.id)) do %>
           <% if board.photos.first.present? %>

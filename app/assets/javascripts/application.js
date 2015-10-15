@@ -25,6 +25,12 @@
 
 var ready = function () {
 
+    $('.masonry-container').masonry({
+        // options
+        itemSelector: '.masonry-item',
+        columnWidth: 50
+    });
+
     $('#photothumbnail').pinterest_grid({
         no_columns: 4,
         padding_x: 10,
