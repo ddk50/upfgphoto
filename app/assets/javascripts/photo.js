@@ -172,11 +172,6 @@ var ready = function() {
          }
      });
 
-    /* smooth scrolling for scroll to top */
-    $('.scroll-top').click(function(){
-        $('body,html').animate({scrollTop:0},1000);
-    })
-
     // $('#bloodhoundtextboxzip').qtip({ // Grab some elements to apply the tooltip to
     //     position: {
     //         my: 'bottom center',

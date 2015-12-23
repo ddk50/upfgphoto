@@ -1,7 +1,7 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="page-header">貴方がアップロードした写真<span class="badge"><%= current_employee.photos.size %></span></h2>
+    <h2 class="page-header">自分の写真<span class="badge"><%= current_employee.photos.size %></span></h2>
   </div>
 </div>
 
@@ -15,9 +15,9 @@
   </div>
 </div>
 
-<div id="list_de_trucs" class="table-responsive">
-  <table class="table">
-    <thead>
+<div id="list_de_trucs">
+  <table class="col-md-12 table-bordered table-striped table-condensed cf">
+    <thead class="cf">
       <tr>
         <th>#</th>
         <th>写真</th>
@@ -30,27 +30,27 @@
     <tbody>
       <% @photos.each do |p| %>
           <tr>
-            <td>
+            <td data-title="#">
 	      <%= form_tag(photo_delete_url(id: p.id), :method => :delete) do %>
-                <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
-			       :class => "btn btn-danger") %>
+		<button type="" class="btn btn-warning glyphicon glyphicon-trash">
+		</button>
 	      <% end %>
             </td>
-            <td>
+            <td data-title="写真">
               <%= link_to(photo_view_url(id: p.id)) do %>
                 <%= image_tag("/images/blank.gif", class: "img-lazy-responsive media-object", width: 64, height: 64, data: { original: photo_thumbnail_url(id: p.id, type: 'small') } ) %>
               <% end %>
             </td>
-            <td>
+            <td data-title="タグ">
               <input class="edittagbox form-control" name="tags" type="text" value="<%= p.tags.map{|t| t.name }.join(",") %>" data-photoid="<%=p.id%>" placeholder="タグを入力してください" />
             </td>
-            <td>
+            <td data-title="タイトル">
               <input class="photocaption form-control" name="photocaption" type="text" value="<%= p.caption %>" onKeyPress="submitStop(event)" data-photoid="<%=p.id%>">
             </td>
-            <td>
+            <td data-title="説明">
               <textarea class="photodescription form-control" name="photodescription" rows="3" data-photoid="<%=p.id%>"><%= p.description %></textarea>
             </td>
-	    <td>
+	    <td data-title="アルバム">
 	      <% if p.board %>
 		<%= link_to(boards_show_url(p.board.id), style: "padding: 4px 4px 4px 4px;") do %><span class="label label-danger"> <%= p.board.caption %> </span> <% end %>
 	      <% end %>	      
@@ -66,8 +66,3 @@
     <%= render 'layouts/pagination', locals: {pages_count: @pages_count, current_page: @current_page} %>
   </div>
 </div>
-
-<ul class="nav pull-right scroll-top">
-  <li><a href="#" title="Scroll to top"><i class="glyphicon glyphicon-chevron-up"></i></a></li>
-</ul>
-

@@ -126,18 +126,6 @@ html, body {
     box-shadow:0 0 5px rgba(0, 0, 0, .1);    
 }
 
-div#list_de_trucs {
-    margin:10px auto;
-    width:100%;
-    min-width:700px;
-//    max-width:700px;
-}
-
-div#list_de_trucs table {
-    margin:0px;
-    width:100%;
-}
-
 .profile 
 {
     min-height: 355px;
