@@ -67,6 +67,10 @@ Rails.application.routes.draw do
   get 'albums/:id/admin' => 'boards#adminboard', as: :board_admin 
 
   get 'search/index' => 'search#index', as: :search_index
+
+  get 'comiket/index' => 'comiket_csv#index', as: :comiketcsv_index
+  get 'comiket/download' => 'comiket_csv#download', as: :comiketcsv_download
+  post 'comiket/download' => 'comiket_csv#upload', as: :comiketcsv_post
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

@@ -119,6 +119,18 @@ var ready = function () {
     });
 }
 
+function disable_btn(id, msg)
+{
+    $(id).attr('value', msg).attr('disabled', true);
+    $(id).closest('form').submit();
+}
+
+function enable_btn(id, msg)
+{
+    $(id).attr('value', msg).attr('disabled', false);
+    $(id).closest('form').submit();
+}
+
 $(document).ready(ready);
 $(document).on('page:load', ready);
 

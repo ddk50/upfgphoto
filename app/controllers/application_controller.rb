@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+class InvalidFileFormat < StandardError; end
+class InvalidFieldFormat < StandardError; end
+class InvalidRequest < StandardError; end
+
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -65,5 +70,10 @@ class ApplicationController < ActionController::Base
     end
     return nil
   end
+
+  def checkfiletype(filepath)
+    `file #{filepath}`
+  end
   
 end
+

@@ -178,10 +178,6 @@ module Upload
         File.delete(delthem)
       end
     end
-
-    def checkfiletype(filepath)
-      `file #{filepath}`
-    end
     
   end ## included  
 end

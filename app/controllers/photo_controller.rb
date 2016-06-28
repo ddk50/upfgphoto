@@ -4,10 +4,6 @@
 ## SPOOL_DIR         = '/mnt/upfgphotos'
 ## PHOTO_RESIE_RATE  = 0.1
 
-class InvalidFileFormat < StandardError; end
-class InvalidFieldFormat < StandardError; end
-class InvalidRequest < StandardError; end
-
 class PhotoController < ApplicationController
 
   before_action :authenticate_user!, except: :index
