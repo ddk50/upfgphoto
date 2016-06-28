@@ -1,0 +1,35 @@
+
+<div id="legend">
+  <legend class="">コミケ用CSV変換</legend>
+</div>
+
+<div class="row">
+  <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
+    
+    <p>Webカタログから出力されたcsvファイルを指定してください</p>
+    
+    <%= form_tag(comiketcsv_post_path(id: current_employee.id), method: "POST", multipart: true) do |f| %>
+      <div class="form-group" style="width:400px;">
+	<div class="input-group">
+	  <input type="file" id="file_input" name="target_comiket_csvfile" style="display: none;">
+	  <span class="input-group-btn">
+            <button class="btn btn-default" type="button" onclick="$('#file_input').click();"><i class="glyphicon glyphicon-folder-open"></i></button>
+	  </span>
+	  <div class="input-group">
+            <input id="dummy_file" type="text" class="form-control" placeholder="select file..." disabled>
+	  </div>
+	</div>
+      </div>
+      <button type="submit" name="csv_up" class="btn btn-primary">変換</button>
+    <% end %>
+    
+    <script type="text/javascript">
+      $(function(){
+      $('#file_input').change(function() {
+      $('#dummy_file').val($(this).val());
+      });
+      })
+    </script>
+    
+  </div>
+</div>
