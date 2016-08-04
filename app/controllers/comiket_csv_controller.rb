@@ -156,9 +156,14 @@ class ComiketCsvController < ApplicationController
     row6 = "" if not row6.present?
     row7 = "" if not row7.present?
     row8 = "" if not row8.present?
+
     row21 = "" if not row21.present?
     ab = row21 == "0" ? "a" : "b"
-    return row6 + row7 + row8 + ab
+
+    num = row8.to_i
+    new_num = num.to_s.rjust(2, '0')
+
+    return row6 + row7 + new_num + ab
   end
 
   def sanitize_circlename(row10)
