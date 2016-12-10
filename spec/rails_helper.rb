@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'spork'
 require 'database_cleaner'
+require 'nkf'
 
 Spork.prefork do
 

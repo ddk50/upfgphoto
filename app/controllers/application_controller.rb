@@ -14,6 +14,8 @@ class ApplicationController < ActionController::Base
   helper_method :authenticate_guest!, :authenticate_admin!
 
   helper_method :format_date_time
+
+  include ComiketCsvHelper
   
   private
   def current_employee

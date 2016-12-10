@@ -1,11 +1,12 @@
 
 <div id="legend">
-  <legend class="">コミケ用CSV変換</legend>
+  <legend class="">コミケ用CSV変換ツール</legend>
 </div>
 
 <div class="row">
   <div class="col-lg-6 col-md-6 col-sm-6" style="padding-bottom: 10px;">
     
+    <h3 style="color: #FF0000">C91対応版 (2016/12/11更新)</h3>
     <p>Webカタログから出力されたcsvファイルを指定してください</p>
 
     <%= form_tag(comiketcsv_post_path(id: current_employee.id), method: "POST", multipart: true) do |f| %>
@@ -43,8 +44,7 @@
 	<li>追加サークルがあるときは、フォーマットを遵守し追加する</li>
       </ul>
       <h4>！！！半角全角大文字小文字に注意すること！！！</h4>
-      <li>発注者生成したデータをGoogleドキュメントへ貼り付ける</l>
-      <h4>※その際に、コンバート元のCSVを東村宛に送付する</h4>
+      <li>発注者生成したデータを指定されたGoogleドキュメントへ貼り付ける</li>
     </ul>
   </div>
 </div>
