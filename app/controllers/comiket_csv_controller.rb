@@ -62,6 +62,7 @@ class ComiketCsvController < ApplicationController
     NKF::UTF16    => 'UTF-16',
     NKF::BINARY   => 'BINARY',
     NKF::ASCII    => 'ASCII',
+    Encoding::WINDOWS_31J    => 'CP932', ## Windows-31J
     NKF::UNKNOWN  => 'UNKNOWN'
   }
 
@@ -76,7 +77,8 @@ class ComiketCsvController < ApplicationController
 
     f = open(filepath, 'r')
     contents = f.read
-    encode = CODES[NKF.guess(contents)]
+    r = NKF.guess(contents)
+    encode = CODES[r]
 
     logger.debug("*********************** #{encode} ************************")
 
@@ -87,8 +89,11 @@ class ComiketCsvController < ApplicationController
       save_csv_as(filepath, tmpfilepath, "UTF-8")
     when 'SJIS'
       save_csv_as(filepath, tmpfilepath, "Shift_JIS")
+    when 'CP932'
+      ## Windows-31J CP932 はSJISとしてやっても問題ないだろう
+      save_csv_as(filepath, tmpfilepath, "Shift_JIS")
     else
-      raise InvalidFileFormat, "不明な文字コードのCSVファイルです"
+      raise InvalidFileFormat, "不明な文字コードのCSVファイルです: #{r}"
     end
   end
 
