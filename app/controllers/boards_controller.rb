@@ -93,6 +93,7 @@ class BoardsController < ApplicationController
       .limit(perpage)
       .photo_order(params[:sort])
       .like_tag(params[:tag])
+      .between_date(params[:start], params[:end])
 
     @photo_count = rel.size
     @current_page = page
