@@ -28,16 +28,8 @@ class PhotoController < ApplicationController
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
 
-    @employee = Employee.find_by_id(id)
-    
-    @photos = rel.offset(page * perpage).limit(perpage)
-
-    photo_count = rel.size
-    @current_page = page
-    @pages_count = (photo_count % perpage) > 0 ? 
-                   ((photo_count / perpage) + 1) : 
-                   photo_count / perpage
-    
+    @employee = Employee.find_by_id(id)    
+    @photos = Kaminari.paginate_array(rel).page(page).per(perpage)
   end
 
   def view

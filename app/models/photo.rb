@@ -13,7 +13,6 @@ class Photo < ActiveRecord::Base
   
   has_many :activities, class_name: "Activity", foreign_key: :target_photo_id
   has_many :likecount, lambda { where(action_type: Activity.action_types[:like_photo]) }, class_name: "Activity", foreign_key: :target_photo_id
-  
 
   def like!(current_employee)
     new = Activity.new(employee_id: current_employee.id,
