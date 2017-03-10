@@ -86,8 +86,7 @@ class BoardsController < ApplicationController
       return
     end
     
-    rel = @board.photos.default_includes()
-    @photos = Kaminari.paginate_array(rel).page(page).per(perpage)    
+    @photos = @board.photos.default_includes().page(page).per(perpage)
   end
 
   def edit

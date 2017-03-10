@@ -76,12 +76,11 @@ class EmployeesController < ApplicationController
 
     @employee = Employee.find_by_id(id)
 
-    rel = Photo.default_includes().employee_photo(id)
+    @photos = Photo.default_includes().employee_photo(id)
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort]) 
-
-    @photos = Kaminari.paginate_array(rel).page(page).per(perpage)
+      .page(page).per(perpage)
   end
 
 end

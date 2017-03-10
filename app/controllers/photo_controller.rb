@@ -23,13 +23,13 @@ class PhotoController < ApplicationController
     page = params[:page] == nil ? 0 : params[:page].to_i
     perpage = params[:perpage] == nil ? PHOTO_CONFIG['page_window_size'] : params[:perpage].to_i
     
-    rel  = Photo.default_includes().employee_photo(id)
+    @photos = Photo.default_includes().employee_photo(id)
       .like_tag(params[:tag])
       .between_date(params[:start], params[:end])
       .photo_order(params[:sort])
+      .page(page).per(perpage)
 
-    @employee = Employee.find_by_id(id)    
-    @photos = Kaminari.paginate_array(rel).page(page).per(perpage)
+    @employee = Employee.find_by_id(id)
   end
 
   def view
