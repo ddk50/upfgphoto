@@ -1,5 +1,7 @@
 <section id="photothumbnail">
 
+  <%= page_entries_info(locals[:contents]) %>
+
   <% locals[:contents].each do |p| %>
     <% p = p.photo if p.respond_to?(:photo) %>
     <article class="white-panel">
