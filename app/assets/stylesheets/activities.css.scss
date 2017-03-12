@@ -4,12 +4,16 @@
     height: 50px;
 }
 
+#recent_activities a {
+    color: #bcfff0;
+}
+
 .cbp_tmtimeline {
     margin: 30px 0 0 0;
     padding: 0;
     list-style: none;
     position: relative;
-} 
+}
 
 /* The line */
 .cbp_tmtimeline:before {
