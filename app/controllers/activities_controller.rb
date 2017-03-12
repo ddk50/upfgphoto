@@ -8,7 +8,7 @@ class ActivitiesController < ApplicationController
   before_action :authenticate_guest!
 
   def index
-    @activities = Activity.recent_acts(50)
+    @activities = Activity.recent_acts(50, 200)
   end
   
   def poke

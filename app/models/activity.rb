@@ -18,12 +18,12 @@ class Activity < ActiveRecord::Base
     new.save!
   end
 
-  def self.recent_acts(limit)        
-    day = 7
+  def self.recent_acts(limit, numofresult)
+    day = 360
     begin
       f = includes(:target_photo, :target_employee, :employee).where('created_at > ?', day.days.ago).order('created_at desc')
-      day += 7
-    end while f.size <= 0
+      day += 360
+    end while f.size < numofresult
     return f.group_by{|act| act.employee.id}.take(limit)
   end
 
