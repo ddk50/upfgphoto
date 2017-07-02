@@ -86,7 +86,12 @@ class BoardsController < ApplicationController
       return
     end
     
-    @photos = @board.photos.default_includes().page(page).per(perpage)
+    @photos = @board.photos.default_includes()
+      .like_tag(params[:tag])
+      .between_date(params[:start], params[:end])
+      .photo_order(params[:sort])
+      .page(page).per(perpage)
+
   end
 
   def edit
