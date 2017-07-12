@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150617050136) do
+ActiveRecord::Schema.define(version: 20170707131550) do
 
   create_table "activities", force: true do |t|
     t.integer  "employee_id",                        null: false
@@ -64,6 +64,27 @@ ActiveRecord::Schema.define(version: 20150617050136) do
 
   add_index "boards", ["caption"], name: "index_boards_on_caption", unique: true
   add_index "boards", ["employee_id"], name: "index_boards_on_employee_id"
+
+  create_table "comikets", force: true do |t|
+    t.integer  "employee_id",             null: false
+    t.integer  "color",       default: 0, null: false
+    t.string   "date"
+    t.string   "chiku"
+    t.string   "space"
+    t.string   "shima"
+    t.string   "circle_name"
+    t.string   "zokusei"
+    t.string   "item"
+    t.integer  "tanka"
+    t.integer  "hattyusu"
+    t.string   "hattyusha"
+    t.text     "bikou"
+    t.integer  "point"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "comikets", ["employee_id"], name: "index_comikets_on_employee_id"
 
   create_table "employees", force: true do |t|
     t.string   "nickname"

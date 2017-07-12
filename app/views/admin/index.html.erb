@@ -4,11 +4,12 @@
 </div>
 
 <div role="tabpanel">
-
+  
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#whitelist" aria-controls="whitelist" role="tab" data-toggle="tab">WhiteList</a></li>
     <li role="presentation"><a href="#upfgemployee" aria-controls="upfgemployee" role="tab" data-toggle="tab">UPFG employee</a></li>
+    <li role="presentation"><a href="#admincomiketlist" aria-controls="admincomiketlist" role="tab" data-toggle="tab">コミケのリスト集約 (<%= @uploader_count %>)</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -137,7 +138,16 @@
 	  <% end %>
 	<% end %>
       </table>
-      
+    </div>
+    
+    <div role="tabpanel" class="tab-pane" id="admincomiketlist">
+      <div style="padding: 10px;">
+        <%= form_tag(download_all_comiket_path, method: "GET", multipart: false) do |f| %>
+          <%= submit_tag("集約リストをダウンロード", :class => "btn btn-primary", :id => "downloadcomiketcsv") %>
+        <% end %>
+      </div>
+      <h4> <%= @uploader_count %>人がアップロードしています </h4>
+      <%= render 'layouts/comiketlist', locals: {contents: @comiketlist} %>
     </div>    
   </div>
 </div>

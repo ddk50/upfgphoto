@@ -44,6 +44,39 @@ RSpec.describe ComiketCsvHelper, :type => :helper do
 
       ret = get_attribute("木", "東", "Ａ", "77")
       expect(ret).to eq("壁")
+
+      ret = get_attribute("金", "東", "a", "31")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "32")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "33")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "34")
+      expect(ret).to eq("シャッター")
+      
+      ret = get_attribute("金", "東", "a", "35")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "44")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "45")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "54")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "57")
+      expect(ret).to eq("シャッター")
+
+      ret = get_attribute("金", "東", "a", "1")
+      expect(ret).to eq("壁")
+
+      ret = get_attribute("金", "東", "a", "77")
+      expect(ret).to eq("壁")
     end
   end
  
@@ -90,6 +123,12 @@ RSpec.describe ComiketCsvHelper, :type => :helper do
       expect(ret).to eq("東7")
 
       ret = get_chiku("東", "ｅ")
+      expect(ret).to eq("東7")
+
+      ret = get_chiku("東", "a")
+      expect(ret).to eq("東7")
+
+      ret = get_chiku("東", "ａ")
       expect(ret).to eq("東7")
 
       ret = get_chiku("西", "あ")

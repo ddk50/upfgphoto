@@ -1,3 +1,5 @@
+var ready = function () {
+}
 
-$("#downloadall").click(function() {    
-})
+$(document).ready(ready);
+$(document).on('page:load', ready);

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   get 'admin/index' => 'admin#index', as: :admin_index
+  get 'admin/comiketlist_download' => 'admin#download_all_comiket', as: :download_all_comiket
   post 'admin/:id/useredit' => 'admin#user_edit', as: :admin_useredit
   post 'admin/:id/authorityedit' => 'admin#authority_edit', as: :admin_authorityedit
   delete 'admin/:id' => 'admin#delete', as: :admin_delete
@@ -70,7 +71,7 @@ Rails.application.routes.draw do
 
   get 'comiket/index' => 'comiket_csv#index', as: :comiketcsv_index
   get 'comiket/download' => 'comiket_csv#download', as: :comiketcsv_download
-  post 'comiket/download' => 'comiket_csv#upload', as: :comiketcsv_post
+  post 'comiket/upload' => 'comiket_csv#upload', as: :comiketcsv_post
   
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

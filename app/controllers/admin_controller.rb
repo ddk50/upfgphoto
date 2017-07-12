@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 class AdminController < ApplicationController
-
   before_action :authenticate_user!
   before_action :authenticate_admin!
+
+  include Comiketsub
   
   def index
     @users = Whitelist.all
     @employees = Employee.all
+    @comiketlist = Comiket.all
+    @uploader_count = Comiket.uploader_count
+  end
+
+  def download_all_comiket
+    csvtmppath = "/tmp/#{SecureRandom.uuid.to_s}.csv"
+    export_csv(csvtmppath, Comiket.all)
+    send_file(csvtmppath)
   end
 
   def new
