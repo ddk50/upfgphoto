@@ -18,6 +18,8 @@ module ComiketCsvHelper
         "東7"
       when /[あ-の]+/
         "東7"
+      when /[は-ほ]/
+        "東8"
       else
         raise ComiketDefeatCircleDetected
       end
