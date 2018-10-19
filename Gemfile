@@ -38,7 +38,7 @@ gem 'spring',        group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'therubyracer'
+# gem 'therubyracer'
 
 gem 'omniauth'
 gem 'omniauth-twitter'
@@ -77,3 +77,7 @@ end
 
 gem 'nokogiri'
 gem 'kaminari'
+
+gem 'libv8', '3.16.14.11'
+
+
