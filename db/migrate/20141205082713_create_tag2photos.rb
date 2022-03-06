@@ -1,4 +1,4 @@
-class CreateTag2photos < ActiveRecord::Migration
+class CreateTag2photos < ActiveRecord::Migration[7.0]
   def change
     create_table :tag2photos do |t|
       t.integer :photo_id, null: false

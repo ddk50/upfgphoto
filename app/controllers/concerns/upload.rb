@@ -144,7 +144,7 @@ module Upload
 
     def set_and_save_photo_exif(newphoto, jpgpath)
       begin
-        exif = EXIFR::JPEG.new(jpgpath)
+        exif = EXIFR::JPEG.new(jpgpath).exif
         newphoto.shotdate      = format_date_time(exif.date_time_original)
         newphoto.model         = exif.model
         newphoto.exposure_time = exif.exposure_time.to_s
@@ -163,7 +163,7 @@ module Upload
         newphoto.iso_speed_ratings = nil
         newphoto.update_date_time = nil
       end
-      
+
       newphoto.save!
     end
 

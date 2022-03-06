@@ -25,14 +25,14 @@ class SessionsController < ApplicationController
     ##
     employee = Employee.find_or_create_by(uid: user.uid)
     if not employee.edited
-      employee.update_attributes!(nickname: user.nickname,
-                                  provider: user.provider,
-                                  image_url: user.image_url,
-                                  uid: user.uid,
-                                  description: user.description,
-                                  name: user.name)
+      employee.update!(nickname: user.nickname,
+                      provider: user.provider,
+                      image_url: user.image_url,
+                      uid: user.uid,
+                      description: user.description,
+                      name: user.name)
     else
-      employee.update_attributes!(image_url: user.image_url)
+      employee.update!(image_url: user.image_url)
       employee.touch
       employee.save!
     end

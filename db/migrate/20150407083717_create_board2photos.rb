@@ -1,4 +1,4 @@
-class CreateBoard2photos < ActiveRecord::Migration
+class CreateBoard2photos < ActiveRecord::Migration[7.0]
   def change
     create_table :board2photos do |t|
       t.integer :photo_id, null: false

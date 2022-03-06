@@ -1,4 +1,4 @@
-class AddCaptionDescriptionPhotos < ActiveRecord::Migration
+class AddCaptionDescriptionPhotos < ActiveRecord::Migration[7.0]
   def up
     add_column :photos, :caption, :string
     add_column :photos, :description, :text

@@ -1,4 +1,4 @@
-class AddIndexPhotos < ActiveRecord::Migration
+class AddIndexPhotos < ActiveRecord::Migration[7.0]
   def up
     add_index :photos, :employee_id
   end

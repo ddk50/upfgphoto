@@ -1,4 +1,4 @@
-class CreateBoard2employees < ActiveRecord::Migration
+class CreateBoard2employees < ActiveRecord::Migration[7.0]
   def change
     create_table :board2employees do |t|
       t.integer  :employee_id, null: false

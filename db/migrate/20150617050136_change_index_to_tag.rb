@@ -1,4 +1,4 @@
-class ChangeIndexToTag < ActiveRecord::Migration
+class ChangeIndexToTag < ActiveRecord::Migration[7.0]
   def change
     remove_index :tag2photos, [:photo_id, :tag_id]
     add_index :tag2photos, :photo_id

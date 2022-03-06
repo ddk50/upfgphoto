@@ -3,7 +3,7 @@ class Tag < ActiveRecord::Base
   has_many :tag2photos
   has_many :photos, through: :tag2photos
   
-  validate :name, :uniqueness => true
+  validates :name, :uniqueness => true
   validates :name, length: { minimum: 1 }
 
 ##  default_scope { includes(:tag2photos) }

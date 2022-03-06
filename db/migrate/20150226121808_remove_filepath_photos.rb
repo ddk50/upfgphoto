@@ -1,4 +1,4 @@
-class RemoveFilepathPhotos < ActiveRecord::Migration
+class RemoveFilepathPhotos < ActiveRecord::Migration[7.0]
   def up
     remove_column :photos, :filepath
   end

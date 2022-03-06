@@ -52,17 +52,17 @@ class EmployeesController < ApplicationController
       avatar_uploaded = true
     end
     
-    employee.update_attributes!(name: name,
-                                branch: branch,
-                                position: position,
-                                email: email,
-                                hiredate: hiredate,
-                                birthdate: birthdate,
-                                address: address,
-                                phone: phone,
-                                description: description,
-                                edited: true,
-                                existavatar: avatar_uploaded)
+    employee.update!(name: name,
+                     branch: branch,
+                     position: position,
+                     email: email,
+                     hiredate: hiredate,
+                     birthdate: birthdate,
+                     address: address,
+                     phone: phone,
+                     description: description,
+                     edited: true,
+                     existavatar: avatar_uploaded)
 
     redirect_to employee_profile_url(employee_id), notice: "プロフィール書き換え完了"
     
