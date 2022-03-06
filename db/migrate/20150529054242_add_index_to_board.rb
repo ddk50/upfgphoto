@@ -1,4 +1,4 @@
-class AddIndexToBoard < ActiveRecord::Migration
+class AddIndexToBoard < ActiveRecord::Migration[7.0]
   def change
     add_index :boards, :caption, :unique => true
     remove_index :whitelists, :nickname

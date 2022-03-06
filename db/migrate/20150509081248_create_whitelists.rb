@@ -1,4 +1,4 @@
-class CreateWhitelists < ActiveRecord::Migration
+class CreateWhitelists < ActiveRecord::Migration[7.0]
   def change
     create_table :whitelists do |t|
       t.string   :nickname, null: false

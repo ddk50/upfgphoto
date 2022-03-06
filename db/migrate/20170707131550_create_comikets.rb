@@ -1,4 +1,4 @@
-class CreateComikets < ActiveRecord::Migration
+class CreateComikets < ActiveRecord::Migration[7.0]
   def change
     create_table :comikets do |t|
       t.integer :employee_id, null: false

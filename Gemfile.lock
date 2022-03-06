@@ -169,6 +169,9 @@ GEM
     omniauth-oauth (1.2.0)
       oauth
       omniauth (>= 1.0, < 3)
+    omniauth-rails_csrf_protection (1.0.1)
+      actionpack (>= 4.2)
+      omniauth (~> 2.0)
     omniauth-twitter (1.4.0)
       omniauth-oauth (~> 1.1)
       rack
@@ -301,6 +304,7 @@ DEPENDENCIES
   kaminari
   nokogiri
   omniauth
+  omniauth-rails_csrf_protection
   omniauth-twitter
   puma
   rails

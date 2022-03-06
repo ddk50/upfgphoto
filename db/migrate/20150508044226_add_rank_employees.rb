@@ -1,4 +1,4 @@
-class AddRankEmployees < ActiveRecord::Migration
+class AddRankEmployees < ActiveRecord::Migration[7.0]
   def up
     add_column :employees, :rank, :integer, null: false, default: 5
     add_column :photos, :censored, :boolean, null: false, default: false

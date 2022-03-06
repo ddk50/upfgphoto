@@ -1,4 +1,4 @@
-class ChangeColumnsTransactionsAndWhitelists < ActiveRecord::Migration
+class ChangeColumnsTransactionsAndWhitelists < ActiveRecord::Migration[7.0]
   def change
     remove_column :whitelists, :pending, :boolean
     remove_column :whitelists, :declined, :boolean

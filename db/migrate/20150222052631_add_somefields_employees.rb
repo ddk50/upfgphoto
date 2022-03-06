@@ -1,4 +1,4 @@
-class AddSomefieldsEmployees < ActiveRecord::Migration
+class AddSomefieldsEmployees < ActiveRecord::Migration[7.0]
   def up
     add_column :employees, :branch, :string
     add_column :employees, :position, :string
