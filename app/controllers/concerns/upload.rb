@@ -63,6 +63,7 @@ module Upload
           File.delete(path)
         }
 
+        logger.fatal e
         logger.fatal e.backtrace.join("\n")
 
         respond_to do |format|
@@ -162,7 +163,10 @@ module Upload
 
     def set_and_save_photo_exif(newphoto, jpgpath)
       begin
-        exif = EXIFR::JPEG.new(jpgpath).exif
+        ret = EXIFR::JPEG.new(jpgpath)
+        raise EXIFR::MalformedJPEG unless ret.exif?
+
+        exif = ret.exif
         newphoto.shotdate      = __format_date_time(exif.date_time_original)
         newphoto.model         = exif.model
         newphoto.exposure_time = exif.exposure_time.to_s
