@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
 #
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+Whitelist.find_or_create_by!(nickname: "tatarou1986",
+                             description: "ファーストマン",
+                             status: 2)
 
-Board.create(employee_id: 1,
-             caption: "Publicボード",
-             description: "雑に写真を共有するボードです．みんなでワイワイと貼りましょう",
-             specialized: true,
-             :public => true)
+first_man = Employee.find_or_create_by!(uid: 279930495,
+                                        provider: 'twitter',
+                                        rank: 0,
+                                        name: 'tatarou1986')
 
+Board.find_or_create_by!(employee_id: first_man.id,
+                         caption: "Publicボード",
+                         description: "雑に写真を共有するボードです．みんなでワイワイと貼りましょう",
+                         specialized: true,
+                         :public => true)

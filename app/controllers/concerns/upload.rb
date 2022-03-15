@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+require 'exifr/jpeg'
+
 module Upload
   extend ActiveSupport::Concern
   
@@ -142,17 +145,32 @@ module Upload
       end
     end
 
+    def __format_date_time(str)
+      begin
+        if str&.present?
+          ret = str.to_datetime
+          return ret
+        end
+      rescue ArgumentError
+        logger.debug("##################### #{str} がパースできません} #################")
+        return nil
+      rescue => e
+        logger.debug("##################### 不明なエラーです #################")
+      end
+      return nil
+    end
+
     def set_and_save_photo_exif(newphoto, jpgpath)
       begin
         exif = EXIFR::JPEG.new(jpgpath).exif
-        newphoto.shotdate      = format_date_time(exif.date_time_original)
+        newphoto.shotdate      = __format_date_time(exif.date_time_original)
         newphoto.model         = exif.model
         newphoto.exposure_time = exif.exposure_time.to_s
         newphoto.f_number      = exif.f_number.to_f.to_s
         newphoto.focal_length  = exif.focal_length.to_i
         newphoto.focal_length_in_35mm_film = exif.focal_length_in_35mm_film.to_i
         newphoto.iso_speed_ratings = exif.iso_speed_ratings
-        newphoto.update_date_time = format_date_time(exif.date_time)
+        newphoto.update_date_time = __format_date_time(exif.date_time)
       rescue EXIFR::MalformedJPEG
         newphoto.shotdate      = nil
         newphoto.model         = nil

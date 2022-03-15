@@ -41,7 +41,12 @@
 <div class="row">
   <div class="col-lg-12">
     <div class="tree-menu demo" id="tree-menu">
-      <%= @html_content %>
+			<% tree = {} %>
+			<% @boards.each do |board| %>
+				<% insert_tree(tree, board.caption.split("/"), board) %>
+			<% end %>
+			<% html_content = build_html_tree(tree) %>
+			<%= html_content %>
     </div>
   </div>
 </div>
