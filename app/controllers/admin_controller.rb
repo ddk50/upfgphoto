@@ -39,13 +39,13 @@ class AdminController < ApplicationController
       
       user.save!
       
-      redirect_to :back, notice: "ユーザを追加しました"
+      redirect_back fallback_location: root_path, notice: "ユーザを追加しました"
     rescue ActiveRecord::RecordNotUnique
-      redirect_to :back, alert: "twitter nameはユニークでなければなりません"
+      redirect_back fallback_location: root_path, alert: "twitter nameはユニークでなければなりません"
     rescue ActiveRecord::RecordInvalid
-      redirect_to :back, alert: "twitter nameは必ず指定しなければなりません"
+      redirect_back fallback_location: root_path, alert: "twitter nameは必ず指定しなければなりません"
     rescue => e
-      redirect_to :back, alert: "不明なエラーが発生しました"
+      redirect_back fallback_location: root_path, alert: "不明なエラーが発生しました"
     end
   end
 
@@ -55,9 +55,9 @@ class AdminController < ApplicationController
 
     if user.present?
       user.delete
-      redirect_to :back, notice: "ユーザ#{id}を削除"
+      redirect_back fallback_location: root_path, notice: "ユーザ#{id}を削除"
     else
-      redirect_to :back, notice: "ユーザIDが不正です"
+      redirect_back fallback_location: root_path, notice: "ユーザIDが不正です"
     end
   end
 
@@ -81,9 +81,9 @@ class AdminController < ApplicationController
         employee.guest!
       end
       employee.save!
-      redirect_to :back, notice: "社員#{id}の権限を変更"
+      redirect_back fallback_location: root_path, notice: "社員#{id}の権限を変更"
     else
-      redirect_to :back, notice: "ユーザIDが不正です"
+      redirect_back fallback_location: root_path, notice: "ユーザIDが不正です"
     end
   end
 
@@ -109,9 +109,9 @@ class AdminController < ApplicationController
       
       user.save!
 
-      redirect_to :back, notice: "ユーザ#{id}編集しました"
+      redirect_back fallback_location: root_path, notice: "ユーザ#{id}編集しました"
     else
-      redirect_to :back, notice: "ユーザIDが不正です"
+      redirect_back fallback_location: root_path, notice: "ユーザIDが不正です"
     end
   end 
   

@@ -37,7 +37,7 @@ class PhotoController < ApplicationController
     @photo      = Photo.find_by_id(@photoid)
 
     if @photo == nil
-      redirect_to :back, alert: "この写真は存在しません"
+      redirect_back fallback_location: root_path, alert: "この写真は存在しません"
       return
     end
 
@@ -51,7 +51,7 @@ class PhotoController < ApplicationController
     photo = Photo.find_by_id(photoid)
 
     if photo.nil?
-      redirect_to :back, alert: "この写真は存在しません"
+      redirect_back fallback_location: root_path, alert: "この写真は存在しません"
       return
     end
 
@@ -79,7 +79,7 @@ class PhotoController < ApplicationController
     photo = Photo.find_by_id(photoid)    
 
     if not (photo.employee_id == current_employee.id)
-      redirect_to :back, alert: "他人の写真は変更できません"
+      redirect_back fallback_location: root_path, alert: "他人の写真は変更できません"
       return
     else
 
@@ -87,9 +87,9 @@ class PhotoController < ApplicationController
         photo.caption     = caption
         photo.description = description
         photo.save!
-        redirect_to :back, notice: "変更完了"
+        redirect_back fallback_location: root_path, notice: "変更完了"
       rescue => e      
-        redirect_to :back, alert: e.to_s
+        redirect_back fallback_location: root_path, alert: e.to_s
       end
       
     end
@@ -138,11 +138,11 @@ class PhotoController < ApplicationController
     
     begin
       if not (photo.employee_id == current_employee.id)
-        redirect_to :back, alert: "他人の写真は削除できません"
+        redirect_back fallback_location: root_path, alert: "他人の写真は削除できません"
       else
         photo.destroy
         destroyed = true
-        redirect_to :back, notice: "写真#{photoid}を削除"
+        redirect_back fallback_location: root_path, notice: "写真#{photoid}を削除"
       end    
     ensure
       if destroyed
@@ -188,7 +188,7 @@ class PhotoController < ApplicationController
 
     if err
       respond_to do |format|
-        format.html { redirect_to :back, notice: msg }
+        format.html { redirect_back fallback_location: root_path, notice: msg }
         format.json { 
           render :json => 
           {:result   => 'error',  
@@ -198,7 +198,7 @@ class PhotoController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to :back, notice: "#{deleted_photoids.size}個の写真を削除" }
+        format.html { redirect_back fallback_location: root_path, notice: "#{deleted_photoids.size}個の写真を削除" }
         format.json { render :json => 
           {:result   => 'success',  
            :redirect => employees_url(current_employee.id),
