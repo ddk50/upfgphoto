@@ -50,7 +50,7 @@ module Upload
 
         respond_to do |format|
           format.html {
-            redirect_to :back, notice: "アップロード完了 #{additions.size}個のファイルを追加"
+            redirect_back fallback_location: root_path, notice: "アップロード完了 #{additions.size}個のファイルを追加"
           }
           format.json { render :json => 
             {:result   => 'success',  
@@ -68,7 +68,7 @@ module Upload
 
         respond_to do |format|
           format.html {
-            redirect_to :back, alert: ('トランザクションエラー ' + e.to_s)
+            redirect_back fallback_location: root_path, alert: ('トランザクションエラー ' + e.to_s)
           }
           format.json { render :json => 
             {:result   => 'error', 

@@ -108,7 +108,7 @@ class BoardsController < ApplicationController
     end
 
     if not authenticate_board!(board)
-      redirect_to :back, alert: "ゲストはこのアルバムにアップロードはできません"
+      redirect_back fallback_location: root_path, alert: "ゲストはこのアルバムにアップロードはできません"
       return
     end
 
@@ -193,7 +193,7 @@ class BoardsController < ApplicationController
       redirect_to boards_index_url(), notice: "新たなアルバム #{caption} を作成しました"
       
     rescue => e
-      redirect_to :back, alert: e.to_s
+      redirect_back fallback_location: root_path, alert: e.to_s
       logger.fatal "[FATAL] 例外が発生しました"
       logger.fatal e.backtrace.join("\n")
     end
@@ -265,7 +265,7 @@ class BoardsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html { redirect_to :back, notice: msg }
+      format.html { redirect_back fallback_location: root_path, notice: msg }
       format.json { 
         render :json => 
         {:result   => result,
@@ -289,7 +289,7 @@ class BoardsController < ApplicationController
     }
 
     respond_to do |format|
-      format.html { redirect_to :back, notice: "購読者を変更しました" }
+      format.html { redirect_back fallback_location: root_path, notice: "購読者を変更しました" }
       format.json {
         render :json =>
         {

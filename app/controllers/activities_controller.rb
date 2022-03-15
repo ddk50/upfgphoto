@@ -19,16 +19,16 @@ class ActivitiesController < ApplicationController
       end      
       new_act = Activity.poke(current_employee.id, params[:employee_id].to_i)
     rescue => e
-      redirect_to :back, alert: e.to_s
+      redirect_back fallback_location: root_path, alert: e.to_s
       return
     end
 
-    redirect_to :back, notice: "Pokeしました"
+    redirect_back fallback_location: root_path, notice: "Pokeしました"
   end
 
   def clearfeeds
     current_employee.mark_unread_activities
-    redirect_to :back
+    redirect_back fallback_location: root_path
   end
 
   def viewphoto
@@ -61,7 +61,7 @@ class ActivitiesController < ApplicationController
     if err
       logger.debug("***************************************** like (#{e.to_s}) **************************************")
       respond_to do |format|
-        format.html { redirect_to :back, notice: err_msg }
+        format.html { redirect_back fallback_location: root_path, notice: err_msg }
         format.json { render :json => 
           { :status   => 'error',
             :msg => err_msg }
@@ -69,7 +69,7 @@ class ActivitiesController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to :back, notice: "Likeしました" }
+        format.html { redirect_back fallback_location: root_path, notice: "Likeしました" }
         format.json { render :json => 
           { :status   => 'success', 
             :msg => '' }

@@ -25,14 +25,14 @@ class ComiketCsvController < ApplicationController
       end      
       redirect_to comiketcsv_index_url, notice: "アップロード完了"
     rescue InvalidFieldFormat => e
-      redirect_to :back, alert: "#{e}"
+      redirect_back fallback_location: root_path, alert: "#{e}"
     rescue InvalidFileFormat => e
-      redirect_to :back, alert: "#{e}"
+      redirect_back fallback_location: root_path, alert: "#{e}"
     rescue CSV::MalformedCSVError
-      redirect_to :back, alert: "アップロードされたファイルはCSVファイルではないようです"
+      redirect_back fallback_location: root_path, alert: "アップロードされたファイルはCSVファイルではないようです"
     rescue => e
       logger.fatal e.backtrace.join("\n")
-      redirect_to :back, alert: "Error #{e}"
+      redirect_back fallback_location: root_path, alert: "Error #{e}"
     end
   end
   
