@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+    puma:
+      build:
+        context: ./
+        dockerfile: ./containers/puma/Dockerfile
+      environment:
+        RAILS_ENV: production
+      volumes:
+        - ./log:/app/log # persist logs
+        - ./data:/app/data # persist photos
+        - ./db:/app/db # persist db
+        - /app/public
+        - /app/tmp
+      env_file:
+        - prod.envs
+    nginx:
+      build:
+        context: ./
+        dockerfile: ./containers/nginx/Dockerfile
+      ports:
+        - "80:80"
+      volumes_from:
+        - puma
+      depends_on:
+        - puma
+

@@ -37,3 +37,4 @@ public/images/topbanner.jpg
 .DS_Store
 
 data
+prod.envs

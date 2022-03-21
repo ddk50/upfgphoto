@@ -639,11 +639,17 @@ small.text-muted {
     margin-right: 15px;
 }
 
+@mixin opacity($opacity) {
+    opacity: $opacity;
+    $opacity-ie: $opacity * 100;
+    filter: alpha(opacity=$opacity-ie);
+}
+
 .modal-backdrop{
     z-index: 1000; /* very important */
     background-color: #000 !important;
     &.in {
-	@include opacity(.8);
+	@include opacity(0.8);
     }
 }
 
