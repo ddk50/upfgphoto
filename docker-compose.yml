@@ -19,9 +19,8 @@ services:
         context: ./
         dockerfile: ./containers/nginx/Dockerfile
       ports:
-        - "80:80"
+        - "0.0.0.0:80:80"
       volumes_from:
         - puma
       depends_on:
         - puma
-
