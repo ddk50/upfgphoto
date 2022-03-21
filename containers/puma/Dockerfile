@@ -19,10 +19,7 @@ RUN mkdir -p db
 # Expose volumes to frontend
 VOLUME /app/public
 VOLUME /app/tmp
-
-RUN RAILS_ENV=production bundle exec rake db:migrate
-RUN RAILS_ENV=production bundle exec rails assets:precompile
-
+VOLUME /app/db
 
 # Start Server
 CMD bundle exec puma -C config/puma.rb -e production
