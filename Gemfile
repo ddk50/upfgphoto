@@ -43,7 +43,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-rails_csrf_protection'
 
 gem 'exifr'
-##gem 'zip'
+
 gem 'rubyzip', :require => 'zip'
 
 ## gem 'digest/sha1'
@@ -64,11 +64,6 @@ group :test do
    gem 'database_cleaner'
 end
 
-gem 'yaml_db'
-
-gem 'unicorn'
-gem 'rb-readline'
-
 group :development, :test do
   gem 'rails-erd'
 end
@@ -76,3 +71,4 @@ end
 gem 'nokogiri'
 gem 'kaminari'
 
+gem 'nkf'
