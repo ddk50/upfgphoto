@@ -20,8 +20,9 @@ RUN mkdir -p db
 VOLUME /app/public
 VOLUME /app/tmp
 
-CMD RAILS_ENV=production bundle exec rake db:migrate
-CMD RAILS_ENV=production bundle exec rails assets:precompile
+RUN RAILS_ENV=production bundle exec rake db:migrate
+RUN RAILS_ENV=production bundle exec rails assets:precompile
+
 
 # Start Server
 CMD bundle exec puma -C config/puma.rb -e production
