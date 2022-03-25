@@ -1,9 +1,11 @@
 #!/bin/sh
 
-docker-compose -f docker-compose.yml up -d
-sleep 5
+docker network create --driver bridge web_network
 
-docker-compose exec puma bundle exec rake db:migrate
-docker-compose exec puma bundle exec rails assets:precompile
+docker-compose -f docker-compose.yml up -d
+sleep 3
+
+docker-compose exec uprun_puma bundle exec rake db:migrate
+docker-compose exec uprun_puma bundle exec rails assets:precompile
 
 docker-compose -f docker-compose.yml restart
