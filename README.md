@@ -1,10 +1,11 @@
 ## README
 
-### make `prod.envs` file the root of project
+### make `prod.envs` file into the root of project
 
 ```
 TWITTER_API_KEY=<your key>
 TWITTER_API_SECRET=<your secret>
+DISCORD_HOOK_URL=<your discord webhook URL>
 SECRET_KEY_BASE=<bundle exec rake secret>
 ```
 
@@ -12,7 +13,7 @@ SECRET_KEY_BASE=<bundle exec rake secret>
 
 ```
 $ start_prod.sh
-$ docker-compose exec puma bundle exec rake db:seed
+$ docker-compose exec uprun_puma bundle exec rake db:seed
 ```
 
 ### logs
