@@ -16,6 +16,7 @@ services:
         - web_network
       env_file:
         - prod.envs
+      restart: always
     uprun_nginx:
       build:
         context: ./
@@ -26,6 +27,7 @@ services:
         - uprun_puma
       depends_on:
         - uprun_puma
+      restart: always
 
 networks:
   web_network:
