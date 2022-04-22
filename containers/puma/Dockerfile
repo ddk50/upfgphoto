@@ -1,4 +1,4 @@
-FROM ruby:3.1.1
+FROM ruby:3.1.2
 RUN apt-get update -qq && \
     apt-get install -y build-essential sqlite3 libsqlite3-dev libmagickwand-dev libpq-dev nodejs
 
