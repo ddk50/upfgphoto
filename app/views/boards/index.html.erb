@@ -1,3 +1,11 @@
+<% content_for(:postform) do %>
+  <% unless current_employee.guest? %>
+    <li>
+      <a href=<%= board_addboardpanel_url %> role="button"><i class="glyphicon glyphicon-new-window"></i> New Album</a>
+    </li>
+  <% end %>
+<% end %>
+
 <div id="legend">
   <legend class="">今ホットなアルバム一覧</legend>
 </div>

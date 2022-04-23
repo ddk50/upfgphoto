@@ -135,14 +135,6 @@ module BoardsHelper
     ##
     markup do |m|
       do_build_html_tree(m, hash)
-      unless current_employee.guest?
-        m.div({ :style => "text-align: center; margin-top: 50px;" }) do
-          m.a({ :href => board_addboardpanel_url, :class => "btn btn-success btn-sm btn-block", :role => "button" }) do
-            m.span({ :class => "glyphicon glyphicon-new-window" })
-            m.print " 新しいアルバムの作成"
-          end
-        end
-      end
     end
   end
 
