@@ -57,7 +57,6 @@ html, body {
     color: #3B5999;
     font-family: Lobster;
     font-size: 24px;
-/ / text-shadow: 1 px 1 px 0 px #222222;
 }
 
 /* Echo out a label for the example */
@@ -579,53 +578,6 @@ h1, h2, h3 {
     background-color: #fff;
 }
 
-/* .btn-primary,.label-primary,.list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus  { */
-/*     background-color:#3B5999; */
-/*     color:#fffffe; */
-/* } */
-/* .btn-default { */
-/*     color:#666666; */
-/*     text-shadow:0 0 1px rgba(0,0,0,.3); */
-/* } */
-
-/* .form-control { */
-
-/* } */
-
-/* .panel textarea, .well textarea, textarea.form-control */
-/* { */
-/*    resize: none; */
-/* } */
-
-/* .badge{ */
-/*    color:#3B5999; */
-/*    background-color:#fff; */
-/* } */
-/* .badge:hover, .badge-inverse{ */
-/*    background-color:#3B5999; */
-/*    color:#fff; */
-/* } */
-
-/* .jumbotron { */
-/*   background-color:transparent; */
-/* } */
-/* .label-default { */
-/*   background-color:#dddddd; */
-/* } */
-/* .page-header { */
-/*   margin-top: 55px; */
-/*   padding-top: 9px; */
-/*   border-top:1px solid #eeeeee; */
-/*   font-weight:700; */
-/*   text-transform:uppercase; */
-/*   letter-spacing:2px; */
-/* } */
-
-/* .panel-default .panel-heading { */
-/*   background-color:#f9fafb; */
-/*   color:#555555; */
-/* } */
-
 .col-sm-9.full {
     width: 100%;
 }
@@ -647,7 +599,7 @@ h1, h2, h3 {
 
 .modal-body textarea.form-control {
     resize: none;
-    border: 1;
+    border: 1px;
     box-shadow: 0 0 0;
 }
 
@@ -714,21 +666,9 @@ small.text-muted {
     margin-right: 15px;
 }
 
-@mixin opacity($opacity) {
-    opacity: $ opacity;
-    $ opacity-ie: $ opacity *100;
-    filter: alpha(opacity=$ opacity-ie);
-}
-
 .modal-backdrop {
     z-index: 1000; /* very important */
     background-color: #000 !important;
-
-&
-.in {
-    @include opacity(0.8);
-}
-
 }
 
 #postformforgalleryModal input[type="text"] {
@@ -751,20 +691,6 @@ small.text-muted {
     padding: 3px 15px;
     color: #999999;
 }
-
-/* .tree-menu .closed > a { background-image: url(../img/icon-expand.gif); } */
-/* .tree-menu .opened > a { background-image: url(../img/icon-collapse.gif); } */
-
-/* label { */
-/*   display: block; */
-/*   margin-bottom: 5px; */
-/* } */
-
-/* label, input, button, select, textarea { */
-/*   font-size: 14px; */
-/*   font-weight: normal; */
-/*   line-height: 20px; */
-/* } */
 
 #photosearchtag .twitter-typeahead {
     width: auto !important;
