@@ -1,5 +1,5 @@
 <div class="container">
-  
+
   <div class="row">
     <div class="col-md-12">
       <h2 class="page-header"><%= @photo.caption == nil ? "写真#{@photoid}" : @photo.caption %></h2>
@@ -11,9 +11,9 @@
   </div>
 
   <div class="row">
-    <div class="col-md-12">     
-      
-      <input class="edittagbox" type="text" value="<%= @photo.tags.map{|t| t.name }.join(",") %>" data-provide="typeahead" data-photoid="<%= @photo.id %>"/>
+    <div class="col-md-12">
+
+      <input class="edittagbox" type="text" value="<%= @photo.tags.map { |t| t.name }.join(",") %>" data-provide="typeahead" data-photoid="<%= @photo.id %>"/>
 
     </div>
   </div>
@@ -37,19 +37,19 @@
             <dt>写真撮影日時</dt>
             <dd><%= @photo.shotdate ? @photo.shotdate.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
             <dt>モデル</dt>
-	    <dd><%= @photo.model %></dd>
-	    <dt>露光時間</dt>
-	    <dd><%= @photo.exposure_time %></dd>	
-	    <dt>f値</dt>
-	    <dd><%= @photo.f_number %></dd>	
-	    <dt>焦点距離</dt>
-	    <dd><%= @photo.focal_length %></dd>
-	    <dt>35mm換算での焦点距離</dt>
-	    <dd><%= @photo.focal_length_in_35mm_film %></dd>
-	    <dt>ISO感度</dt>
-	    <dd><%= @photo.iso_speed_ratings %></dd>
-	    <dt>写真編集日時</dt>
-	    <dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
+            <dd><%= @photo.model %></dd>
+            <dt>露光時間</dt>
+            <dd><%= @photo.exposure_time %></dd>
+            <dt>f値</dt>
+            <dd><%= @photo.f_number %></dd>
+            <dt>焦点距離</dt>
+            <dd><%= @photo.focal_length %></dd>
+            <dt>35mm換算での焦点距離</dt>
+            <dd><%= @photo.focal_length_in_35mm_film %></dd>
+            <dt>ISO感度</dt>
+            <dd><%= @photo.iso_speed_ratings %></dd>
+            <dt>写真編集日時</dt>
+            <dd><%= @photo.update_date_time ? @photo.update_date_time.strftime("%Y-%m-%d %H:%M:%S") : "" %></dd>
           </dl>
         </div>
       </div>
@@ -73,21 +73,21 @@
               <label for="photodescription" class="control-label">紹介文</label>
               <textarea class="photodescription form-control" name="photodescription" rows="3" data-photoid="<%= @photo.id %>"><%= @photo.description %></textarea>
             </div>
-              
+
           </div>
         </div>
-            
+
         <div class="panel panel-danger">
           <div class="panel-heading">この写真を削除</div>
           <div class="panel-body">
-            
+
             <div class="form-group">
               <p></p>
               <% if current_employee.id == @holder.id %>
-	        <%= form_tag(photo_delete_url(id: @photoid), :method => :delete) do %>
-                  <%= submit_tag("削除", :data => {:disable_with => "Deleting..."}, 
-			         :class => "btn btn-danger") %>
-	        <% end %>
+                <%= form_tag(photo_delete_url(id: @photoid), :method => :delete) do %>
+                  <%= submit_tag("削除", :data => { :disable_with => "Deleting..." },
+                                 :class => "btn btn-danger") %>
+                <% end %>
               <% end %>
             </div>
           </div>
@@ -96,5 +96,5 @@
       </div>
     </div>
   <% end %>
-  
+
 </div>

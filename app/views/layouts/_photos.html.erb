@@ -7,22 +7,26 @@
     <article class="white-panel">
 
       <ul class="nav nav-pills">
-	<% if p.board %>
-	  <li> <%= link_to(boards_show_url(p.board.id), style: "padding: 4px 4px 4px 4px;") do %><span class="label label-danger"><i class="glyphicon glyphicon-book"></i> <%= p.board.caption %> </span> <% end %></li>
-	<% end %>
+        <% if p.board %>
+          <li> <%= link_to(boards_show_url(p.board.id), style: "padding: 4px 4px 4px 4px;") do %>
+              <span class="label label-danger"><i class="glyphicon glyphicon-book"></i> <%= p.board.caption %> </span>
+            <% end %></li>
+        <% end %>
         <% p.tags.each do |tag| %>
-          <li><%= link_to(search_index_path(tag: tag.name), style: "padding: 4px 4px 4px 4px;") do %> <span class="label label-primary"><i class="glyphicon glyphicon-tags"></i>  <%= tag.name %> </span> <% end %></li>
+          <li><%= link_to(search_index_path(tag: tag.name), style: "padding: 4px 4px 4px 4px;") do %>
+              <span class="label label-primary"><i class="glyphicon glyphicon-tags"></i>  <%= tag.name %> </span>
+            <% end %></li>
         <% end %>
       </ul>
 
       <div id="photo-coner-check-box">
         <div class="checkbox-inline">
-          <%= check_box_tag("photo_id[]", p.id, false, {class: "photo_check_group"}) %>
+          <%= check_box_tag("photo_id[]", p.id, false, { class: "photo_check_group" }) %>
         </div>
       </div>
 
       <%= link_to(photo_view_url(id: p.id), style: "margin-bottom: 0px;") do %>
-        <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id, type: 'small')}, class: "img-lazy-responsive", width: 400, height: 300) %>
+        <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: p.id, type: 'small') }, class: "img-lazy-responsive", width: 400, height: 300) %>
         <h4><%= p.caption %></h4>
       <% end %>
       <p><%= p.description %></p>
@@ -31,8 +35,8 @@
 
         <span class="pull-left">
 	  <p style="font-size: 9px;">
-            by 
-            <%= link_to(employees_url(id: p.employee.id)) do %>
+            by
+      <%= link_to(employees_url(id: p.employee.id)) do %>
 	      <%= p.employee.name %>
             <% end %>
 	  </p>
@@ -40,17 +44,19 @@
 
         <span class="pull-right">
           <% @likecount = p.likecount.size %>
-          <i id="like<%=p.id%>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%=activities_likephoto_url(p.id)%>" data-count="<%= @likecount%>"></i> <div id="like<%=p.id%>-bs3"><%= @likecount %></div>
-          <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%=p.id%>-bs3"></div>
+          <i id="like<%= p.id %>" class="glyphicon glyphicon-thumbs-up" data-likeurl="<%= activities_likephoto_url(p.id) %>" data-count="<%= @likecount %>"></i> <div id="like<%= p.id %>-bs3"><%= @likecount %></div>
+          <p class="glyphicon glyphicon glyphicon-eye-open"></p> <div id="view<%= p.id %>-bs3"></div>
           <div class="linebutton">
             <script type="text/javascript">
-              new media_line_me.LineButton({"pc"   : true,
-                                            "lang" : "ja",
-                                            "type" : "a",
-                                            "text" : "この写真を見ています <%= photo_view_url(p.id) %> photo by <%= p.employee.name %>",
-                                            "withUrl" : false,
-                                            "width"   : 82, 
-                                            "height"  : 20});
+                new media_line_me.LineButton({
+                    "pc": true,
+                    "lang": "ja",
+                    "type": "a",
+                    "text": "この写真を見ています <%= photo_view_url(p.id) %> photo by <%= p.employee.name %>",
+                    "withUrl": false,
+                    "width": 82,
+                    "height": 20
+                });
             </script>
           </div>
           

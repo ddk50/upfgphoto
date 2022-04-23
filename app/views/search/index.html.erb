@@ -1,18 +1,18 @@
-
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="page-header"><%= image_tag("/images/folder.png") %> '<%= @keyword %>' が含まれるアルバム <span class="badge"><%= @boards.size %></span></h2>
+    <h2 class="page-header"><%= image_tag("/images/folder.png") %> '<%= @keyword %>' が含まれるアルバム
+      <span class="badge"><%= @boards.size %></span></h2>
   </div>
 </div>
 
 <div class="row masonry-container">
   <% @boards.each do |board| %>
-    
+
     <div class="masonry-item col-xs-18 col-sm-6 col-md-3">
       <div class="thumbnail">
         <%= link_to(boards_show_url(board.id)) do %>
           <% if board.photos.first.present? %>
-            <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: board.photos.first.id, type: 'small')}, class: "img-lazy-responsive", width: 400, height: 300) %>          
+            <%= image_tag("/images/blank.gif", data: { original: photo_thumbnail_url(id: board.photos.first.id, type: 'small') }, class: "img-lazy-responsive", width: 400, height: 300) %>
           <% else %>
             <%= image_tag("/images/no_image.png", class: "img-responsive", width: 400, height: 300) %>
           <% end %>
@@ -29,7 +29,7 @@
               View more
             <% end %>
           </p>
-          
+
           <p style="font-size: 12px;">
             <i class="glyphicon glyphicon-user"></i> by <a href="#"><%= board.employee.name %></a> <br/>
             <i class="glyphicon glyphicon-calendar"></i> <%= board.created_at.strftime("%Y-%m-%d") %>
@@ -47,7 +47,8 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="page-header"><i class="glyphicon glyphicon-camera"></i> '<%= @keyword %>' が含まれる写真 <span class="badge"><%= @photo_count %></span></h2>
+    <h2 class="page-header"><i class="glyphicon glyphicon-camera"></i> '<%= @keyword %>' が含まれる写真
+      <span class="badge"><%= @photo_count %></span></h2>
   </div>
 </div>
 
@@ -59,7 +60,7 @@
   <div class="col-lg-12">
     <div class="form-inline form-group">
       <%= submit_tag("ダウンロード", :class => "btn btn-success", :id => "downloadall") %>
-      
+
       <div class="checkbox" style="margin-left:10px; margin-right:10px;">
         <label><input type="checkbox" id="photo_check_group" class="photocheckAll"> 全てにチェックを入れる</label>
       </div>
@@ -69,7 +70,7 @@
 </div>
 
 <div class="row">
-  <%= render 'layouts/photos', locals: {contents: @photos} %>
+  <%= render 'layouts/photos', locals: { contents: @photos } %>
 </div>
 
 <div class="row">

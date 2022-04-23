@@ -11,7 +11,7 @@
         <p class="help-block">アルバム（画像掲示板）のタイトルです．全ての文字が使えます</p>
       </div>
     </div>
- 
+
     <div class="control-group">
       <!-- Board Description -->
       <label class="control-label" for="description">アルバムの説明文</label>
@@ -23,24 +23,24 @@
 
     <div class="control-group">
       <div class="controls">
-	<input type="checkbox" name="public" value="checked"> Publicアルバムにする
+        <input type="checkbox" name="public" value="checked"> Publicアルバムにする
         <p class="help-block">アルバムをPublicにすると．掲示板の内容はUPFG社員全てに公開されます</p>
       </div>
     </div>
 
     <div class="control-group">
       <div class="controls">
-	<input type="checkbox" name="guest" value="checked"> ゲストモードにする
-        <p class="help-block", style="color: #ff0000;">注意：ゲストモードにすると，UPFGの正規職員以外の人々もアルバムを見ることができます</p>
+        <input type="checkbox" name="guest" value="checked"> ゲストモードにする
+        <p class="help-block" , style="color: #ff0000;">注意：ゲストモードにすると，UPFGの正規職員以外の人々もアルバムを見ることができます</p>
       </div>
     </div>
- 
+
     <div class="control-group">
       <!-- Button -->
       <div class="controls">
-        <%= submit_tag("アルバムを作成する", 
-		       :data => {:disable_with => "送信中..."}, 
-		       :class => "btn btn-success") %>
+        <%= submit_tag("アルバムを作成する",
+                       :data => { :disable_with => "送信中..." },
+                       :class => "btn btn-success") %>
       </div>
     </div>
   </fieldset>

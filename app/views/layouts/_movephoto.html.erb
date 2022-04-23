@@ -1,10 +1,12 @@
-
 <div class="btn-group">
   <button type="button" class="btn btn-default">写真をアルバムに移動</button>
-  <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span></button>
+  <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span>
+  </button>
   <ul class="dropdown-menu">
     <% locals[:boards].each do |b| %>
-      <li><a data-boardid="<%=b.id%>" data-boardcaption="<%=b.caption%>" href="#" class="movephoto"><%= b.caption %></a></li>
+      <li>
+        <a data-boardid="<%= b.id %>" data-boardcaption="<%= b.caption %>" href="#" class="movephoto"><%= b.caption %></a>
+      </li>
     <% end %>
   </ul>
 </div>

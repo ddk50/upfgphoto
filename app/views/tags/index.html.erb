@@ -15,9 +15,9 @@
 
 <ul class="list-group row">
   <% @tags.each do |tag| %>
-    <li class="list-group-item col-xs-4" style="border: 0px;"><%= tag.name %> 
+    <li class="list-group-item col-xs-4" style="border: 0px;"><%= tag.name %>
       <%= link_to(search_index_path(tag: tag.name)) do %>
-	(<%= tag.count %>)
+        (<%= tag.count %>)
       <% end %>
     </li>
   <% end %>

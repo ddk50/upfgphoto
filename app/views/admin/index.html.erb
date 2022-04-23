@@ -1,145 +1,148 @@
-
 <div id="legend">
   <legend class="">Admin Dashboard</legend>
 </div>
 
 <div role="tabpanel">
-  
+
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#whitelist" aria-controls="whitelist" role="tab" data-toggle="tab">WhiteList</a></li>
-    <li role="presentation"><a href="#upfgemployee" aria-controls="upfgemployee" role="tab" data-toggle="tab">UPFG employee</a></li>
-    <li role="presentation"><a href="#admincomiketlist" aria-controls="admincomiketlist" role="tab" data-toggle="tab">コミケのリスト集約 (<%= @uploader_count %>)</a></li>
+    <li role="presentation" class="active">
+      <a href="#whitelist" aria-controls="whitelist" role="tab" data-toggle="tab">WhiteList</a></li>
+    <li role="presentation">
+      <a href="#upfgemployee" aria-controls="upfgemployee" role="tab" data-toggle="tab">UPFG employee</a></li>
+    <li role="presentation"><a href="#admincomiketlist" aria-controls="admincomiketlist" role="tab" data-toggle="tab">コミケのリスト集約
+      (<%= @uploader_count %>)</a></li>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="whitelist">
       <table class="table table-striped custab">
-	<thead>
-	  <br/>
-	  <a href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#newwhitelistuser"><b>+</b> 新しいユーザを追加</a>
-          <tr>
-            <th>Twitter Name</th>
-            <th>ステータス</th>
-	    <th>アクセス有効期限</th>
-            <th class="text-center">#</th>
-          </tr>
-	</thead>
-	<% @users.each do |user| %>
-	  <%= form_tag(admin_useredit_path(user.id), method: "POST") do |f| %>
-	    <tr>
-	      <td><%= user.nickname %></td>
-	      <td>
-		<select class="selectpicker input-small" data-width="85px" name="state">
-		  <% if user.accepted? %>
+        <thead>
+        <br/>
+        <a href="#" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#newwhitelistuser"><b>+</b>
+          新しいユーザを追加</a>
+        <tr>
+          <th>Twitter Name</th>
+          <th>ステータス</th>
+          <th>アクセス有効期限</th>
+          <th class="text-center">#</th>
+        </tr>
+        </thead>
+        <% @users.each do |user| %>
+          <%= form_tag(admin_useredit_path(user.id), method: "POST") do |f| %>
+            <tr>
+              <td><%= user.nickname %></td>
+              <td>
+                <select class="selectpicker input-small" data-width="85px" name="state">
+                  <% if user.accepted? %>
                     <option value="accepted" data-content="<span class='label label-success'>許可</span>" selected>許可</option>
-		  <% else %>
+                  <% else %>
                     <option value="accepted" data-content="<span class='label label-success'>許可</span>">許可</option>
-		  <% end %>
+                  <% end %>
 
-		  <% if user.pending? %>
+                  <% if user.pending? %>
                     <option value="pending" data-content="<span class='label label-warning'>保留</span>" selected>保留</option>
-		  <% else %>
+                  <% else %>
                     <option value="pending" data-content="<span class='label label-warning'>保留</span>">保留</option>
-		  <% end %>
+                  <% end %>
 
-		  <% if user.declined? %>
+                  <% if user.declined? %>
                     <option value="declined" data-content="<span class='label label-danger'>禁止</span>" selected>禁止</option>
-		  <% else %>
+                  <% else %>
                     <option value="declined" data-content="<span class='label label-danger'>禁止</span>">禁止</option>
-		  <% end %>
-		</select>
-	      </td>
-	      
-	      <td>	    
-		<input type="text" class="form-control datepicker input-mini" name="date" value="<%= user.expires_at.present? ? user.expires_at.strftime("%Y-%m-%d") : "indefinitely" %>" />
-	      </td>
-	      
-	      <td class="text-center">
-		<button class="btn btn-info btn-xs" name="commit" type="submit">
-		  <span class="glyphicon glyphicon-pencil"></span> Edit
-		</button>
+                  <% end %>
+                </select>
+              </td>
 
-		<%= link_to(admin_delete_path(user.id), class: "btn btn-danger btn-xs", method: :delete) do %>
-		  <span class="glyphicon glyphicon-remove">
-		  </span> Del
-		<% end %>	     	      
-	      </td>
-	      
-	    </tr>
-	  <% end %>
-	<% end %>
+              <td>
+                <input type="text" class="form-control datepicker input-mini" name="date" value="<%= user.expires_at.present? ? user.expires_at.strftime("%Y-%m-%d") : "indefinitely" %>"/>
+              </td>
+
+              <td class="text-center">
+                <button class="btn btn-info btn-xs" name="commit" type="submit">
+                  <span class="glyphicon glyphicon-pencil"></span> Edit
+                </button>
+
+                <%= link_to(admin_delete_path(user.id), class: "btn btn-danger btn-xs", method: :delete) do %>
+                  <span class="glyphicon glyphicon-remove">
+                  </span> Del
+                <% end %>
+              </td>
+
+            </tr>
+          <% end %>
+        <% end %>
       </table>
     </div>
-    
+
     <div role="tabpanel" class="tab-pane" id="upfgemployee">
       <table class="table table-striped custab">
-	<thead>
-	  <tr>
-            <th>Name</th>
-	    <th>Twitter Name</th>
-            <th>status</th>
-	    <th>#</th>
-	  </tr>
-	</thead>
-	<% @employees.each do |employee| %>
-	  <%= form_tag(admin_authorityedit_path(employee.id), method: "POST") do |f| %>
-	    <tr>
-	      <td><%= employee.name %></td>
-	      <td><%= employee.nickname %></td>
-	      <td>
-		<select class="selectpicker input-small show-tick" name="status">
-		  <% if employee.supervisor? %>
-		    <option value="supervisor" selected>supervisor</option>
-		  <% else %>
-		    <option value="supervisor">supervisor</option>
-		  <% end %>
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Twitter Name</th>
+          <th>status</th>
+          <th>#</th>
+        </tr>
+        </thead>
+        <% @employees.each do |employee| %>
+          <%= form_tag(admin_authorityedit_path(employee.id), method: "POST") do |f| %>
+            <tr>
+              <td><%= employee.name %></td>
+              <td><%= employee.nickname %></td>
+              <td>
+                <select class="selectpicker input-small show-tick" name="status">
+                  <% if employee.supervisor? %>
+                    <option value="supervisor" selected>supervisor</option>
+                  <% else %>
+                    <option value="supervisor">supervisor</option>
+                  <% end %>
 
-		  <% if employee.supervisor_and_boardmember? %>
-		    <option value="supervisor_and_boardmember" selected>supervisor_and_boardmember</option>
-		  <% else %>
-		    <option value="supervisor_and_boardmember">supervisor_and_boardmember</option>
-		  <% end %>
+                  <% if employee.supervisor_and_boardmember? %>
+                    <option value="supervisor_and_boardmember" selected>supervisor_and_boardmember</option>
+                  <% else %>
+                    <option value="supervisor_and_boardmember">supervisor_and_boardmember</option>
+                  <% end %>
 
-		  <% if employee.board_member? %>
-		    <option value="board_member" selected>board_member</option>
-		  <% else %>
-		    <option value="board_member">board_member</option>
-		  <% end %>
+                  <% if employee.board_member? %>
+                    <option value="board_member" selected>board_member</option>
+                  <% else %>
+                    <option value="board_member">board_member</option>
+                  <% end %>
 
-		  <% if employee.branch_manager? %>
-		    <option value="branch_manager" selected>branch_manager</option>
-		  <% else %>
-		    <option value="branch_manager">branch_manager</option>
-		  <% end %>
+                  <% if employee.branch_manager? %>
+                    <option value="branch_manager" selected>branch_manager</option>
+                  <% else %>
+                    <option value="branch_manager">branch_manager</option>
+                  <% end %>
 
-		  <% if employee.candidate? %>
-		    <option value="candidate" selected>candidate</option>
-		  <% else %>
-		    <option value="candidate">candidate</option>
-		  <% end %>
+                  <% if employee.candidate? %>
+                    <option value="candidate" selected>candidate</option>
+                  <% else %>
+                    <option value="candidate">candidate</option>
+                  <% end %>
 
-		  <% if employee.guest? %>
-		    <option value="guest" selected>guest</option>
-		  <% else %>
-		    <option value="guest">guest</option>
-		  <% end %>	      
-		</select>
-	      </td>
+                  <% if employee.guest? %>
+                    <option value="guest" selected>guest</option>
+                  <% else %>
+                    <option value="guest">guest</option>
+                  <% end %>
+                </select>
+              </td>
 
-	      <td>
-		<button class="btn btn-info btn-xs" name="commit" type="submit">
-		  <span class="glyphicon glyphicon-pencil"></span> Edit
-		</button>
-	      </td>
-	      
-	    </tr>
-	  <% end %>
-	<% end %>
+              <td>
+                <button class="btn btn-info btn-xs" name="commit" type="submit">
+                  <span class="glyphicon glyphicon-pencil"></span> Edit
+                </button>
+              </td>
+
+            </tr>
+          <% end %>
+        <% end %>
       </table>
     </div>
-    
+
     <div role="tabpanel" class="tab-pane" id="admincomiketlist">
       <div style="padding: 10px;">
         <%= form_tag(download_all_comiket_path, method: "GET", multipart: false) do |f| %>
@@ -147,72 +150,72 @@
         <% end %>
       </div>
       <h4> <%= @uploader_count %>人がアップロードしています </h4>
-      <%= render 'layouts/comiketlist', locals: {contents: @comiketlist} %>
-    </div>    
+      <%= render 'layouts/comiketlist', locals: { contents: @comiketlist } %>
+    </div>
   </div>
 </div>
 
 <% content_for(:modalform) do %>
   <div class="modal fade" id="newwhitelistuser" tabindex="-1" role="dialog" aria-labelledby="contactLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="panel panel-primary">      
-	<div class="panel-heading">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
           <h4 class="panel-title" id="contactLabel"><span class="glyphicon glyphicon-info-sign"></span> 新しいユーザを追加</h4>
-	</div>
-	
-	<%= form_tag(admin_new_path, method: "POST") do |f| %>
-	  
-          <div class="modal-body" style="padding: 5px;">
-            <div class="row">
-              <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-		<label for="nickname" class="control-label">twitter nickname</label>
-		<input name="nickname" type="text" class="form-control" value="" required />	      
-              </div>
-            </div>	  
-	  </div>	
+        </div>
+
+        <%= form_tag(admin_new_path, method: "POST") do |f| %>
 
           <div class="modal-body" style="padding: 5px;">
             <div class="row">
               <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-		<label for="forstate" class="control-label">ステータス</label>
-		<select class="selectpicker input-small" data-width="85px" name="state">
-		  <option value="accepted" data-content="<span class='label label-success'>許可</span>">許可</option>
-		  <option value="pending" data-content="<span class='label label-warning'>保留</span>">保留</option>
-		  <option value="declined" data-content="<span class='label label-danger'>禁止</span>">禁止</option>
-		</select>
-	      </div>
-	    </div>
-	  </div>
-	  
+                <label for="nickname" class="control-label">twitter nickname</label>
+                <input name="nickname" type="text" class="form-control" value="" required/>
+              </div>
+            </div>
+          </div>
+
           <div class="modal-body" style="padding: 5px;">
             <div class="row">
               <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
-		<label for="fordate" class="control-label">有効期限</label>
-		<input type="text" class="form-control datepicker input-mini" name="date" />
-	      </div>
-	    </div>
-	  </div>
+                <label for="forstate" class="control-label">ステータス</label>
+                <select class="selectpicker input-small" data-width="85px" name="state">
+                  <option value="accepted" data-content="<span class='label label-success'>許可</span>">許可</option>
+                  <option value="pending" data-content="<span class='label label-warning'>保留</span>">保留</option>
+                  <option value="declined" data-content="<span class='label label-danger'>禁止</span>">禁止</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-body" style="padding: 5px;">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+                <label for="fordate" class="control-label">有効期限</label>
+                <input type="text" class="form-control datepicker input-mini" name="date"/>
+              </div>
+            </div>
+          </div>
 
           <div class="modal-body" style="padding: 5px;">
             <div class="row">
               <div class="col-lg-12 col-md-12 col-sm-12">
-		<label for="description" class="control-label">コメント</label>
-		<textarea style="resize:vertical;" name="description" class="form-control" placeholder="このユーザに対してメモしたいことあれば何か" rows="6"></textarea>
+                <label for="description" class="control-label">コメント</label>
+                <textarea style="resize:vertical;" name="description" class="form-control" placeholder="このユーザに対してメモしたいことあれば何か" rows="6"></textarea>
               </div>
             </div>
-	  </div>
+          </div>
 
           <div class="panel-footer" style="margin-bottom:-14px;">
-            <input type="submit" class="btn btn-success" value="Send" />
+            <input type="submit" class="btn btn-success" value="Send"/>
             <!--<span class="glyphicon glyphicon-ok"></span>-->
-            <input type="reset" class="btn btn-danger" value="Clear" />
+            <input type="reset" class="btn btn-danger" value="Clear"/>
             <!--<span class="glyphicon glyphicon-remove"></span>-->
             <button style="float: right;" type="button" class="btn btn-default btn-close" data-dismiss="modal">Close</button>
           </div>
-	  
-	<% end %>
-	
+
+        <% end %>
+
       </div>
     </div>
   </div>
