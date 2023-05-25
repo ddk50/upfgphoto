@@ -50,7 +50,7 @@ gem 'rubyzip', :require => 'zip'
 ## gem 'digest/sha1'
 ## gem 'securerandom'
 
-gem 'rmagick', :require => 'RMagick'
+gem "rmagick"
 
 group :development, :test do
    gem 'rspec-rails'
