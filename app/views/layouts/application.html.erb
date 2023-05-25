@@ -480,7 +480,11 @@
 
           </p>
 
-          <p class="lead"><%= link_to "hello world", "/auth/twitter", method: :post, class: "btn btn-lg btn-info" %></p>
+          <p class="lead">
+            <%= button_to "hello world", "/auth/twitter2",
+                          method: :post,
+                          class: "btn btn-lg btn-info" %>
+          </p>
         </div>
 
         <div class="inner">

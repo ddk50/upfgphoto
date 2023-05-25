@@ -18,7 +18,7 @@ class SessionsController < ApplicationController
     user = User.find_or_create_from_auth_hash(request.env['omniauth.auth'])
     session[:user_id] = user.id
 
-    logger.debug("aaaaaaaaaaaaaaaaaa #{user.description} #{user.name}")
+    logger.warn("An unknown person tried to sign in: #{user.description} #{user.name} #{user.id}")
 
     ##
     ## create an employee instance when logged in
@@ -36,8 +36,6 @@ class SessionsController < ApplicationController
       employee.touch
       employee.save!
     end
-
-    logger.debug("**************************** BACK_URL #{back_to} *********************************")
     
     redirect_to root_path, notice: 'ログインしました'
   end

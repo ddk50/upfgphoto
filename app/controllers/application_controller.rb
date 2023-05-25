@@ -36,7 +36,7 @@ class ApplicationController < ActionController::Base
       if params[:back_to].blank?
         redirect_to root_path, alert: "ログインしてください"
       else
-        redirect_to '/auth/twitter?origin=' + params[:back_to]
+        redirect_to '/auth/twitter2?origin=' + params[:back_to]
       end
     end
   end

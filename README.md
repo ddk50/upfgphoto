@@ -3,8 +3,8 @@
 ### make `prod.envs` file into the root of project
 
 ```
-TWITTER_API_KEY=<your key>
-TWITTER_API_SECRET=<your secret>
+TWITTER_CLIENT_ID=<your client id>
+TWITTER_CLIENT_SECRET=<your client secret>
 DISCORD_HOOK_URL=<your discord webhook URL>
 SECRET_KEY_BASE=<bundle exec rake secret>
 ```

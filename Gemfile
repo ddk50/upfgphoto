@@ -39,8 +39,7 @@ gem 'puma'
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'omniauth'
-gem 'omniauth-twitter'
+gem 'omniauth-twitter2'
 gem 'omniauth-rails_csrf_protection'
 
 gem 'exifr'
