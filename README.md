@@ -1,38 +1,27 @@
-## README
+# uprun (upfgphoto v2)
 
-### make `prod.envs` file into the root of project
+写真共有サービス upfgphoto のフルリプレイス。モノレポ構成。
 
-```
-TWITTER_CLIENT_ID=<your client id>
-TWITTER_CLIENT_SECRET=<your client secret>
-DISCORD_HOOK_URL=<your discord webhook URL>
-SECRET_KEY_BASE=<bundle exec rake secret>
-```
+- 旧システム（jQuery + Rails, 2013〜）は **`legacy` ブランチ / タグ `legacy-final`** に凍結
+- 設計判断はすべて [docs/ADR.md](docs/ADR.md) に記録（ADR-001〜020）
 
-### run for production
+## 構成
 
-```
-$ start_prod.sh
-$ docker-compose exec uprun_puma bundle exec rake db:seed
-```
+| ディレクトリ | 内容 |
+|---|---|
+| `frontend/` | React 19 + TypeScript + Vite + Tailwind v4 + shadcn/ui。UIモックとして開発され、API 接続版へ発展中 |
+| `backend/` | Rails（最新）+ SQLite + ActiveStorage。API サーバ（構築中） |
+| `docs/` | ADR（アーキテクチャ決定記録）ほか |
 
-### logs
-puma log
+## 開発
 
-```
-$ tails -f log/production.log
-```
-
-### run for development
-
-```
-$ bunlde install
-$ bundle exec rails s
+```bash
+# frontend
+cd frontend
+npm install
+npm run dev      # http://localhost:5173/
+npm test         # vitest（アクセス制御の仕様表テスト等）
+npm run build    # tsc + vite build
 ```
 
-### misc
-clear docker-compose files
-
-```
-docker-compose down --rmi all --volumes --remove-orphans
-```
+backend のセットアップは構築後に追記。
