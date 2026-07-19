@@ -15,11 +15,15 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": BACKEND,
-      "/auth": BACKEND,
-      "/logout": BACKEND,
-      "/dev": BACKEND,
-      "/rails": BACKEND,
+      // 文字列短縮形は changeOrigin: true (Host を :3000 に書き換え) になり、
+      // Rails の CSRF Origin チェック (Origin ヘッダ vs base_url) が落ちる。
+      // Host を保存して Rails に「自分は localhost:5173」と見せることで、
+      // Origin 検証と OAuth コールバック URL の生成を :5173 基準に揃える
+      "/api": { target: BACKEND },
+      "/auth": { target: BACKEND },
+      "/logout": { target: BACKEND },
+      "/dev": { target: BACKEND },
+      "/rails": { target: BACKEND },
     },
   },
 })

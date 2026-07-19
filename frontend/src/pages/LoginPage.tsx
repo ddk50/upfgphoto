@@ -1,14 +1,35 @@
-import { useState } from "react"
+import { useRef, useState, type FormEvent } from "react"
 import { toast } from "sonner"
-import { LogIn, ShieldAlert } from "lucide-react"
+import { LoaderCircle, LogIn, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "@/contexts/SessionContext"
+import { api } from "@/lib/api"
 
 export function LoginPage() {
-  const { csrf, devLogin } = useSession()
+  const { devLogin } = useSession()
   const [devUserId, setDevUserId] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const tokenRef = useRef<HTMLInputElement>(null)
   const loginError = new URLSearchParams(window.location.search).get("login")
+
+  // CSRF トークンは押下時に取り直す。起動時の並行 me フェッチ (StrictMode の二重実行等) で
+  // セッション Cookie とページロード時のトークンが別セッションになり得るため、
+  // Cookie が確定したこの時点で現セッションのトークンを取得してから POST する
+  const handleGoogleLogin = async (e: FormEvent) => {
+    e.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    try {
+      const me = await api.me()
+      if (tokenRef.current) tokenRef.current.value = me.csrf
+      formRef.current?.submit() // ネイティブ submit は onSubmit を再発火しない
+    } catch {
+      setSubmitting(false)
+      toast.error("サーバに接続できません。しばらくして再度お試しください。")
+    }
+  }
 
   const handleDevLogin = async () => {
     const id = Number(devUserId)
@@ -42,10 +63,10 @@ export function LoginPage() {
         )}
 
         <div className="rounded-2xl border bg-card p-6 space-y-4">
-          <form method="post" action="/auth/google_oauth2">
-            <input type="hidden" name="authenticity_token" value={csrf} />
-            <Button type="submit" className="w-full" size="lg">
-              <LogIn className="size-4" />
+          <form ref={formRef} method="post" action="/auth/google_oauth2" onSubmit={handleGoogleLogin}>
+            <input ref={tokenRef} type="hidden" name="authenticity_token" />
+            <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+              {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <LogIn className="size-4" />}
               Google でログイン
             </Button>
           </form>
