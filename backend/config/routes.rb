@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   delete "/logout", to: "sessions#destroy"
   post "/dev/login", to: "sessions#dev_login" if Rails.env.development?
 
+  # 共有リンクの HTML 配信 (OGP 焼き込み)。SPA 本体は本番では public/index.html
+  get "/g/:token(/*sub)", to: "share_pages#show", format: false
+
   namespace :api do
     namespace :v1 do
       get "me", to: "me#show"
