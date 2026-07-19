@@ -11,6 +11,7 @@ module RendersPhotos
     {
       id: photo.id,
       title: photo.title,
+      description: photo.description,
       folder_path: photo.folder_path,
       file_name: photo.file_name,
       path: photo.path,

@@ -161,6 +161,7 @@ module Etl
           folder_path: path,
           file_name: "#{p['id']}.jpg",
           title: presence(p["caption"]) || "#{p['id']}.jpg",
+          description: presence(p["description"]),
           taken_at: presence(p["shotdate"]) || p["created_at"],
           exif: build_exif(p),
           created_at: p["created_at"], updated_at: p["updated_at"]

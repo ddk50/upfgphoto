@@ -40,6 +40,7 @@ module Api
           {
             id: photo.id,
             title: photo.title,
+            description: photo.description,
             file_name: photo.file_name,
             taken_at: photo.taken_at,
             urls: photo_urls(photo)

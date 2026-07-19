@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_160001) do
   create_table "access_rule_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "access_rule_id", null: false
     t.datetime "created_at", null: false
@@ -80,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
   create_table "photos", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
+    t.text "description"
     t.json "exif"
     t.string "file_name", null: false
     t.string "folder_path", null: false, collation: "utf8mb4_bin"
