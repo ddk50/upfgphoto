@@ -12,6 +12,13 @@
 3. ETL レポートの nickname 不整合5件 (46malonu, celeron1ghz, c5vecco, MooncraftShiden, Akiba_univ) の expires_at 手動判断
 4. ステージングのサーバ設置場所は未定 (構成コードは staging 環境として準備済み)
 
+**本番切替後に回すと決めたもの**:
+- **フォルダの階層移動**（`/a/b/c` → `/x/y/c`）。リネーム（ADR-023, `FolderRenamer`）は実装済みだが移動は意図的にスコープ外。機構は同じ「folder_path 接頭辞の前置換」で済む一方、権限設計が別物なので実装時は以下に注意:
+  - 移動は**アクセス制御の継承コンテキストが変わる**（リネームは変わらない）。持ち出し方向の漏洩は移動元の `can_edit_access?`（ADR-019 隷属）が自動で防ぐが、**持ち込み方向**（自分のフォルダを他人の restricted 配下へ）は隷属に入る旨の確認 UI を出すこと
+  - 移動先の親にも編集権を要求する（対称性）。**自己子孫への移動（循環）の禁止**は新規バリデーションが必要
+  - 移動先の未実体化中間パスは移動者を first-creator 登録（`register_first_creator!` と同じ扱い）。同名衝突は 409 で拒否（リネームと同じ）
+  - 決定時は ADR-024 として記録し、`folder_renamer_spec` のスナップショット突合ヘルパー（`spec/support/snapshot_helpers.rb`）でホワイトボックス検証を書くこと
+
 **ローカル開発の起動**: README.md 参照。dev ログインは画面の「開発用ログイン」に user id (1=admin tatarou1986)。MySQL は `backend/compose.yaml` (docker)。旧DB/写真原本は `~/repos/upfgphoto` (legacy ブランチ・凍結)。
 
 ## 最重要ドキュメント
