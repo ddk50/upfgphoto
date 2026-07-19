@@ -102,6 +102,7 @@ GEM
     drb (2.2.3)
     erb (6.0.5)
     erubi (1.13.1)
+    exifr (1.5.1)
     faraday (2.14.3)
       faraday-net_http (>= 2.0, < 3.5)
       json
@@ -389,6 +390,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   debug
+  exifr (~> 1.5)
   image_processing (~> 1.2)
   importmap-rails
   omniauth-google-oauth2 (~> 1.2)
@@ -435,6 +437,7 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.5) sha256=858e63488cb796c9daba8b6e9ff4b3879c395022049be9a66a8e00980e612eac
   erubi (1.13.1) sha256=a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9
+  exifr (1.5.1) sha256=ad87a5dbc92946fbf1d8ccd178d557d95d9168e8b3c5c5f381ea2bffcc312521
   faraday (2.14.3) sha256=1882247e6766615c8220b4392bf1d27f6ebb63d8e28267587cef1fb0bf37f278
   faraday-net_http (3.4.4) sha256=0e78af151747ed1b00f33e25973b4bc220d7f16c00c39676817c8b12331eb588
   ffi (1.17.4-aarch64-linux-gnu) sha256=b208f06f91ffd8f5e1193da3cae3d2ccfc27fc36fba577baf698d26d91c080df

@@ -71,7 +71,7 @@ RSpec.describe "admin 承認・紐付けフロー (ADR-020)" do
       login_as(admin)
       post "/api/v1/admin/pending_users/#{pending.id}/link",
            params: { target_user_id: legacy.id }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(User.exists?(pending.id)).to be true
     end
   end
