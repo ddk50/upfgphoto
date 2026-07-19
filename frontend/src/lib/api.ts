@@ -363,7 +363,14 @@ export const api = {
   },
 
   async logout(): Promise<void> {
-    await fetch("/logout", { method: "DELETE", credentials: "same-origin" })
+    // DELETE /logout は CSRF 保護下にあるので、現セッションのトークンを取得して送る
+    const me = await req<Me>("/api/v1/me")
+    const res = await fetch("/logout", {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { "X-CSRF-Token": me.csrf },
+    })
+    if (!res.ok) throw new ApiError(res.status)
   },
 
   async folder(path: string): Promise<FolderView> {
