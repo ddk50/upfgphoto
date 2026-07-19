@@ -26,6 +26,55 @@ RSpec.describe "写真 API" do
       expect(Photo.last.tags.map(&:name)).to eq([ "夏" ])
     end
 
+    describe "タグ付きアップロード" do
+      it "複数ファイル×複数タグで、全ファイルに全タグが付く" do
+        login_as(a)
+        post "/api/v1/photos",
+             params: { files: [ fake_jpg("1.jpg"), fake_jpg("2.jpg") ],
+                       folder_path: "/夏祭り", tags: [ "夏", "花火" ] }
+
+        expect(response).to have_http_status(:created)
+        expect(Photo.count).to eq(2)
+        Photo.find_each do |p|
+          expect(p.tags.map(&:name)).to contain_exactly("夏", "花火")
+        end
+        expect(response.parsed_body["photos"].map { |p| p["tags"] })
+          .to all(contain_exactly("夏", "花火"))
+      end
+
+      it "既存タグは再利用され、Tag 行が重複しない" do
+        existing = Tag.create!(name: "夏")
+
+        login_as(a)
+        post "/api/v1/photos",
+             params: { files: [ fake_jpg ], folder_path: "/x", tags: [ "夏", "新緑" ] }
+
+        expect(Tag.where(name: "夏").sole.id).to eq(existing.id)
+        expect(Tag.pluck(:name)).to contain_exactly("夏", "新緑")
+        expect(Photo.last.tags.map(&:name)).to contain_exactly("夏", "新緑")
+      end
+
+      it "前後空白は strip され、空要素・重複は除去される" do
+        login_as(a)
+        post "/api/v1/photos",
+             params: { files: [ fake_jpg ], folder_path: "/x",
+                       tags: [ " 夏 ", "夏", "", "  ", "花火" ] }
+
+        expect(Tag.pluck(:name)).to contain_exactly("夏", "花火")
+        expect(Photo.last.taggings.count).to eq(2)
+      end
+
+      it "アップロードしたタグは GET /api/v1/tags の件数に反映される (サジェストの源泉)" do
+        login_as(a)
+        post "/api/v1/photos",
+             params: { files: [ fake_jpg("1.jpg"), fake_jpg("2.jpg") ],
+                       folder_path: "/x", tags: [ "夏" ] }
+
+        get "/api/v1/tags"
+        expect(response.parsed_body["tags"]).to include("name" => "夏", "count" => 2)
+      end
+    end
+
     it "既存パス（他人が実体化済み）の所有権は主張しない" do
       Photo.create!(user: b, folder_path: "/既存", file_name: "0.jpg", title: "0",
                     taken_at: Time.current)

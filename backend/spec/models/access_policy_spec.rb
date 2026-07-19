@@ -136,9 +136,40 @@ RSpec.describe AccessPolicy do
       expect(blocker[:owner]).to eq(b)
     end
 
+    it "他人の restricted が複数重なるときは根に最も近いものが源泉になる" do
+      # A から見ると /nested (B) と /nested/inner (C) の両方が他人の restricted
+      blocker = described_class.edit_blocker("/nested/inner/leaf", a)
+      expect(blocker[:folder_path]).to eq("/nested")
+      expect(blocker[:owner]).to eq(b)
+    end
+
+    it "『根に最も近い他人の restricted』であって『根に最も近い restricted』ではない" do
+      # B にとって根側の /nested は自分のゾーンなので源泉にならず、深い側の C の /nested/inner が源泉
+      blocker = described_class.edit_blocker("/nested/inner/leaf", b)
+      expect(blocker[:folder_path]).to eq("/nested/inner")
+      expect(blocker[:owner]).to eq(c)
+    end
+
+    it "途中に自分の restricted が挟まっていても、他人の源泉だけが報告される" do
+      # C にとって /nested/inner は自分のゾーン。源泉は根側の /nested (B) になる
+      blocker = described_class.edit_blocker("/nested/inner/leaf", c)
+      expect(blocker[:folder_path]).to eq("/nested")
+      expect(blocker[:owner]).to eq(b)
+    end
+
+    it "restricted が全く存在しないパスでは nil（他人のフォルダで編集不可でも、隷属ロックではない）" do
+      expect(described_class.edit_blocker("/plain-b", a)).to be_nil # can_edit_access? は false だが blocker は nil
+      expect(described_class.edit_blocker("/plain-a", a)).to be_nil
+      expect(described_class.edit_blocker("/", a)).to be_nil
+    end
+
     it "ロックされていなければ nil" do
       expect(described_class.edit_blocker("/mine/sub", a)).to be_nil
       expect(described_class.edit_blocker("/plain-b", admin)).to be_nil
+    end
+
+    it "admin は隷属ネストの最深部でも nil (ロックされない)" do
+      expect(described_class.edit_blocker("/nested/inner/leaf", admin)).to be_nil
     end
   end
 end

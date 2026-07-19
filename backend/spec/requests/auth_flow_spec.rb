@@ -87,4 +87,24 @@ RSpec.describe "Google 認証フロー" do
       expect(response.parsed_body).to include("status" => "anonymous")
     end
   end
+
+  describe "開発用ログイン (dev バックドア)" do
+    it "development 以外ではルートごと存在しない (test 環境も非 development 側で 404)" do
+      User.create!(name: "花", nickname: "hana", role: "admin", status: "approved")
+
+      post "/dev/login", params: { user_id: User.last.id }
+      expect(response).to have_http_status(:not_found)
+
+      # ログイン状態にもなっていない
+      get "/api/v1/me"
+      expect(response.parsed_body).to include("status" => "anonymous")
+    end
+
+    it "アクション自体にも development ガードがある (ルートが誤って露出しても 404)" do
+      # routes.rb の分岐が万一外れた場合の多層防御 (sessions_controller#dev_login) を直接検証
+      controller = SessionsController.new
+      expect(Rails.env.development?).to be false
+      expect { controller.dev_login }.to raise_error(ActionController::RoutingError)
+    end
+  end
 end

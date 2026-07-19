@@ -93,5 +93,28 @@ RSpec.describe "ゴミ箱 (論理削除, ADR-022)" do
       expect(ActiveStorage::Blob.where(filename: "old.jpg")).to be_empty
       expect(photo.reload.image).to be_attached # ゴミ箱外は無傷
     end
+
+    it "期限切れゴミ箱写真 (と、そのタグ関連) 以外は全テーブル・全カラム無変更 (ホワイトボックス)" do
+      tag = Tag.create!(name: "思い出")
+      old_photo = Photo.create!(user: a, folder_path: "/x", file_name: "old.jpg", title: "old",
+                                taken_at: Time.current, deleted_at: 31.days.ago)
+      old_photo.taggings.create!(tag: tag)
+      recent = Photo.create!(user: a, folder_path: "/x", file_name: "r.jpg", title: "r",
+                             taken_at: Time.current, deleted_at: 1.day.ago)
+      recent.taggings.create!(tag: tag)
+      photo.taggings.create!(tag: tag)
+
+      before_state = snapshot
+      Rake::Task["trash:purge"].execute
+
+      # 期待値 = 事前状態から「期限切れ写真の行」と「その taggings」だけを除いたもの。
+      # kept 写真・期限内ゴミ箱・タグ本体・ユーザ等は 1 カラムも変わらない
+      expected = before_state.merge(
+        Photo => before_state[Photo].reject { |r| r["id"] == old_photo.id },
+        Tagging => before_state[Tagging].reject { |r| r["photo_id"] == old_photo.id }
+      )
+      expect(snapshot).to eq(expected)
+      expect(Tag.exists?(tag.id)).to be true # タグ本体は他の写真が使っているので残る
+    end
   end
 end
