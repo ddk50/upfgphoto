@@ -172,6 +172,8 @@ export function FolderPage({ path }: { path?: string } = {}) {
           <div className="flex items-center gap-2">
             <PhotoViewToggle view={photoView} onChange={setPhotoView} />
             <CreateFolderButton parentPath={folderPath} />
+            {/* ルートの公開設定は変更不可 (API も 422 で弾く) のでボタン自体を出さない */}
+            {folderPath !== "/" && (
             <AccessButton
               canEdit={view.canEditAccess}
               isAdminEditingOthers={isAdmin && !view.isOwner}
@@ -182,6 +184,7 @@ export function FolderPage({ path }: { path?: string } = {}) {
               }
               onClick={() => setAccessDialogOpen(true)}
             />
+            )}
           </div>
         </div>
       </header>

@@ -5,10 +5,14 @@
 class AccessRuleUpdater
   class Forbidden < StandardError; end
   class InvalidMode < StandardError; end
+  # ArgumentError 継承でコントローラの既存 rescue (422 + message) に乗る
+  class InvalidTarget < ArgumentError; end
 
   MODES = %w[inherit everyone restricted guest].freeze
 
   def self.apply!(folder_path:, mode:, actor:, member_ids: [], clear_descendants: false)
+    # ルートは常に everyone (全ルールの継承の起点)。admin でも変更不可
+    raise InvalidTarget, "ルートの公開設定は変更できません" if folder_path == "/"
     raise InvalidMode, mode unless MODES.include?(mode)
     raise Forbidden unless AccessPolicy.can_edit_access?(folder_path, actor)
 

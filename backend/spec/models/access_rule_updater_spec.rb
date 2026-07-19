@@ -36,6 +36,22 @@ RSpec.describe AccessRuleUpdater do
     guest_rule!("/a/b/cX", a)
   end
 
+  describe "ルート (/) の保護" do
+    it "admin でもルートには一切のルールを設定できない (clear_descendants 併用も不可)" do
+      %w[everyone restricted guest inherit].each do |mode|
+        expect {
+          described_class.apply!(folder_path: "/", mode: mode, actor: admin)
+        }.to raise_error(described_class::InvalidTarget)
+      end
+
+      expect {
+        described_class.apply!(folder_path: "/", mode: "inherit", actor: admin,
+                               clear_descendants: true)
+      }.to raise_error(described_class::InvalidTarget)
+      expect(AccessRule.count).to eq(4) # 既存ルールが巻き添えで消えていない
+    end
+  end
+
   describe "パス途中への clear_descendants" do
     it "/a/b/c 配下の子孫ルールだけ消え、並走サブツリー・接頭辞兄弟は全カラム無変更" do
       before_state = snapshot

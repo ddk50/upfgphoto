@@ -11,6 +11,16 @@ RSpec.describe "PUT /api/v1/access_rules (台帳連動, ADR-013/018/019)" do
     FolderOwner.create!(folder_path: "/album", user: a)
   end
 
+  it "ルート (/) は admin でも 422 で拒否される" do
+    login_as(admin)
+    put "/api/v1/access_rules", params: { path: "/", mode: "guest" }
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.parsed_body["error"]).to include("ルートの公開設定は変更できません")
+    expect(AccessRule.find_by(folder_path: "/")).to be_nil
+    expect(ShareLink.count).to eq(0)
+  end
+
   it "guest 化で share_link が発行され、解除で manual 停止が台帳に残る" do
     login_as(a)
     put "/api/v1/access_rules", params: { path: "/album", mode: "guest" }
