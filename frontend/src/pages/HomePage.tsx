@@ -1,21 +1,31 @@
-import { useMemo } from "react"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
+import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
 import { FolderGrid } from "@/components/folder/FolderGrid"
 import { CreateFolderButton } from "@/components/folder/CreateFolderButton"
 import { SearchBar } from "@/components/search/SearchBar"
 import { SuggestedTagChips } from "@/components/search/SuggestedTagChips"
-import { summarizeTags } from "@/lib/search"
+import { api, type FolderView } from "@/lib/api"
+import type { TagSummary } from "@/types"
 
 export function HomePage() {
-  const { tree, photos } = usePhotoLibrary()
-  const popularTags = useMemo(() => summarizeTags(photos), [photos])
+  const [view, setView] = useState<FolderView | null>(null)
+  const [tags, setTags] = useState<TagSummary[]>([])
+
+  useEffect(() => {
+    void api.folder("/").then(setView).catch(() => setView(null))
+    void api.tags().then(setTags).catch(() => setTags([]))
+  }, [])
+
+  const totalPhotos = view
+    ? view.folders.reduce((sum, f) => sum + f.descendantPhotoCount, 0) + view.photos.length
+    : 0
 
   return (
     <div className="space-y-10">
       <section className="space-y-4">
         <div className="mx-auto max-w-2xl space-y-4">
           <SearchBar size="lg" />
-          <SuggestedTagChips tags={popularTags} max={10} />
+          <SuggestedTagChips tags={tags} max={10} />
         </div>
       </section>
 
@@ -24,13 +34,19 @@ export function HomePage() {
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">ライブラリ</h1>
             <p className="text-sm text-muted-foreground">
-              {tree.descendantPhotoCount} 枚の写真 ・ {tree.children.length} フォルダ
+              {view ? `${totalPhotos} 枚の写真 ・ ${view.folders.length} フォルダ` : " "}
             </p>
           </div>
           <CreateFolderButton parentPath="/" />
         </header>
 
-        <FolderGrid folders={tree.children} />
+        {view ? (
+          <FolderGrid folders={view.folders} info={view.childInfo} />
+        ) : (
+          <div className="flex justify-center py-16 text-muted-foreground">
+            <Loader2 className="size-6 animate-spin" />
+          </div>
+        )}
       </section>
     </div>
   )

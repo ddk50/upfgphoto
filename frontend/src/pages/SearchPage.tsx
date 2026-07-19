@@ -1,29 +1,19 @@
 import { useEffect, useMemo, useState } from "react"
-import { Navigate, useSearchParams } from "react-router-dom"
-import { Link2, Search, Tag, User as UserIcon, X } from "lucide-react"
+import { useSearchParams } from "react-router-dom"
+import { Loader2, Search, Tag, User as UserIcon, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { FolderGrid } from "@/components/folder/FolderGrid"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
-import {
-  parseTagsParam,
-  searchFolders,
-  searchPhotos,
-  serializeTagsParam,
-  summarizeTags,
-} from "@/lib/search"
+import { api, type SearchResult } from "@/lib/api"
+import { parseTagsParam, serializeTagsParam } from "@/lib/search"
+import type { TagSummary } from "@/types"
 import { cn } from "@/lib/utils"
 
 export function SearchPage() {
-  const { photos, tree, viewAsRole, getPhotoEffectiveAccess, isMyPhoto } = usePhotoLibrary()
   const [searchParams, setSearchParams] = useSearchParams()
-
-  if (viewAsRole === "guest") {
-    return <Navigate to="/" replace />
-  }
   const query = searchParams.get("q") ?? ""
   const selected = parseTagsParam(searchParams.get("tags"))
   const ownedFilter = searchParams.get("owned") === "me"
@@ -31,12 +21,43 @@ export function SearchPage() {
   const [queryDraft, setQueryDraft] = useState(query)
   const [tagFilter, setTagFilter] = useState("")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [allTags, setAllTags] = useState<TagSummary[]>([])
+  const [result, setResult] = useState<SearchResult | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setQueryDraft(query)
   }, [query])
 
-  const allTags = useMemo(() => summarizeTags(photos), [photos])
+  useEffect(() => {
+    void api.tags().then(setAllTags).catch(() => setAllTags([]))
+  }, [])
+
+  const hasFilter = query.length > 0 || selected.length > 0
+
+  useEffect(() => {
+    if (!hasFilter && !ownedFilter) {
+      setResult(null)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    void api
+      .search({ q: query, tags: selected, owned: ownedFilter })
+      .then((r) => {
+        if (!cancelled) setResult(r)
+      })
+      .catch(() => {
+        if (!cancelled) setResult({ folders: [], photos: [] })
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, searchParams.get("tags"), ownedFilter])
 
   const visibleTags = useMemo(() => {
     if (!tagFilter.trim()) return allTags
@@ -44,26 +65,10 @@ export function SearchPage() {
     return allTags.filter((tag) => tag.name.toLowerCase().includes(t))
   }, [allTags, tagFilter])
 
-  const rawResults = useMemo(
-    () => searchPhotos(photos, { query, tags: selected }),
-    [photos, query, selected],
-  )
-
-  const matchedFolders = useMemo(() => searchFolders(tree, query), [tree, query])
-
-  const mineCount = useMemo(() => rawResults.filter((p) => isMyPhoto(p)).length, [rawResults, isMyPhoto])
-  const othersCount = rawResults.length - mineCount
-
-  const results = useMemo(
-    () => (ownedFilter ? rawResults.filter((p) => isMyPhoto(p)) : rawResults),
-    [rawResults, ownedFilter, isMyPhoto],
-  )
-
-  const sharedCount = useMemo(
-    () =>
-      results.filter((p) => getPhotoEffectiveAccess(p.path).mode === "guest").length,
-    [results, getPhotoEffectiveAccess],
-  )
+  const photos = result?.photos ?? []
+  const matchedFolders = result?.folders ?? []
+  const mineCount = useMemo(() => photos.filter((p) => p.isMine).length, [photos])
+  const othersCount = photos.length - mineCount
 
   const updateParams = (next: { q?: string; tags?: string[]; owned?: boolean }) => {
     const params = new URLSearchParams(searchParams)
@@ -83,21 +88,16 @@ export function SearchPage() {
     setLightboxIndex(null)
   }
 
-  const toggleOwned = () => updateParams({ owned: !ownedFilter })
-
   const submitQuery = () => updateParams({ q: queryDraft.trim() })
-
+  const toggleOwned = () => updateParams({ owned: !ownedFilter })
   const toggleTag = (tag: string) => {
     if (selected.includes(tag)) updateParams({ tags: selected.filter((t) => t !== tag) })
     else updateParams({ tags: [...selected, tag] })
   }
-
   const clearAll = () => {
     setQueryDraft("")
     updateParams({ q: "", tags: [], owned: false })
   }
-
-  const hasFilter = query.length > 0 || selected.length > 0
 
   return (
     <div className="space-y-8">
@@ -178,7 +178,7 @@ export function SearchPage() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {visibleTags.map((t) => {
+            {visibleTags.slice(0, 40).map((t) => {
               const active = selected.includes(t.name)
               return (
                 <button
@@ -213,7 +213,13 @@ export function SearchPage() {
 
       <Separator />
 
-      {matchedFolders.length > 0 && (
+      {loading && (
+        <div className="flex justify-center py-8 text-muted-foreground">
+          <Loader2 className="size-5 animate-spin" />
+        </div>
+      )}
+
+      {!loading && matchedFolders.length > 0 && (
         <section className="space-y-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">フォルダ</h2>
@@ -223,61 +229,46 @@ export function SearchPage() {
         </section>
       )}
 
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
-          <p className="text-xs text-muted-foreground tabular-nums">
-            自分 {mineCount}枚 ・ 他 {othersCount}枚
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleOwned}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
-              ownedFilter
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card hover:border-foreground/30 hover:bg-muted",
-            )}
-          >
-            <UserIcon className="size-3.5" />
-            自分のだけ
-          </button>
-          {ownedFilter && (
-            <span className="text-xs text-muted-foreground">{results.length}枚を表示中</span>
-          )}
-        </div>
-        {sharedCount > 0 && (
-          <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs text-blue-900">
-            <Link2 className="mt-0.5 size-3.5 shrink-0" />
-            <span>
-              結果には <span className="font-semibold">限定公開リンクで共有中</span> の写真が {sharedCount} 枚含まれています。
-              該当の写真には右上に <Link2 className="inline size-3 align-text-bottom" /> アイコンが付きます。
-            </span>
+      {!loading && (
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              自分 {mineCount}枚 ・ 他 {othersCount}枚
+            </p>
           </div>
-        )}
-        {results.length > 0 ? (
-          <PhotoGrid
-            photos={results}
-            onSelect={(_p, i) => setLightboxIndex(i)}
-            showShareIndicators
-            showUploaderBadges
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {hasFilter || ownedFilter
-              ? matchedFolders.length > 0
-                ? "写真の直接マッチはありません。上のフォルダの中を見てみてください。"
-                : "条件に一致する写真がありません。フィルタを減らしてみてください。"
-              : "検索ワードかキーワードを選ぶと結果が表示されます。"}
-          </p>
-        )}
-      </section>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleOwned}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                ownedFilter
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:border-foreground/30 hover:bg-muted",
+              )}
+            >
+              <UserIcon className="size-3.5" />
+              自分のだけ
+            </button>
+          </div>
+          {photos.length > 0 ? (
+            <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {hasFilter || ownedFilter
+                ? matchedFolders.length > 0
+                  ? "写真の直接マッチはありません。上のフォルダの中を見てみてください。"
+                  : "条件に一致する写真がありません。フィルタを減らしてみてください。"
+                : "検索ワードかキーワードを選ぶと結果が表示されます。"}
+            </p>
+          )}
+        </section>
+      )}
 
-      {lightboxIndex !== null && results[lightboxIndex] && (
+      {lightboxIndex !== null && photos[lightboxIndex] && (
         <Lightbox
-          photos={results}
+          photos={photos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}

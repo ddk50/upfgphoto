@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get "/auth/:provider/callback", to: "sessions#create"
   get "/auth/failure", to: "sessions#failure"
   delete "/logout", to: "sessions#destroy"
+  post "/dev/login", to: "sessions#dev_login" if Rails.env.development?
 
   namespace :api do
     namespace :v1 do

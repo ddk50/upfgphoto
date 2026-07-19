@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { ChevronRight, ImageUp, Link2, ShieldAlert, X } from "lucide-react"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
+import { ChevronRight, ImageUp, Link2, Loader2, ShieldAlert, X } from "lucide-react"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { Separator } from "@/components/ui/separator"
@@ -21,32 +20,35 @@ import {
   UploadPreviewList,
   type PreviewItem,
 } from "@/components/upload/UploadPreviewList"
-import { GUEST_UPLOADER_ID } from "@/mocks/users"
+import { api, PLACEHOLDER_IMAGE, type GuestFolderView } from "@/lib/api"
 import type { Photo } from "@/types"
-import { joinPath, splitPath } from "@/lib/path"
 
 export function GuestFolderPage() {
   const { token } = useParams()
   const splat = useParams()["*"] ?? ""
   const [searchParams, setSearchParams] = useSearchParams()
-  const {
-    tokenToFolderPath,
-    findNode,
-    addPhotos,
-    accessRules,
-  } = usePhotoLibrary()
-
-  const rootFolderPath = token ? tokenToFolderPath.get(token) : undefined
-  const folderPath = useMemo(() => {
-    if (!rootFolderPath) return null
-    const rootParts = splitPath(rootFolderPath)
-    const subParts = splitPath(splat)
-    return joinPath([...rootParts, ...subParts])
-  }, [rootFolderPath, splat])
-
-  const node = folderPath ? findNode(folderPath) : null
-  const photos = useMemo(() => node?.photos ?? [], [node])
+  const [view, setView] = useState<GuestFolderView | null>(null)
+  const [status, setStatus] = useState<"loading" | "ok" | "invalid">("loading")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const load = useCallback(async () => {
+    if (!token) {
+      setStatus("invalid")
+      return
+    }
+    try {
+      setView(await api.guestFolder(token, splat))
+      setStatus("ok")
+    } catch {
+      setView(null)
+      setStatus("invalid")
+    }
+  }, [token, splat])
+
+  useEffect(() => {
+    setStatus("loading")
+    void load()
+  }, [load])
 
   const isUploadModalOpen = searchParams.get("upload") === "1"
   const openUpload = () => {
@@ -60,7 +62,15 @@ export function GuestFolderPage() {
     setSearchParams(params)
   }
 
-  if (!token || !rootFolderPath || !folderPath || !node) {
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center py-24 text-muted-foreground">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    )
+  }
+
+  if (status === "invalid" || !view || !token) {
     return (
       <div className="mx-auto max-w-md rounded-2xl border bg-card p-8 text-center">
         <ShieldAlert className="mx-auto size-10 text-muted-foreground" />
@@ -72,22 +82,18 @@ export function GuestFolderPage() {
     )
   }
 
-  // breadcrumb: 共有ルート / sub1 / sub2 ...
-  const subParts = splitPath(splat)
+  const subParts = view.sub ? view.sub.split("/") : []
   const breadcrumb = [
-    { label: "共有ルート", to: `/g/${token}`, name: rootFolderPath },
+    { label: "共有ルート", to: `/g/${token}` },
     ...subParts.map((part, i) => ({
       label: part,
       to: `/g/${token}/${subParts.slice(0, i + 1).join("/")}`,
-      name: joinPath([...splitPath(rootFolderPath), ...subParts.slice(0, i + 1)]),
     })),
   ]
   const isAtRoot = subParts.length === 0
-  const accessSource = accessRules[rootFolderPath]
-  const shareToken = accessSource?.mode === "guest" ? accessSource.shareToken : token
-
-  const hasChildren = node.children.length > 0
-  const hasPhotos = photos.length > 0
+  const hasChildren = view.folders.length > 0
+  const hasPhotos = view.photos.length > 0
+  const totalCount = view.photos.length + view.folders.reduce((s, f) => s + f.photoCount, 0)
 
   return (
     <div className="space-y-8">
@@ -119,8 +125,8 @@ export function GuestFolderPage() {
               <p className="font-medium">このフォルダはリンクを知っている全員が閲覧・アップロード可能です</p>
               <p className="text-xs text-blue-800/80">
                 {isAtRoot
-                  ? <>共有ルート: <span className="font-mono">{rootFolderPath}</span></>
-                  : <>共有ルート <span className="font-mono">{rootFolderPath}</span> 配下のサブフォルダです</>}
+                  ? <>共有フォルダ: <span className="font-mono">{view.rootName}</span></>
+                  : <>共有フォルダ <span className="font-mono">{view.rootName}</span> 配下のサブフォルダです</>}
               </p>
             </div>
           </div>
@@ -128,8 +134,10 @@ export function GuestFolderPage() {
 
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{node.name || "共有フォルダ"}</h1>
-            <p className="text-sm text-muted-foreground">{node.descendantPhotoCount} 枚の写真</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              {view.name || "共有フォルダ"}
+            </h1>
+            <p className="text-sm text-muted-foreground">{totalCount} 枚の写真</p>
           </div>
           <Button onClick={openUpload}>
             <ImageUp className="size-4" />
@@ -142,24 +150,28 @@ export function GuestFolderPage() {
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">サブフォルダ</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-            {node.children.map((child) => {
-              const childSplat = [...subParts, child.name].join("/")
-              return (
-                <Link
-                  key={child.path}
-                  to={`/g/${token}/${childSplat}`}
-                  className="group flex flex-col gap-2 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <FolderCoverStack coverPhoto={child.coverPhoto} name={child.name} />
-                  <div className="flex items-baseline justify-between px-1 text-sm">
-                    <span className="truncate font-medium">{child.name}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {child.descendantPhotoCount}
-                    </span>
-                  </div>
-                </Link>
-              )
-            })}
+            {view.folders.map((child) => (
+              <Link
+                key={child.sub}
+                to={`/g/${token}/${child.sub}`}
+                className="group flex flex-col gap-2 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <FolderCoverStack
+                  coverPhoto={
+                    child.coverUrl
+                      ? coverPhotoOf(child.sub, child.name, child.coverUrl)
+                      : undefined
+                  }
+                  name={child.name}
+                />
+                <div className="flex items-baseline justify-between px-1 text-sm">
+                  <span className="truncate font-medium">{child.name}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {child.photoCount}
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
@@ -169,7 +181,7 @@ export function GuestFolderPage() {
       {hasPhotos && (
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
-          <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+          <PhotoGrid photos={view.photos} onSelect={(_p, i) => setLightboxIndex(i)} />
         </section>
       )}
 
@@ -177,9 +189,9 @@ export function GuestFolderPage() {
         <p className="text-sm text-muted-foreground">このフォルダにはまだ写真がありません。</p>
       )}
 
-      {lightboxIndex !== null && (
+      {lightboxIndex !== null && view.photos[lightboxIndex] && (
         <Lightbox
-          photos={photos}
+          photos={view.photos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}
@@ -190,33 +202,48 @@ export function GuestFolderPage() {
         open={isUploadModalOpen}
         onClose={closeUpload}
         token={token}
-        folderPath={folderPath}
-        rootFolderPath={rootFolderPath}
-        shareToken={shareToken ?? token}
-        onUploadComplete={(newPhotos) => {
-          addPhotos(newPhotos)
+        sub={view.sub}
+        displayPath={view.name || view.rootName}
+        onUploaded={() => {
           closeUpload()
+          void load()
         }}
       />
     </div>
   )
 }
 
+function coverPhotoOf(sub: string, name: string, coverUrl: string): Photo {
+  return {
+    id: `cover:${sub}`,
+    uploaderId: "",
+    url: coverUrl || PLACEHOLDER_IMAGE,
+    thumbnailUrl: coverUrl || PLACEHOLDER_IMAGE,
+    path: sub,
+    title: name,
+    takenAt: "",
+    width: 0,
+    height: 0,
+  }
+}
+
 function GuestUploadDialog({
   open,
   onClose,
-  folderPath,
-  onUploadComplete,
+  token,
+  sub,
+  displayPath,
+  onUploaded,
 }: {
   open: boolean
   onClose: () => void
   token: string
-  folderPath: string
-  rootFolderPath: string
-  shareToken: string
-  onUploadComplete: (photos: Photo[]) => void
+  sub: string
+  displayPath: string
+  onUploaded: () => void
 }) {
   const [items, setItems] = useState<PreviewItem[]>([])
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -243,26 +270,21 @@ function GuestUploadDialog({
     })
   }
 
-  const handleUpload = () => {
-    const now = new Date().toISOString()
-    const basePath = folderPath === "/" ? "" : folderPath
-    const newPhotos: Photo[] = items.map((it) => ({
-      id: `upload_${Math.random().toString(36).slice(2, 10)}`,
-      uploaderId: GUEST_UPLOADER_ID,
-      url: it.previewUrl,
-      thumbnailUrl: it.previewUrl,
-      path: `${basePath}/${it.file.name}`,
-      title: it.file.name,
-      takenAt: now,
-      width: 0,
-      height: 0,
-    }))
-    onUploadComplete(newPhotos)
-    toast.success(`${items.length} 枚をアップロードしました`)
-    setItems([])
+  const handleUpload = async () => {
+    setUploading(true)
+    try {
+      await api.guestUpload(token, sub, items.map((it) => it.file))
+      toast.success(`${items.length} 枚をアップロードしました`)
+      setItems([])
+      onUploaded()
+    } catch {
+      toast.error("アップロードに失敗しました")
+    } finally {
+      setUploading(false)
+    }
   }
 
-  const canUpload = items.length > 0
+  const canUpload = items.length > 0 && !uploading
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -270,7 +292,7 @@ function GuestUploadDialog({
         <DialogHeader>
           <DialogTitle>写真を追加</DialogTitle>
           <DialogDescription>
-            保存先: <span className="font-mono text-xs">{folderPath}</span>
+            保存先: <span className="font-mono text-xs">{displayPath}</span>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -282,8 +304,8 @@ function GuestUploadDialog({
             <X className="size-4" />
             キャンセル
           </Button>
-          <Button disabled={!canUpload} onClick={handleUpload}>
-            <ImageUp className="size-4" />
+          <Button disabled={!canUpload} onClick={() => void handleUpload()}>
+            {uploading ? <Loader2 className="size-4 animate-spin" /> : <ImageUp className="size-4" />}
             アップロード
           </Button>
         </DialogFooter>
@@ -291,4 +313,3 @@ function GuestUploadDialog({
     </Dialog>
   )
 }
-

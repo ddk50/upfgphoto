@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { UserMenu } from "@/components/layout/UserMenu"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
+import { useSession } from "@/contexts/SessionContext"
 
 type NavItem = { to: string; label: string; icon: typeof Images; end: boolean; adminOnly?: boolean }
 
@@ -21,8 +21,7 @@ const NAV: NavItem[] = [
 ]
 
 export function Header() {
-  const { viewAsRole } = usePhotoLibrary()
-  const isAdmin = viewAsRole === "admin"
+  const { isAdmin } = useSession()
   const visibleNav = NAV.filter((n) => !n.adminOnly || isAdmin)
 
   return (

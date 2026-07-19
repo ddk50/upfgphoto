@@ -1,20 +1,43 @@
 import { Link } from "react-router-dom"
-import type { FolderNode } from "@/types"
+import type { EffectiveAccess, FolderNode } from "@/types"
 import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
 import { AccessBadge } from "@/components/access/AccessBadge"
 import { FolderCoverStack } from "./FolderCoverStack"
+import type { ChildInfo } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 type FolderCardProps = {
   folder: FolderNode
+  // API 接続ページから渡される実データ。未指定時は mock Context にフォールバック (移行期間)
+  info?: ChildInfo
 }
 
-export function FolderCard({ folder }: FolderCardProps) {
+export function FolderCard({ folder, info }: FolderCardProps) {
   const linkPath = `/folders${folder.path === "/" ? "" : folder.path}`
   const { resolveAccess, getFolderOwner, isOwner } = usePhotoLibrary()
-  const access = resolveAccess(folder.path)
-  const owner = getFolderOwner(folder.path)
-  const ownsThis = isOwner(folder.path)
+
+  let access: EffectiveAccess
+  let ownsThis: boolean
+  let ownerName: string
+  let ownerAvatarUrl: string | null
+  if (info) {
+    access =
+      info.mode === "restricted"
+        ? { mode: "restricted", source: folder.path, allowedUserIds: [] }
+        : info.mode === "guest"
+          ? { mode: "guest", source: folder.path, allowedUserIds: [], shareToken: "" }
+          : { mode: "everyone", source: folder.path, allowedUserIds: [] }
+    ownsThis = info.isMineOwner || info.ownerName === null
+    ownerName = info.ownerName ?? ""
+    ownerAvatarUrl = info.ownerAvatarUrl
+  } else {
+    access = resolveAccess(folder.path)
+    const owner = getFolderOwner(folder.path)
+    ownsThis = isOwner(folder.path)
+    ownerName = owner.name
+    ownerAvatarUrl = owner.avatarUrl
+  }
+
   const isGuestShared = access.mode === "guest"
   const isRestricted = access.mode === "restricted"
 
@@ -40,11 +63,11 @@ export function FolderCard({ folder }: FolderCardProps) {
             <AccessBadge access={access} size="sm" />
           </div>
         )}
-        {!ownsThis && (
+        {!ownsThis && ownerAvatarUrl && (
           <img
-            src={owner.avatarUrl}
-            alt={owner.name}
-            title={`${owner.name} のフォルダ`}
+            src={ownerAvatarUrl}
+            alt={ownerName}
+            title={`${ownerName} のフォルダ`}
             className={cn(
               "absolute size-5 rounded-full object-cover ring-1 ring-white/80 shadow",
               // guest 共有時は下端をバッジpillが使うので右上に退避 (restricted バッジとは排他)

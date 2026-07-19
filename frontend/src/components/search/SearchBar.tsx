@@ -1,9 +1,9 @@
-import { useMemo, useState, type FormEvent, type KeyboardEvent } from "react"
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { Folder, Image as ImageIcon, Search, Tag } from "lucide-react"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
-import { searchFolders, summarizeTags } from "@/lib/search"
-import { dirParts, fileName, joinPath } from "@/lib/path"
+import { api, type SearchResult } from "@/lib/api"
+import { dirParts, joinPath } from "@/lib/path"
+import type { TagSummary } from "@/types"
 import { cn } from "@/lib/utils"
 
 type SearchBarProps = {
@@ -29,16 +29,41 @@ export function SearchBar({ initialValue = "", size = "lg", autoFocus, onSubmit 
   const [value, setValue] = useState(initialValue)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [result, setResult] = useState<SearchResult | null>(null)
+  const [allTags, setAllTags] = useState<TagSummary[]>([])
+  const requestSeq = useRef(0)
   const navigate = useNavigate()
-  const { tree, photos } = usePhotoLibrary()
 
-  const allTags = useMemo(() => summarizeTags(photos), [photos])
+  useEffect(() => {
+    void api.tags().then(setAllTags).catch(() => setAllTags([]))
+  }, [])
 
   const q = value.trim().toLowerCase()
+
+  // API へのデバウンス付きサジェスト検索
+  useEffect(() => {
+    if (!q) {
+      setResult(null)
+      return
+    }
+    const seq = ++requestSeq.current
+    const timer = setTimeout(() => {
+      void api
+        .search({ q })
+        .then((r) => {
+          if (requestSeq.current === seq) setResult(r)
+        })
+        .catch(() => {
+          if (requestSeq.current === seq) setResult(null)
+        })
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [q])
+
   const suggestions = useMemo<Suggestion[]>(() => {
     if (!q) return []
     const out: Suggestion[] = []
-    for (const f of searchFolders(tree, q).slice(0, 4)) {
+    for (const f of (result?.folders ?? []).slice(0, 4)) {
       out.push({ kind: "folder", label: f.name, sub: f.path, to: `/folders${f.path}` })
     }
     for (const t of allTags.filter((t) => t.name.toLowerCase().includes(q)).slice(0, 4)) {
@@ -49,13 +74,7 @@ export function SearchBar({ initialValue = "", size = "lg", autoFocus, onSubmit 
         to: `/search?tags=${encodeURIComponent(t.name)}`,
       })
     }
-    const photoMatches = photos
-      .filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) || fileName(p.path).toLowerCase().includes(q),
-      )
-      .slice(0, 4)
-    for (const p of photoMatches) {
+    for (const p of (result?.photos ?? []).slice(0, 4)) {
       const dir = joinPath(dirParts(p.path))
       out.push({
         kind: "photo",
@@ -71,7 +90,7 @@ export function SearchBar({ initialValue = "", size = "lg", autoFocus, onSubmit 
       to: `/search?q=${encodeURIComponent(value.trim())}`,
     })
     return out
-  }, [q, tree, allTags, photos, value])
+  }, [q, result, allTags, value])
 
   const showDropdown = open && suggestions.length > 0
 

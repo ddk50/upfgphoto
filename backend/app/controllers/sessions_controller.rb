@@ -1,6 +1,6 @@
 class SessionsController < ApplicationController
   # OAuth コールバックは外部からのリダイレクトなので CSRF トークンを持たない
-  skip_forgery_protection only: :create
+  skip_forgery_protection only: %i[create dev_login]
 
   # Google OAuth callback。
   # - 既知の identity (google sub) → その user でログイン
@@ -27,6 +27,14 @@ class SessionsController < ApplicationController
 
   def destroy
     reset_session
+    head :no_content
+  end
+
+  # 開発環境限定: Google 資格情報なしでローカル動作確認するためのバックドア
+  def dev_login
+    raise ActionController::RoutingError, "not found" unless Rails.env.development?
+
+    session[:user_id] = User.find(params.require(:user_id)).id
     head :no_content
   end
 
