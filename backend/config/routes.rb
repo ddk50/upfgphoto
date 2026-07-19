@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       get "me", to: "me#show"
 
       get "folders", to: "folders#show"
+      patch "folders", to: "folders#rename"
       resources :photos, only: %i[show create destroy]
       get "search", to: "search#show"
       resources :tags, only: :index

@@ -32,6 +32,24 @@ module Api
         head :bad_request
       end
 
+      def rename
+        path = FolderPath.normalize(params.require(:path))
+        return head :not_found unless FolderQuery.new(current_user).folder_visible?(path)
+
+        new_path = FolderRenamer.rename!(
+          folder_path: path, new_name: params.require(:new_name), actor: current_user
+        )
+        render json: { path: new_path, name: FolderPath.name(new_path) }
+      rescue FolderRenamer::Forbidden
+        head :forbidden
+      rescue FolderRenamer::Conflict
+        head :conflict
+      rescue FolderRenamer::InvalidName
+        head :unprocessable_content
+      rescue ArgumentError, ActionController::ParameterMissing
+        head :bad_request
+      end
+
       private
 
       def child_json(child, fq)

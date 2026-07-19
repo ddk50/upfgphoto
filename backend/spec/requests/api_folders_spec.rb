@@ -8,7 +8,7 @@ RSpec.describe "GET /api/v1/folders" do
 
   before do
     Photo.create!(user: a, folder_path: "/2023/風景", file_name: "1.jpg", title: "山",
-                  taken_at: Time.current)
+                  description: "夜明けの山", taken_at: Time.current)
     Photo.create!(user: a, folder_path: "/秘密", file_name: "2.jpg", title: "内緒",
                   taken_at: Time.current)
     FolderOwner.create!(folder_path: "/秘密", user: a)
@@ -28,6 +28,7 @@ RSpec.describe "GET /api/v1/folders" do
     get "/api/v1/folders", params: { path: "/2023/風景" }
     body = response.parsed_body
     expect(body["photos"].map { |p| p["title"] }).to eq([ "山" ])
+    expect(body["photos"].first["description"]).to eq("夜明けの山") # 旧DBから移行した説明文
     expect(body["breadcrumb"]).to eq([ "/", "/2023", "/2023/風景" ])
   end
 
@@ -68,5 +69,64 @@ RSpec.describe "GET /api/v1/folders" do
   it "未ログインは 401" do
     get "/api/v1/folders", params: { path: "/" }
     expect(response).to have_http_status(:unauthorized)
+  end
+end
+
+RSpec.describe "PATCH /api/v1/folders (リネーム)" do
+  let!(:a) { User.create!(name: "A", nickname: "a", role: "user", status: "approved") }
+  let!(:b) { User.create!(name: "B", nickname: "b", role: "user", status: "approved") }
+
+  before do
+    Photo.create!(user: a, folder_path: "/2023/風景", file_name: "1.jpg", title: "山",
+                  taken_at: Time.current)
+    FolderOwner.create!(folder_path: "/2023/風景", user: a)
+  end
+
+  it "オーナーはリネームでき、新パスが返る" do
+    login_as(a)
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "山岳" }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to eq("path" => "/2023/山岳", "name" => "山岳")
+    expect(Photo.sole.folder_path).to eq("/2023/山岳")
+  end
+
+  it "深い階層の子孫も追随し、接頭辞が同じだけの兄弟は無傷 (エンドポイント経由)" do
+    Photo.create!(user: a, folder_path: "/2023/風景/山/朝焼け", file_name: "3.jpg", title: "朝",
+                  taken_at: Time.current)
+    Photo.create!(user: a, folder_path: "/2023/風景色", file_name: "4.jpg", title: "色",
+                  taken_at: Time.current)
+
+    login_as(a)
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "山岳" }
+
+    expect(response).to have_http_status(:ok)
+    expect(Photo.pluck(:folder_path)).to contain_exactly(
+      "/2023/山岳", "/2023/山岳/山/朝焼け", "/2023/風景色"
+    )
+  end
+
+  it "オーナー以外は 403、同名衝突は 409、不正名は 422" do
+    login_as(b)
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "x" }
+    expect(response).to have_http_status(:forbidden)
+
+    Photo.create!(user: a, folder_path: "/2023/夜景", file_name: "2.jpg", title: "夜",
+                  taken_at: Time.current)
+    login_as(a)
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "夜景" }
+    expect(response).to have_http_status(:conflict)
+
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "a/b" }
+    expect(response).to have_http_status(:unprocessable_content)
+  end
+
+  it "見えないフォルダは 404 (存在も漏らさない)" do
+    rule = AccessRule.create!(folder_path: "/2023/風景", mode: "restricted")
+    rule.access_rule_members.create!(user: a)
+
+    login_as(b)
+    patch "/api/v1/folders", params: { path: "/2023/風景", new_name: "x" }
+    expect(response).to have_http_status(:not_found)
   end
 end
