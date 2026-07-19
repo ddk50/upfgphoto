@@ -19,6 +19,12 @@ export type Photo = {
   height: number
   exif?: Exif
   tags?: string[]
+  // API 接続後は写真自身がメタ情報を持つ (Context 経由の解決は廃止)
+  uploaderName?: string
+  uploaderAvatarUrl?: string | null
+  isMine?: boolean
+  canDelete?: boolean
+  effectiveMode?: "everyone" | "restricted" | "guest"
 }
 
 export type TagSummary = {

@@ -11,9 +11,9 @@ class SessionsController < ApplicationController
     user = User.find_by_identity(provider: auth.provider, uid: auth.uid) ||
            create_pending_user!(auth)
 
-    if user.expired?
+    if user.login_blocked?
       reset_session
-      redirect_to "/?login=expired"
+      redirect_to user.banned? ? "/?login=banned" : "/?login=expired"
       return
     end
 

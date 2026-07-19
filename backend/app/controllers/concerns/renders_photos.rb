@@ -3,6 +3,10 @@ module RendersPhotos
 
   private
 
+  def photo_access_resolver
+    @photo_access_resolver ||= EffectiveAccessResolver.new
+  end
+
   def photo_json(photo)
     {
       id: photo.id,
@@ -19,6 +23,7 @@ module RendersPhotos
       is_mine: current_user&.id == photo.user_id,
       can_delete: current_user.present? &&
         (current_user.admin_role? || current_user.id == photo.user_id),
+      effective_mode: photo_access_resolver.effective_mode(photo.folder_path),
       urls: photo_urls(photo)
     }
   end

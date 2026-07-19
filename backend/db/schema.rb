@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_120000) do
   create_table "access_rule_members", force: :cascade do |t|
     t.integer "access_rule_id", null: false
     t.datetime "created_at", null: false
@@ -126,6 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_060000) do
 
   create_table "users", force: :cascade do |t|
     t.string "avatar_url"
+    t.boolean "banned", default: false, null: false
     t.datetime "created_at", null: false
     t.string "email"
     t.datetime "expires_at"

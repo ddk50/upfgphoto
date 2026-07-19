@@ -1,5 +1,4 @@
 import { AlertTriangle } from "lucide-react"
-import type { AccessRule } from "@/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,15 +14,15 @@ type OverrideWarningDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   folderPath: string
-  descendants: { path: string; rule: AccessRule }[]
+  descendants: { path: string; mode: string }[]
   onOverride: () => void
   onKeep: () => void
 }
 
-function describeRule(rule: AccessRule): string {
-  if (rule.mode === "everyone") return "全員に公開"
-  if (rule.mode === "restricted") return `${rule.allowedUserIds.length}人のみ`
-  if (rule.mode === "guest") return "リンクで共有"
+function describeMode(mode: string): string {
+  if (mode === "everyone") return "全員に公開"
+  if (mode === "restricted") return "指定ユーザのみ"
+  if (mode === "guest") return "リンクで共有"
   return "継承"
 }
 
@@ -53,7 +52,7 @@ export function OverrideWarningDialog({
             {descendants.map((d) => (
               <li key={d.path} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
                 <span className="truncate font-mono text-xs">{d.path}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{describeRule(d.rule)}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">{describeMode(d.mode)}</span>
               </li>
             ))}
           </ul>
@@ -61,7 +60,7 @@ export function OverrideWarningDialog({
 
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="font-medium text-foreground">上書きする</span>: サブフォルダの独立設定を全て解除し、親の設定に揃えます
+            <span className="font-medium text-foreground">上書きする</span>: サブフォルダの独立設定を全て解除し、親の設定に揃えます（guest 共有中のリンクは停止され台帳に記録されます）
           </p>
           <p>
             <span className="font-medium text-foreground">維持する</span>: サブフォルダの独立設定はそのままにし、このフォルダだけ更新します

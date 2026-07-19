@@ -16,7 +16,15 @@
 ## 開発
 
 ```bash
-# frontend
+# backend (Rails 8.1 / Ruby 4.0, rbenv)
+cd backend
+bundle install
+bin/rails db:migrate
+bin/rails etl:import   # 旧DBから開発データ投入 (upfgphoto/db/production.sqlite3)
+bin/rails server       # :3000
+bin/check              # rubocop + rspec
+
+# frontend (別ターミナル。/api 等は :3000 へプロキシ)
 cd frontend
 npm install
 npm run dev      # http://localhost:5173/
@@ -24,4 +32,5 @@ npm test         # vitest（アクセス制御の仕様表テスト等）
 npm run build    # tsc + vite build
 ```
 
-backend のセットアップは構築後に追記。
+ログイン: 開発環境ではログイン画面の「開発用ログイン」に user id（例: 1 = admin）。
+本番は Google OAuth（`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` が必要）。

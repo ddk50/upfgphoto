@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { ChevronDown, Cloud, FolderPlus, FolderTree, ImageUp, Info, Sparkles, Tag } from "lucide-react"
+import { ChevronDown, Cloud, FolderPlus, FolderTree, ImageUp, Info, Loader2, Sparkles, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
@@ -18,14 +18,14 @@ import {
 } from "@/components/upload/UploadPreviewList"
 import { FolderPicker } from "@/components/upload/FolderPicker"
 import { StorageBar } from "@/components/storage/StorageBar"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
+import { api } from "@/lib/api"
 import { normalizeFolderPath } from "@/lib/path"
-import { buildAutoFolderPath, groupByAutoFolder, inferShotDate } from "@/lib/upload"
+import { groupByAutoFolder } from "@/lib/upload"
+import type { FolderNode, StorageInfo } from "@/types"
 import { cn } from "@/lib/utils"
-import type { Photo } from "@/types"
 
 export function UploadPage() {
-  const { tree, storage, currentUser, addPhotos } = usePhotoLibrary()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   // フォルダ新規作成 (CreateFolderButton) からの遷移: 保存先をプリセットし手動指定モードで開く
   const presetPath = searchParams.get("to")
@@ -36,8 +36,13 @@ export function UploadPage() {
   const [advancedOpen, setAdvancedOpen] = useState(() => !!presetPath)
   const [useManualPath, setUseManualPath] = useState(() => !!presetPath)
   const [tagsInput, setTagsInput] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [storage, setStorage] = useState<StorageInfo | null>(null)
+  const [tree, setTree] = useState<FolderNode | null>(null)
 
   useEffect(() => {
+    void api.storage().then(setStorage).catch(() => setStorage(null))
+    void api.folderTree().then(setTree).catch(() => setTree(null))
     return () => {
       items.forEach((it) => URL.revokeObjectURL(it.previewUrl))
     }
@@ -71,42 +76,34 @@ export function UploadPage() {
     [items],
   )
 
-  const handleUpload = () => {
-    const tagsLabel = parsedTags.length > 0 ? ` ・ キーワード: ${parsedTags.join(", ")}` : ""
-    const now = new Date().toISOString()
-    const newPhotos: Photo[] = items.map((it) => {
-      const dest = useManualPath
-        ? normalizeFolderPath(folderPath) || "/"
-        : buildAutoFolderPath(inferShotDate(it.file))
-      const basePath = dest === "/" ? "" : dest
-      return {
-        id: `upload_${Math.random().toString(36).slice(2, 10)}`,
-        uploaderId: currentUser.id,
-        url: it.previewUrl,
-        thumbnailUrl: it.previewUrl,
-        path: `${basePath}/${it.file.name}`,
-        title: it.file.name,
-        takenAt: now,
-        width: 0,
-        height: 0,
-        tags: parsedTags.length > 0 ? parsedTags : undefined,
+  const handleUpload = async () => {
+    setUploading(true)
+    try {
+      const result = await api.uploadPhotos({
+        files: items.map((it) => it.file),
+        folderPath: useManualPath ? normalizeFolderPath(folderPath) : undefined,
+        tags: parsedTags,
+      })
+      const destLabel =
+        result.folders.length === 1 ? result.folders[0] : `${result.folders.length} 個のフォルダ`
+      toast.success(`${result.photos.length} 枚を ${destLabel} にアップロードしました`)
+      items.forEach((it) => URL.revokeObjectURL(it.previewUrl))
+      setItems([])
+      setTagsInput("")
+      setAdvancedOpen(false)
+      setUseManualPath(false)
+      if (presetPath) {
+        setSearchParams({}, { replace: true })
+        navigate(`/folders${result.folders[0] ?? ""}`)
       }
-    })
-    addPhotos(newPhotos)
-    const destLabel = useManualPath
-      ? (normalizeFolderPath(folderPath) === "/" ? "ライブラリ直下" : folderPath)
-      : `${autoBuckets.length} 個のフォルダ`
-    toast.success(`${items.length} 枚を ${destLabel} にアップロードしました`, {
-      description: `（モックなのでリロードで消えます）${tagsLabel}`,
-    })
-    setItems([])
-    setTagsInput("")
-    setAdvancedOpen(false)
-    setUseManualPath(false)
-    if (presetPath) setSearchParams({}, { replace: true })
+    } catch {
+      toast.error("アップロードに失敗しました")
+    } finally {
+      setUploading(false)
+    }
   }
 
-  const canUpload = items.length > 0
+  const canUpload = items.length > 0 && !uploading
 
   return (
     <div className="space-y-8">
@@ -117,7 +114,7 @@ export function UploadPage() {
         </p>
       </header>
 
-      <StorageBar storage={storage} variant="full" />
+      {storage && <StorageBar storage={storage} variant="full" />}
 
       {presetPath && useManualPath && (
         <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs text-blue-900">
@@ -184,7 +181,7 @@ export function UploadPage() {
                     </span>
                   </span>
                 </label>
-                {useManualPath && (
+                {useManualPath && tree && (
                   <FolderPicker root={tree} value={folderPath} onChange={setFolderPath} />
                 )}
               </div>
@@ -235,8 +232,8 @@ export function UploadPage() {
         >
           クリア
         </Button>
-        <Button disabled={!canUpload} onClick={handleUpload}>
-          <ImageUp className="size-4" />
+        <Button disabled={!canUpload} onClick={() => void handleUpload()}>
+          {uploading ? <Loader2 className="size-4 animate-spin" /> : <ImageUp className="size-4" />}
           アップロード
         </Button>
       </div>
@@ -267,7 +264,7 @@ function AutoDestinationPreview({ buckets }: { buckets: ReturnType<typeof groupB
         ))}
       </ul>
       <p className="text-[10px] text-muted-foreground">
-        ※ モック実装では `file.lastModified` を撮影日として扱っています（実プロダクトでは EXIF 撮影日を使用）
+        ※ プレビューはファイルの更新日時による目安です。実際の振り分けはサーバ側で EXIF 撮影日から決まります
       </p>
     </div>
   )

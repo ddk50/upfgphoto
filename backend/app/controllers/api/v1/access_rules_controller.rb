@@ -11,6 +11,9 @@ module Api
         own = AccessRule.find_by(folder_path: path)
         blocker = AccessPolicy.edit_blocker(path, current_user)
 
+        parent = path == "/" ? nil : File.dirname(path).then { |d| d == "" ? "/" : d }
+        parent_effective = parent && resolver.resolve(parent)
+
         render json: {
           path: path,
           effective: {
@@ -18,7 +21,13 @@ module Api
             source: effective&.folder_path || "/",
             member_ids: effective&.restricted_mode? ? effective.access_rule_members.map(&:user_id) : []
           },
+          parent_effective: parent && {
+            mode: parent_effective&.mode || "everyone",
+            source: parent_effective&.folder_path || "/",
+            member_ids: parent_effective&.restricted_mode? ? parent_effective.access_rule_members.map(&:user_id) : []
+          },
           own_mode: own&.mode || "inherit",
+          own_member_ids: own&.restricted_mode? ? own.access_rule_members.map(&:user_id) : [],
           descendant_rules: AccessRuleUpdater.descendant_rules(path)
                                             .map { |r| { path: r.folder_path, mode: r.mode } },
           can_edit: AccessPolicy.can_edit_access?(path, current_user),

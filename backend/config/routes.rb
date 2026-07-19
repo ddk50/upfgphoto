@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       resources :share_links, only: :index
       resources :users, only: :index
       get "storage", to: "storage#show"
+      get "folder_tree", to: "folder_tree#show"
 
       # ゲスト (認証不要, ADR-008/009)
       scope "g/:token", module: :guest, as: :guest do
@@ -36,6 +37,7 @@ Rails.application.routes.draw do
             post :link
           end
         end
+        resources :users, only: %i[index update]
       end
     end
   end

@@ -18,6 +18,10 @@ class User < ApplicationRecord
     expires_at.present? && expires_at < now
   end
 
+  def login_blocked?(now = Time.current)
+    banned? || expired?(now)
+  end
+
   # ゲストアップロードの帰属先 (ADR-010)。identity を持たないためログインは不可能
   def self.guest_system
     find_or_create_by!(nickname: "guest_anonymous") do |u|

@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   def require_approved
     require_login
     return if performed?
-    head :forbidden unless current_user.approved? && !current_user.expired?
+    head :forbidden unless current_user.approved? && !current_user.login_blocked?
   end
 
   def require_admin

@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom"
-import type { EffectiveAccess, Photo, User } from "@/types"
-import { Calendar, Camera, Folder, Globe, ImageIcon, Link2, Lock, Tag, UserCircle } from "lucide-react"
+import type { Photo } from "@/types"
+import { Calendar, Camera, Folder, Globe, Link2, Lock, Tag, UserCircle } from "lucide-react"
 import { serializeTagsParam } from "@/lib/search"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
 
 type PhotoMetaPanelProps = {
   photo: Photo
@@ -21,11 +20,6 @@ function formatDateTime(iso: string): string {
 }
 
 export function PhotoMetaPanel({ photo }: PhotoMetaPanelProps) {
-  const { getPhotoEffectiveAccess, getUploader, isMyPhoto } = usePhotoLibrary()
-  const access = getPhotoEffectiveAccess(photo.path)
-  const uploader = getUploader(photo)
-  const mine = isMyPhoto(photo)
-
   return (
     <div className="space-y-6 text-sm">
       <section className="space-y-1">
@@ -35,10 +29,9 @@ export function PhotoMetaPanel({ photo }: PhotoMetaPanelProps) {
 
       <section className="space-y-3">
         <MetaRow icon={Calendar} label="撮影日時" value={formatDateTime(photo.takenAt)} />
-        <MetaRow icon={ImageIcon} label="サイズ" value={`${photo.width} × ${photo.height}`} />
         <MetaRow icon={Folder} label="フォルダ" value={parentLabel(photo.path)} />
-        <AccessRow access={access} photoPath={photo.path} />
-        <UploaderRow uploader={uploader} mine={mine} />
+        {photo.effectiveMode && <AccessRow mode={photo.effectiveMode} />}
+        <UploaderRow photo={photo} />
       </section>
 
       {photo.tags && photo.tags.length > 0 && (
@@ -81,44 +74,28 @@ export function PhotoMetaPanel({ photo }: PhotoMetaPanelProps) {
   )
 }
 
-function AccessRow({ access, photoPath }: { access: EffectiveAccess; photoPath: string }) {
-  const sourceLabel = access.source === "/" ? "ルート" : access.source
-  const inheritedHint =
-    access.source !== parentLabelRaw(photoPath) ? `（${sourceLabel} から継承）` : ""
-
-  let icon = Globe
-  let text = "全員に公開"
-  let className = ""
-
-  if (access.mode === "restricted") {
-    icon = Lock
-    text = `${access.allowedUserIds.length}人のみ閲覧可`
-    className = "text-amber-800"
-  } else if (access.mode === "guest") {
-    icon = Link2
-    text = "リンクで共有中"
-    className = "text-blue-700 font-medium"
-  }
+function AccessRow({ mode }: { mode: "everyone" | "restricted" | "guest" }) {
+  const Icon = mode === "restricted" ? Lock : mode === "guest" ? Link2 : Globe
+  const text =
+    mode === "restricted" ? "指定ユーザのみ閲覧可" : mode === "guest" ? "リンクで共有中" : "全員に公開"
+  const className =
+    mode === "restricted" ? "text-amber-800" : mode === "guest" ? "text-blue-700 font-medium" : ""
 
   return (
     <div className="flex items-start gap-3">
-      {(() => {
-        const Icon = icon
-        return <Icon className={`mt-0.5 size-4 ${access.mode === "guest" ? "text-blue-600" : "text-muted-foreground"}`} />
-      })()}
+      <Icon
+        className={`mt-0.5 size-4 ${mode === "guest" ? "text-blue-600" : "text-muted-foreground"}`}
+      />
       <div className="min-w-0 flex-1">
         <div className="text-xs text-muted-foreground">アクセス</div>
         <div className={`truncate ${className}`}>{text}</div>
-        {inheritedHint && (
-          <div className="text-xs text-muted-foreground">{inheritedHint}</div>
-        )}
       </div>
     </div>
   )
 }
 
-function UploaderRow({ uploader, mine }: { uploader: User | null; mine: boolean }) {
-  if (!uploader) {
+function UploaderRow({ photo }: { photo: Photo }) {
+  if (photo.uploaderId === "guest_anonymous") {
     return (
       <div className="flex items-start gap-3">
         <Link2 className="mt-0.5 size-4 text-blue-600" />
@@ -131,19 +108,19 @@ function UploaderRow({ uploader, mine }: { uploader: User | null; mine: boolean 
   }
   return (
     <div className="flex items-start gap-3">
-      {mine ? (
+      {photo.isMine || !photo.uploaderAvatarUrl ? (
         <UserCircle className="mt-0.5 size-4 text-muted-foreground" />
       ) : (
         <img
-          src={uploader.avatarUrl}
-          alt={uploader.name}
+          src={photo.uploaderAvatarUrl}
+          alt={photo.uploaderName ?? ""}
           className="mt-0.5 size-4 rounded-full object-cover"
         />
       )}
       <div className="min-w-0 flex-1">
         <div className="text-xs text-muted-foreground">追加者</div>
-        <div className={`truncate ${mine ? "text-foreground font-medium" : ""}`}>
-          {mine ? "あなた" : uploader.name}
+        <div className={`truncate ${photo.isMine ? "text-foreground font-medium" : ""}`}>
+          {photo.isMine ? "あなた" : photo.uploaderName ?? "不明"}
         </div>
       </div>
     </div>
@@ -151,14 +128,9 @@ function UploaderRow({ uploader, mine }: { uploader: User | null; mine: boolean 
 }
 
 function parentLabel(path: string): string {
-  const dirs = parentLabelRaw(path)
-  return dirs === "/" ? "ライブラリ直下" : dirs
-}
-
-function parentLabelRaw(path: string): string {
   const parts = path.split("/").filter(Boolean)
   const dirs = parts.slice(0, -1)
-  return dirs.length === 0 ? "/" : "/" + dirs.join("/")
+  return dirs.length === 0 ? "ライブラリ直下" : "/" + dirs.join("/")
 }
 
 function MetaRow({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) {

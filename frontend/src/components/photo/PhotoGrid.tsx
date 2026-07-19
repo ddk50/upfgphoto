@@ -1,6 +1,5 @@
 import type { Photo } from "@/types"
 import { PhotoTile, type UploaderAvatarInfo } from "./PhotoTile"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
 
 type PhotoGridProps = {
   photos: Photo[]
@@ -21,7 +20,6 @@ export function PhotoGrid({
   selectedIds,
   onSelectionChange,
 }: PhotoGridProps) {
-  const { getPhotoEffectiveAccess, getUploader, isMyPhoto } = usePhotoLibrary()
   if (photos.length === 0) return null
 
   const toggle = (id: string) => {
@@ -35,14 +33,12 @@ export function PhotoGrid({
   return (
     <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 md:grid-cols-4 xl:grid-cols-5">
       {photos.map((photo, i) => {
-        const shared =
-          showShareIndicators && getPhotoEffectiveAccess(photo.path).mode === "guest"
+        const shared = showShareIndicators && photo.effectiveMode === "guest"
 
         let uploaderAvatar: UploaderAvatarInfo | undefined
-        if (showUploaderBadges && !isMyPhoto(photo)) {
-          const uploader = getUploader(photo)
-          uploaderAvatar = uploader
-            ? { avatarUrl: uploader.avatarUrl, name: uploader.name }
+        if (showUploaderBadges && photo.isMine === false) {
+          uploaderAvatar = photo.uploaderAvatarUrl
+            ? { avatarUrl: photo.uploaderAvatarUrl, name: photo.uploaderName ?? "" }
             : "guest"
         }
 

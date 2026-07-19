@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AccessBadge } from "@/components/access/AccessBadge"
+import { AccessSettingsDialog } from "@/components/access/AccessSettingsDialog"
 import { CreateFolderButton } from "@/components/folder/CreateFolderButton"
 import { useSession } from "@/contexts/SessionContext"
 import { api, ApiError, type FolderView } from "@/lib/api"
@@ -27,6 +28,7 @@ export function FolderPage() {
   const ownedFilter = searchParams.get("owned") === "me"
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [copied, setCopied] = useState(false)
+  const [accessDialogOpen, setAccessDialogOpen] = useState(false)
 
   const load = useCallback(async () => {
     setStatus("loading")
@@ -150,11 +152,7 @@ export function FolderPage() {
                   ? `このフォルダは ${view.editBlocker.folderPath}（オーナー: ${view.editBlocker.ownerName ?? "不明"}）の限定公開設定に従属しています`
                   : "オーナーまたは管理者のみ変更可能です"
               }
-              onClick={() =>
-                toast.info("公開設定の編集は次の接続ステップで有効になります", {
-                  description: "閲覧系の API 接続が完了した段階です",
-                })
-              }
+              onClick={() => setAccessDialogOpen(true)}
             />
           </div>
         </div>
@@ -203,8 +201,17 @@ export function FolderPage() {
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}
+          onDeleted={() => void load()}
         />
       )}
+
+      <AccessSettingsDialog
+        open={accessDialogOpen}
+        onOpenChange={setAccessDialogOpen}
+        folderPath={folderPath}
+        isOwner={view.isOwner}
+        onSaved={() => void load()}
+      />
     </div>
   )
 }

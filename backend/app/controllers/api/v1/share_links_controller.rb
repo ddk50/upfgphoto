@@ -11,12 +11,17 @@ module Api
           links = links.where(folder_path: own_paths)
         end
 
+        own_paths = FolderOwner.where(user: current_user).pluck(:folder_path).to_set
+        owner_names = FolderOwner.includes(:user).index_by(&:folder_path)
+
         render json: {
           share_links: links.map do |l|
             {
               token: l.token,
               folder_path: l.folder_path,
               active: l.active?,
+              own: own_paths.include?(l.folder_path),
+              folder_owner: owner_names[l.folder_path]&.user&.name,
               issued_by: l.issued_by.name,
               issued_at: l.issued_at,
               revoked_at: l.revoked_at,

@@ -54,6 +54,7 @@ type ApiPhoto = {
   uploader: { id: number; name: string; avatar_url: string | null }
   is_mine: boolean
   can_delete: boolean
+  effective_mode: "everyone" | "restricted" | "guest"
   urls: { small: string; large: string; original: string } | null
 }
 
@@ -134,6 +135,8 @@ function adaptPhoto(p: ApiPhoto): AdaptedPhoto {
   return {
     id: String(p.id),
     uploaderId: String(p.uploader.id),
+    uploaderName: p.uploader.name,
+    uploaderAvatarUrl: p.uploader.avatar_url,
     url: p.urls?.large ?? p.urls?.original ?? PLACEHOLDER_IMAGE,
     thumbnailUrl: p.urls?.small ?? PLACEHOLDER_IMAGE,
     path: p.path,
@@ -145,6 +148,7 @@ function adaptPhoto(p: ApiPhoto): AdaptedPhoto {
     tags: p.tags,
     isMine: p.is_mine,
     canDelete: p.can_delete,
+    effectiveMode: p.effective_mode,
   }
 }
 
@@ -229,6 +233,104 @@ function adaptFolderView(v: ApiFolderView): FolderView {
   }
 }
 
+export type ApiUser = {
+  id: number
+  name: string
+  nickname: string
+  avatarUrl: string | null
+}
+
+export type AdminUser = ApiUser & {
+  email: string | null
+  role: "admin" | "user"
+  banned: boolean
+  expiresAt: string | null
+  expired: boolean
+  joinedAt: string
+  providers: string[]
+  isSelf: boolean
+}
+
+export type PendingUser = {
+  id: number
+  name: string
+  nickname: string
+  email: string | null
+  googleEmail: string | null
+  requestedAt: string
+}
+
+export type ShareLinkEntry = {
+  token: string
+  folderPath: string
+  active: boolean
+  own: boolean
+  folderOwner: string | null
+  issuedBy: string
+  issuedAt: string
+  revokedAt: string | null
+  revokedBy: string | null
+  revokedReason: "manual" | "parent-override" | null
+}
+
+export type AccessRuleView = {
+  path: string
+  effective: { mode: string; source: string; memberIds: number[] }
+  parentEffective: { mode: string; source: string; memberIds: number[] } | null
+  ownMode: "inherit" | "everyone" | "restricted" | "guest"
+  ownMemberIds: number[]
+  descendantRules: { path: string; mode: string }[]
+  canEdit: boolean
+  editBlocker: { folderPath: string; ownerName: string | null } | null
+}
+
+export type MyPhotosFolders = {
+  total: number
+  folders: { path: string; name: string; photoCount: number; coverUrl: string | null }[]
+}
+
+// FolderPicker 用: パス一覧から FolderNode ツリーを構築
+export function buildFolderTree(
+  folders: { path: string; photo_count: number }[],
+): FolderNode {
+  const root: FolderNode = {
+    name: "",
+    path: "/",
+    children: [],
+    photos: [],
+    descendantPhotoCount: 0,
+  }
+  const nodeOf = new Map<string, FolderNode>([["/", root]])
+  const sorted = [...folders].sort((a, b) => a.path.localeCompare(b.path, "ja"))
+  for (const f of sorted) {
+    if (f.path === "/") continue
+    const segments = f.path.split("/").filter(Boolean)
+    let parent = root
+    let acc = ""
+    for (const seg of segments) {
+      acc += `/${seg}`
+      let node = nodeOf.get(acc)
+      if (!node) {
+        node = { name: seg, path: acc, children: [], photos: [], descendantPhotoCount: 0 }
+        parent.children.push(node)
+        nodeOf.set(acc, node)
+      }
+      parent = node
+    }
+  }
+  for (const f of sorted) {
+    const segments = f.path.split("/").filter(Boolean)
+    let acc = ""
+    root.descendantPhotoCount += f.photo_count
+    for (const seg of segments) {
+      acc += `/${seg}`
+      const node = nodeOf.get(acc)
+      if (node) node.descendantPhotoCount += f.photo_count
+    }
+  }
+  return root
+}
+
 // ---- endpoints ------------------------------------------------------------
 
 export const api = {
@@ -307,6 +409,239 @@ export const api = {
       method: "POST",
       credentials: "same-origin",
       body,
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async uploadPhotos(input: {
+    files: File[]
+    folderPath?: string
+    tags?: string[]
+  }): Promise<{ photos: AdaptedPhoto[]; folders: string[] }> {
+    const body = new FormData()
+    input.files.forEach((f) => body.append("files[]", f))
+    if (input.folderPath) body.append("folder_path", input.folderPath)
+    input.tags?.forEach((t) => body.append("tags[]", t))
+    const res = await fetch("/api/v1/photos", {
+      method: "POST",
+      credentials: "same-origin",
+      body,
+    })
+    if (!res.ok) throw new ApiError(res.status)
+    const raw = (await res.json()) as { photos: ApiPhoto[]; folders: string[] }
+    return { photos: raw.photos.map(adaptPhoto), folders: raw.folders }
+  },
+
+  async deletePhoto(id: string): Promise<void> {
+    const res = await fetch(`/api/v1/photos/${id}`, {
+      method: "DELETE",
+      credentials: "same-origin",
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async myPhotoFolders(): Promise<MyPhotosFolders> {
+    const raw = await req<{
+      total: number
+      folders: { path: string; name: string; photo_count: number; cover_url: string | null }[]
+    }>("/api/v1/my_photos")
+    return {
+      total: raw.total,
+      folders: raw.folders.map((f) => ({
+        path: f.path,
+        name: f.name,
+        photoCount: f.photo_count,
+        coverUrl: f.cover_url,
+      })),
+    }
+  },
+
+  async myPhotosIn(path: string): Promise<AdaptedPhoto[]> {
+    const raw = await req<{ photos: ApiPhoto[] }>(
+      `/api/v1/my_photos?path=${encodeURIComponent(path)}`,
+    )
+    return raw.photos.map(adaptPhoto)
+  },
+
+  async storage(): Promise<{ totalBytes: number; usedBytes: number }> {
+    const raw = await req<{ total_bytes: number; used_bytes: number }>("/api/v1/storage")
+    return { totalBytes: raw.total_bytes, usedBytes: raw.used_bytes }
+  },
+
+  async users(): Promise<ApiUser[]> {
+    const raw = await req<{ users: { id: number; name: string; nickname: string; avatar_url: string | null }[] }>(
+      "/api/v1/users",
+    )
+    return raw.users.map((u) => ({
+      id: u.id, name: u.name, nickname: u.nickname, avatarUrl: u.avatar_url,
+    }))
+  },
+
+  async folderTree(): Promise<FolderNode> {
+    const raw = await req<{ folders: { path: string; photo_count: number }[] }>(
+      "/api/v1/folder_tree",
+    )
+    return buildFolderTree(raw.folders)
+  },
+
+  async shareLinks(): Promise<ShareLinkEntry[]> {
+    const raw = await req<{
+      share_links: {
+        token: string
+        folder_path: string
+        active: boolean
+        own: boolean
+        folder_owner: string | null
+        issued_by: string
+        issued_at: string
+        revoked_at: string | null
+        revoked_by: string | null
+        revoked_reason: "manual" | "parent-override" | null
+      }[]
+    }>("/api/v1/share_links")
+    return raw.share_links.map((l) => ({
+      token: l.token,
+      folderPath: l.folder_path,
+      active: l.active,
+      own: l.own,
+      folderOwner: l.folder_owner,
+      issuedBy: l.issued_by,
+      issuedAt: l.issued_at,
+      revokedAt: l.revoked_at,
+      revokedBy: l.revoked_by,
+      revokedReason: l.revoked_reason,
+    }))
+  },
+
+  async accessRule(path: string): Promise<AccessRuleView> {
+    const raw = await req<{
+      path: string
+      effective: { mode: string; source: string; member_ids: number[] }
+      parent_effective: { mode: string; source: string; member_ids: number[] } | null
+      own_mode: "inherit" | "everyone" | "restricted" | "guest"
+      own_member_ids: number[]
+      descendant_rules: { path: string; mode: string }[]
+      can_edit: boolean
+      edit_blocker: { folder_path: string; owner_name: string | null } | null
+    }>(`/api/v1/access_rules?path=${encodeURIComponent(path)}`)
+    return {
+      path: raw.path,
+      effective: {
+        mode: raw.effective.mode,
+        source: raw.effective.source,
+        memberIds: raw.effective.member_ids,
+      },
+      parentEffective: raw.parent_effective && {
+        mode: raw.parent_effective.mode,
+        source: raw.parent_effective.source,
+        memberIds: raw.parent_effective.member_ids,
+      },
+      ownMode: raw.own_mode,
+      ownMemberIds: raw.own_member_ids,
+      descendantRules: raw.descendant_rules,
+      canEdit: raw.can_edit,
+      editBlocker: raw.edit_blocker && {
+        folderPath: raw.edit_blocker.folder_path,
+        ownerName: raw.edit_blocker.owner_name,
+      },
+    }
+  },
+
+  async saveAccessRule(input: {
+    path: string
+    mode: "inherit" | "everyone" | "restricted" | "guest"
+    memberIds?: number[]
+    clearDescendants?: boolean
+  }): Promise<{ shareToken: string | null }> {
+    const res = await fetch("/api/v1/access_rules", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: input.path,
+        mode: input.mode,
+        member_ids: input.memberIds ?? [],
+        clear_descendants: input.clearDescendants ?? false,
+      }),
+    })
+    if (!res.ok) throw new ApiError(res.status)
+    const raw = (await res.json()) as { share_token: string | null }
+    return { shareToken: raw.share_token }
+  },
+
+  async adminUsers(): Promise<AdminUser[]> {
+    const raw = await req<{
+      users: {
+        id: number; name: string; nickname: string; email: string | null
+        avatar_url: string | null; role: "admin" | "user"; banned: boolean
+        expires_at: string | null; expired: boolean; joined_at: string
+        providers: string[]; is_self: boolean
+      }[]
+    }>("/api/v1/admin/users")
+    return raw.users.map((u) => ({
+      id: u.id, name: u.name, nickname: u.nickname, avatarUrl: u.avatar_url,
+      email: u.email, role: u.role, banned: u.banned, expiresAt: u.expires_at,
+      expired: u.expired, joinedAt: u.joined_at, providers: u.providers, isSelf: u.is_self,
+    }))
+  },
+
+  async updateAdminUser(
+    id: number,
+    attrs: { expiresAt?: string | null; banned?: boolean },
+  ): Promise<void> {
+    const body: Record<string, unknown> = {}
+    if ("expiresAt" in attrs) body.expires_at = attrs.expiresAt
+    if ("banned" in attrs) body.banned = attrs.banned
+    const res = await fetch(`/api/v1/admin/users/${id}`, {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async pendingUsers(): Promise<{ pending: PendingUser[]; linkCandidates: ApiUser[] }> {
+    const raw = await req<{
+      pending_users: {
+        id: number; name: string; nickname: string; email: string | null
+        google_email: string | null; requested_at: string
+      }[]
+      link_candidates: { id: number; name: string; nickname: string }[]
+    }>("/api/v1/admin/pending_users")
+    return {
+      pending: raw.pending_users.map((u) => ({
+        id: u.id, name: u.name, nickname: u.nickname, email: u.email,
+        googleEmail: u.google_email, requestedAt: u.requested_at,
+      })),
+      linkCandidates: raw.link_candidates.map((u) => ({
+        id: u.id, name: u.name, nickname: u.nickname, avatarUrl: null,
+      })),
+    }
+  },
+
+  async approvePendingUser(id: number): Promise<void> {
+    const res = await fetch(`/api/v1/admin/pending_users/${id}/approve`, {
+      method: "POST",
+      credentials: "same-origin",
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async linkPendingUser(id: number, targetUserId: number): Promise<void> {
+    const res = await fetch(`/api/v1/admin/pending_users/${id}/link`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ target_user_id: targetUserId }),
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async rejectPendingUser(id: number): Promise<void> {
+    const res = await fetch(`/api/v1/admin/pending_users/${id}`, {
+      method: "DELETE",
+      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },

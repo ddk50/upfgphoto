@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useSwipeable } from "react-swipeable"
 import { toast } from "sonner"
-import { ChevronLeft, ChevronRight, Info, Link2, Trash2, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Info, Link2, Loader2, Trash2, X } from "lucide-react"
 import type { Photo } from "@/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,7 +22,7 @@ import {
 import { PhotoMetaPanel } from "./PhotoMetaPanel"
 import { useKeyboard } from "@/hooks/useKeyboard"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { usePhotoLibrary } from "@/contexts/PhotoLibraryContext"
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 type LightboxProps = {
@@ -30,17 +30,19 @@ type LightboxProps = {
   index: number
   onClose: () => void
   onIndexChange: (i: number) => void
+  // 削除完了時に呼ばれる。未指定なら削除ボタン非表示 (ゲストページ等)
+  onDeleted?: (photoId: string) => void
 }
 
-export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProps) {
+export function Lightbox({ photos, index, onClose, onIndexChange, onDeleted }: LightboxProps) {
   const [metaOpen, setMetaOpen] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 640px)")
-  const { getPhotoEffectiveAccess, canDeletePhoto, isMyPhoto, deletePhoto } = usePhotoLibrary()
   const photo = photos[index]
-  const isShared = photo ? getPhotoEffectiveAccess(photo.path).mode === "guest" : false
-  const canDelete = photo ? canDeletePhoto(photo) : false
-  const adminOverride = photo ? canDelete && !isMyPhoto(photo) : false
+  const isShared = photo?.effectiveMode === "guest"
+  const canDelete = !!photo?.canDelete && !!onDeleted
+  const adminOverride = canDelete && photo?.isMine === false
   const hasPrev = index > 0
   const hasNext = index < photos.length - 1
 
@@ -62,6 +64,25 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
   })
 
   if (!photo) return null
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      await api.deletePhoto(photo.id)
+      toast.success(adminOverride ? "管理者として削除しました" : "削除しました")
+      setConfirmDeleteOpen(false)
+      if (photos.length <= 1) {
+        onClose()
+      } else if (!hasNext) {
+        onIndexChange(index - 1)
+      }
+      onDeleted?.(photo.id)
+    } catch {
+      toast.error("削除に失敗しました")
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -180,35 +201,17 @@ export function Lightbox({ photos, index, onClose, onIndexChange }: LightboxProp
       <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{adminOverride ? "管理者として削除しますか？" : "写真を削除しますか？"}</DialogTitle>
-            <DialogDescription>
-              {adminOverride
-                ? `「${photo.title}」を削除します。モックなのでリロードで元に戻ります。`
-                : `「${photo.title}」を削除します。モックなのでリロードで元に戻ります。`}
-            </DialogDescription>
+            <DialogTitle>
+              {adminOverride ? "管理者として削除しますか？" : "写真を削除しますか？"}
+            </DialogTitle>
+            <DialogDescription>「{photo.title}」を削除します。元に戻せません。</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirmDeleteOpen(false)}>
               キャンセル
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                deletePhoto(photo.id)
-                toast.success(adminOverride ? "管理者として削除しました" : "削除しました", {
-                  description: "モックなのでリロードで元に戻ります",
-                })
-                setConfirmDeleteOpen(false)
-                if (photos.length <= 1) {
-                  onClose()
-                } else if (hasNext) {
-                  onIndexChange(index)
-                } else {
-                  onIndexChange(index - 1)
-                }
-              }}
-            >
-              <Trash2 className="size-4" />
+            <Button variant="destructive" disabled={deleting} onClick={() => void handleDelete()}>
+              {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
               削除
             </Button>
           </DialogFooter>
