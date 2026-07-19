@@ -30,6 +30,7 @@ Rails.application.routes.draw do
       end
       resources :users, only: :index
       get "storage", to: "storage#show"
+      get "stats", to: "stats#show"
       get "folder_tree", to: "folder_tree#show"
 
       # ゲスト (認証不要, ADR-008/009)

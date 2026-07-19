@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom"
-import { Menu, ImageUp, Images, Shield } from "lucide-react"
+import { ChartPie, Menu, ImageUp, Images, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -18,6 +18,7 @@ type NavItem = { to: string; label: string; icon: typeof Images; end: boolean; a
 const NAV: NavItem[] = [
   { to: "/", label: "ホーム", icon: Images, end: true },
   { to: "/upload", label: "アップロード", icon: ImageUp, end: false },
+  { to: "/stats", label: "統計", icon: ChartPie, end: false },
   { to: "/admin/users", label: "ユーザ管理", icon: Shield, end: false, adminOnly: true },
 ]
 

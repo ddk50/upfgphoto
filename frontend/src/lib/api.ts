@@ -496,6 +496,25 @@ export const api = {
     return raw.photos.map(adaptPhoto)
   },
 
+  async stats(): Promise<{
+    totalPhotos: number
+    uploaders: { id: number; name: string; avatarUrl: string | null; count: number }[]
+  }> {
+    const raw = await req<{
+      total_photos: number
+      uploaders: { id: number; name: string; avatar_url: string | null; count: number }[]
+    }>("/api/v1/stats")
+    return {
+      totalPhotos: raw.total_photos,
+      uploaders: raw.uploaders.map((u) => ({
+        id: u.id,
+        name: u.name,
+        avatarUrl: u.avatar_url,
+        count: u.count,
+      })),
+    }
+  },
+
   async storage(): Promise<{ totalBytes: number; usedBytes: number }> {
     const raw = await req<{ total_bytes: number; used_bytes: number }>("/api/v1/storage")
     return { totalBytes: raw.total_bytes, usedBytes: raw.used_bytes }
