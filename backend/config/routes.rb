@@ -1,14 +1,24 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # 認証 (Google OAuth のみ)。エントリは omniauth middleware の POST /auth/google_oauth2
+  get "/auth/:provider/callback", to: "sessions#create"
+  get "/auth/failure", to: "sessions#failure"
+  delete "/logout", to: "sessions#destroy"
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  namespace :api do
+    namespace :v1 do
+      get "me", to: "me#show"
+
+      namespace :admin do
+        # Google 初回ログイン者の承認/既存ユーザへの紐付け (ADR-020 移行フロー)
+        resources :pending_users, only: %i[index destroy] do
+          member do
+            post :approve
+            post :link
+          end
+        end
+      end
+    end
+  end
 end

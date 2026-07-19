@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_many :identities, dependent: :destroy
+  has_one :google_identity, -> { where(provider: "google_oauth2") },
+          class_name: "Identity", inverse_of: :user, dependent: nil
   has_many :photos, dependent: :restrict_with_error
 
   enum :role, { admin: "admin", user: "user" }, suffix: :role
