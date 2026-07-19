@@ -14,6 +14,7 @@ export type Photo = {
   thumbnailUrl: string
   path: string
   title: string
+  description?: string
   takenAt: string
   width: number
   height: number

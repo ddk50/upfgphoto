@@ -1,3 +1,15 @@
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return "—"
+  return d.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 const UNITS = ["B", "KB", "MB", "GB", "TB"]
 
 export function formatBytes(bytes: number, fractionDigits = 1): string {

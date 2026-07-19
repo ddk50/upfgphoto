@@ -45,6 +45,7 @@ export type Me =
 type ApiPhoto = {
   id: number
   title: string
+  description: string | null
   folder_path: string
   file_name: string
   path: string
@@ -61,6 +62,7 @@ type ApiPhoto = {
 type ApiGuestPhoto = {
   id: number
   title: string
+  description: string | null
   file_name: string
   taken_at: string
   urls: { small: string; large: string; original: string } | null
@@ -141,6 +143,7 @@ function adaptPhoto(p: ApiPhoto): AdaptedPhoto {
     thumbnailUrl: p.urls?.small ?? PLACEHOLDER_IMAGE,
     path: p.path,
     title: p.title,
+    description: p.description ?? undefined,
     takenAt: p.taken_at,
     width: 0,
     height: 0,
@@ -160,6 +163,7 @@ function adaptGuestPhoto(p: ApiGuestPhoto): AdaptedPhoto {
     thumbnailUrl: p.urls?.small ?? PLACEHOLDER_IMAGE,
     path: p.file_name,
     title: p.title,
+    description: p.description ?? undefined,
     takenAt: p.taken_at,
     width: 0,
     height: 0,
@@ -354,6 +358,17 @@ export const api = {
   async folder(path: string): Promise<FolderView> {
     const raw = await req<ApiFolderView>(`/api/v1/folders?path=${encodeURIComponent(path)}`)
     return adaptFolderView(raw)
+  },
+
+  async renameFolder(path: string, newName: string): Promise<{ path: string; name: string }> {
+    const res = await fetch("/api/v1/folders", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path, new_name: newName }),
+    })
+    if (!res.ok) throw new ApiError(res.status)
+    return (await res.json()) as { path: string; name: string }
   },
 
   async search(params: { q?: string; tags?: string[]; owned?: boolean }): Promise<SearchResult> {

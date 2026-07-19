@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
-import { Check, Copy, Link2, Loader2, Settings2, User as UserIcon } from "lucide-react"
+import { Check, Copy, Link2, Loader2, Pencil, Settings2, User as UserIcon } from "lucide-react"
 import { FolderBreadcrumb } from "@/components/folder/FolderBreadcrumb"
 import { FolderGrid } from "@/components/folder/FolderGrid"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
+import { PhotoListView } from "@/components/photo/PhotoListView"
+import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
+import { usePhotoView } from "@/hooks/usePhotoView"
+import { sortPhotos, type PhotoSort } from "@/lib/photoSort"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -12,15 +16,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { AccessBadge } from "@/components/access/AccessBadge"
 import { AccessSettingsDialog } from "@/components/access/AccessSettingsDialog"
 import { CreateFolderButton } from "@/components/folder/CreateFolderButton"
+import { RenameFolderDialog } from "@/components/folder/RenameFolderDialog"
 import { useSession } from "@/contexts/SessionContext"
 import { api, ApiError, type FolderView } from "@/lib/api"
 import { normalizeFolderPath } from "@/lib/path"
 import type { FolderNode } from "@/types"
 import { cn } from "@/lib/utils"
 
-export function FolderPage() {
+// path を渡すとルート固定などルーティング外からも埋め込める (HomePage が "/" で使用)
+export function FolderPage({ path }: { path?: string } = {}) {
   const params = useParams()
-  const folderPath = normalizeFolderPath("/" + (params["*"] ?? ""))
+  const folderPath = normalizeFolderPath(path ?? "/" + (params["*"] ?? ""))
   const { isAdmin } = useSession()
   const [view, setView] = useState<FolderView | null>(null)
   const [status, setStatus] = useState<"loading" | "ok" | "not-found">("loading")
@@ -29,6 +35,10 @@ export function FolderPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [copied, setCopied] = useState(false)
   const [accessDialogOpen, setAccessDialogOpen] = useState(false)
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [photoView, setPhotoView] = usePhotoView()
+  const [photoSort, setPhotoSort] = useState<PhotoSort>(null)
+  const navigate = useNavigate()
 
   const load = useCallback(async () => {
     setStatus("loading")
@@ -47,10 +57,11 @@ export function FolderPage() {
 
   const allPhotos = view?.photos ?? []
   const mineCount = useMemo(() => allPhotos.filter((p) => p.isMine).length, [allPhotos])
-  const photos = useMemo(
-    () => (ownedFilter ? allPhotos.filter((p) => p.isMine) : allPhotos),
-    [allPhotos, ownedFilter],
-  )
+  const photos = useMemo(() => {
+    const filtered = ownedFilter ? allPhotos.filter((p) => p.isMine) : allPhotos
+    // ソートはリスト表示のみ。並びはライトボックスの前後移動にもそのまま効く
+    return photoView === "list" ? sortPhotos(filtered, photoSort) : filtered
+  }, [allPhotos, ownedFilter, photoView, photoSort])
 
   const toggleOwned = () => {
     const next = new URLSearchParams(searchParams)
@@ -119,6 +130,22 @@ export function FolderPage() {
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
                 {view.name || "ライブラリ"}
               </h1>
+              {view.canEditAccess && folderPath !== "/" && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => setRenameOpen(true)}
+                      aria-label="フォルダ名を変更"
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>フォルダ名を変更</TooltipContent>
+                </Tooltip>
+              )}
               <AccessBadge access={view.access} variant="pill" showWhenPublic />
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -143,6 +170,7 @@ export function FolderPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <PhotoViewToggle view={photoView} onChange={setPhotoView} />
             <CreateFolderButton parentPath={folderPath} />
             <AccessButton
               canEdit={view.canEditAccess}
@@ -158,37 +186,56 @@ export function FolderPage() {
         </div>
       </header>
 
-      {hasChildren && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">フォルダ</h2>
-          <FolderGrid folders={view.folders} info={view.childInfo} />
-        </section>
-      )}
-
-      {hasChildren && hasPhotos && <Separator />}
-
-      {hasPhotos && (
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
+      {photoView === "list" ? (
+        (hasChildren || hasPhotos) && (
+          <section className="space-y-4">
             {mineCount > 0 && mineCount < allPhotos.length && (
-              <button
-                type="button"
-                onClick={toggleOwned}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
-                  ownedFilter
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card hover:border-foreground/30 hover:bg-muted",
-                )}
-              >
-                <UserIcon className="size-3.5" />
-                自分のだけ ({mineCount})
-              </button>
+              <div className="flex justify-end">
+                <OwnedFilterButton
+                  active={ownedFilter}
+                  mineCount={mineCount}
+                  onClick={toggleOwned}
+                />
+              </div>
             )}
-          </div>
-          <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
-        </section>
+            <PhotoListView
+              folders={view.folders}
+              folderInfo={view.childInfo}
+              onOpenFolder={(p) => navigate(`/folders${p}`)}
+              photos={photos}
+              onSelect={(_p, i) => setLightboxIndex(i)}
+              sort={photoSort}
+              onSortChange={setPhotoSort}
+            />
+          </section>
+        )
+      ) : (
+        <>
+          {hasChildren && (
+            <section className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">フォルダ</h2>
+              <FolderGrid folders={view.folders} info={view.childInfo} />
+            </section>
+          )}
+
+          {hasChildren && hasPhotos && <Separator />}
+
+          {hasPhotos && (
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
+                {mineCount > 0 && mineCount < allPhotos.length && (
+                  <OwnedFilterButton
+                    active={ownedFilter}
+                    mineCount={mineCount}
+                    onClick={toggleOwned}
+                  />
+                )}
+              </div>
+              <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+            </section>
+          )}
+        </>
       )}
 
       {!hasChildren && !hasPhotos && (
@@ -205,6 +252,13 @@ export function FolderPage() {
         />
       )}
 
+      <RenameFolderDialog
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+        folderPath={folderPath}
+        currentName={view.name}
+      />
+
       <AccessSettingsDialog
         open={accessDialogOpen}
         onOpenChange={setAccessDialogOpen}
@@ -213,6 +267,32 @@ export function FolderPage() {
         onSaved={() => void load()}
       />
     </div>
+  )
+}
+
+function OwnedFilterButton({
+  active,
+  mineCount,
+  onClick,
+}: {
+  active: boolean
+  mineCount: number
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
+        active
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-card hover:border-foreground/30 hover:bg-muted",
+      )}
+    >
+      <UserIcon className="size-3.5" />
+      自分のだけ ({mineCount})
+    </button>
   )
 }
 

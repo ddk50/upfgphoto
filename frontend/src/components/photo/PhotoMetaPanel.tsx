@@ -25,6 +25,11 @@ export function PhotoMetaPanel({ photo }: PhotoMetaPanelProps) {
       <section className="space-y-1">
         <h3 className="text-base font-semibold tracking-tight text-foreground">{photo.title}</h3>
         <p className="text-xs text-muted-foreground">{photo.path}</p>
+        {photo.description && (
+          <p className="whitespace-pre-line pt-1 text-sm leading-relaxed text-foreground/90">
+            {photo.description}
+          </p>
+        )}
       </section>
 
       <section className="space-y-3">

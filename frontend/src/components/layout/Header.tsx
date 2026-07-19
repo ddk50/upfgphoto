@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom"
+import { Link, NavLink, useLocation } from "react-router-dom"
 import { Menu, ImageUp, Images, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils"
 import { UserMenu } from "@/components/layout/UserMenu"
 import { useSession } from "@/contexts/SessionContext"
+import { normalizeFolderPath } from "@/lib/path"
 
 type NavItem = { to: string; label: string; icon: typeof Images; end: boolean; adminOnly?: boolean }
 
@@ -22,7 +23,20 @@ const NAV: NavItem[] = [
 
 export function Header() {
   const { isAdmin } = useSession()
-  const visibleNav = NAV.filter((n) => !n.adminOnly || isAdmin)
+  const location = useLocation()
+
+  // フォルダ閲覧中は「アップロード」を今いるフォルダ宛 (?to=) にする
+  let uploadTo = "/upload"
+  if (location.pathname.startsWith("/folders")) {
+    const folderPath = normalizeFolderPath(
+      decodeURIComponent(location.pathname.slice("/folders".length)) || "/",
+    )
+    if (folderPath !== "/") uploadTo = `/upload?to=${encodeURIComponent(folderPath)}`
+  }
+
+  const visibleNav = NAV.filter((n) => !n.adminOnly || isAdmin).map((n) =>
+    n.to === "/upload" ? { ...n, to: uploadTo } : n,
+  )
 
   return (
     <header

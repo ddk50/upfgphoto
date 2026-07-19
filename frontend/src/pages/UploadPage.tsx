@@ -4,7 +4,6 @@ import { toast } from "sonner"
 import { ChevronDown, Cloud, FolderPlus, FolderTree, ImageUp, Info, Loader2, Sparkles, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Collapsible,
@@ -17,6 +16,7 @@ import {
   type PreviewItem,
 } from "@/components/upload/UploadPreviewList"
 import { FolderPicker } from "@/components/upload/FolderPicker"
+import { TagSuggestInput } from "@/components/tags/TagSuggestInput"
 import { StorageBar } from "@/components/storage/StorageBar"
 import { api } from "@/lib/api"
 import { normalizeFolderPath } from "@/lib/path"
@@ -103,7 +103,9 @@ export function UploadPage() {
     }
   }
 
-  const canUpload = items.length > 0 && !uploading
+  // ルート直下への保存は WebUI では許可しない (整理上の方針。API 自体は許容)
+  const manualPathIsRoot = useManualPath && normalizeFolderPath(folderPath) === "/"
+  const canUpload = items.length > 0 && !uploading && !manualPathIsRoot
 
   return (
     <div className="space-y-8">
@@ -116,12 +118,13 @@ export function UploadPage() {
 
       {storage && <StorageBar storage={storage} variant="full" />}
 
-      {presetPath && useManualPath && (
+      {presetPath && useManualPath && !manualPathIsRoot && (
         <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2 text-xs text-blue-900">
           <FolderPlus className="mt-0.5 size-3.5 shrink-0" />
           <span>
-            新しいフォルダ <span className="font-mono font-semibold">{normalizeFolderPath(presetPath)}</span> に保存します。
-            写真をアップロードした時点でフォルダが作成されます。
+            {/* プリセット (?to=) ではなく現在の選択を表示する。ピッカーで選び直したらそれが実際の保存先 */}
+            フォルダ <span className="font-mono font-semibold">{normalizeFolderPath(folderPath)}</span> に保存します。
+            まだ存在しないフォルダの場合は、写真をアップロードした時点で作成されます。
           </span>
         </div>
       )}
@@ -184,6 +187,11 @@ export function UploadPage() {
                 {useManualPath && tree && (
                   <FolderPicker root={tree} value={folderPath} onChange={setFolderPath} />
                 )}
+                {manualPathIsRoot && (
+                  <p className="text-xs text-amber-700">
+                    ルート直下には保存できません。フォルダを選択するか、新規パスを入力してください。
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -191,10 +199,10 @@ export function UploadPage() {
                   <Tag className="size-3.5" />
                   キーワード（カンマ・空白区切り）
                 </Label>
-                <Input
+                <TagSuggestInput
                   id="upload-tags"
                   value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
+                  onChange={setTagsInput}
                   placeholder="京都, 桜, 旅行"
                 />
                 {parsedTags.length > 0 && (

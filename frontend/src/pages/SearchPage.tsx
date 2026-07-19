@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
+import { PhotoListView } from "@/components/photo/PhotoListView"
+import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
+import { usePhotoView } from "@/hooks/usePhotoView"
+import { sortPhotos, type PhotoSort } from "@/lib/photoSort"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { FolderGrid } from "@/components/folder/FolderGrid"
 import { api, type SearchResult } from "@/lib/api"
@@ -21,6 +25,8 @@ export function SearchPage() {
   const [queryDraft, setQueryDraft] = useState(query)
   const [tagFilter, setTagFilter] = useState("")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [photoView, setPhotoView] = usePhotoView()
+  const [photoSort, setPhotoSort] = useState<PhotoSort>(null)
   const [allTags, setAllTags] = useState<TagSummary[]>([])
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -65,7 +71,10 @@ export function SearchPage() {
     return allTags.filter((tag) => tag.name.toLowerCase().includes(t))
   }, [allTags, tagFilter])
 
-  const photos = result?.photos ?? []
+  const photos = useMemo(() => {
+    const base = result?.photos ?? []
+    return photoView === "list" ? sortPhotos(base, photoSort) : base
+  }, [result, photoView, photoSort])
   const matchedFolders = result?.folders ?? []
   const mineCount = useMemo(() => photos.filter((p) => p.isMine).length, [photos])
   const othersCount = photos.length - mineCount
@@ -251,9 +260,19 @@ export function SearchPage() {
               <UserIcon className="size-3.5" />
               自分のだけ
             </button>
+            <PhotoViewToggle view={photoView} onChange={setPhotoView} />
           </div>
           {photos.length > 0 ? (
-            <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+            photoView === "list" ? (
+              <PhotoListView
+                photos={photos}
+                onSelect={(_p, i) => setLightboxIndex(i)}
+                sort={photoSort}
+                onSortChange={setPhotoSort}
+              />
+            ) : (
+              <PhotoGrid photos={photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+            )
           ) : (
             <p className="text-sm text-muted-foreground">
               {hasFilter || ownedFilter

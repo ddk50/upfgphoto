@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import {
@@ -21,6 +21,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
+import { PhotoListView } from "@/components/photo/PhotoListView"
+import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
+import { usePhotoView } from "@/hooks/usePhotoView"
+import { sortPhotos, type PhotoSort } from "@/lib/photoSort"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { FolderCoverStack } from "@/components/folder/FolderCoverStack"
 import { api, type AdaptedPhoto, type MyPhotosFolders } from "@/lib/api"
@@ -120,8 +124,16 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [photoView, setPhotoView] = usePhotoView()
+  const [photoSort, setPhotoSort] = useState<PhotoSort>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  // リスト表示のソート結果はライトボックスの前後移動にも効かせる
+  const displayPhotos = useMemo(
+    () => (photos && photoView === "list" ? sortPhotos(photos, photoSort) : photos) ?? [],
+    [photos, photoView, photoSort],
+  )
 
   const load = useCallback(async () => {
     try {
@@ -191,6 +203,7 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <PhotoViewToggle view={photoView} onChange={setPhotoView} />
             <Button asChild variant="outline" size="sm">
               <Link to={folderLink}>
                 <FolderOpen className="size-4" />
@@ -257,14 +270,27 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
       )}
 
       {photos.length > 0 ? (
-        <PhotoGrid
-          photos={photos}
-          showShareIndicators
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-          onSelect={(_p, i) => setLightboxIndex(i)}
-        />
+        photoView === "list" ? (
+          <PhotoListView
+            photos={displayPhotos}
+            showShareIndicators
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onSelect={(_p, i) => setLightboxIndex(i)}
+            sort={photoSort}
+            onSortChange={setPhotoSort}
+          />
+        ) : (
+          <PhotoGrid
+            photos={photos}
+            showShareIndicators
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            onSelect={(_p, i) => setLightboxIndex(i)}
+          />
+        )
       ) : (
         <div className="rounded-2xl border bg-card p-12 text-center">
           <p className="text-sm text-muted-foreground">
@@ -279,9 +305,9 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
         </div>
       )}
 
-      {lightboxIndex !== null && photos[lightboxIndex] && (
+      {lightboxIndex !== null && displayPhotos[lightboxIndex] && (
         <Lightbox
-          photos={photos}
+          photos={displayPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}

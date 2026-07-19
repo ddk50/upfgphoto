@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, useParams, useSearchParams } from "react-router-dom"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { ChevronRight, ImageUp, Link2, Loader2, ShieldAlert, X } from "lucide-react"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
+import { PhotoListView } from "@/components/photo/PhotoListView"
+import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
+import { usePhotoView } from "@/hooks/usePhotoView"
+import { sortPhotos, type PhotoSort } from "@/lib/photoSort"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -30,6 +34,9 @@ export function GuestFolderPage() {
   const [view, setView] = useState<GuestFolderView | null>(null)
   const [status, setStatus] = useState<"loading" | "ok" | "invalid">("loading")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [photoView, setPhotoView] = usePhotoView()
+  const [photoSort, setPhotoSort] = useState<PhotoSort>(null)
+  const navigate = useNavigate()
 
   const load = useCallback(async () => {
     if (!token) {
@@ -94,6 +101,8 @@ export function GuestFolderPage() {
   const hasChildren = view.folders.length > 0
   const hasPhotos = view.photos.length > 0
   const totalCount = view.photos.length + view.folders.reduce((s, f) => s + f.photoCount, 0)
+  // リスト表示のソートはライトボックスの前後移動にも効かせる
+  const displayPhotos = photoView === "list" ? sortPhotos(view.photos, photoSort) : view.photos
 
   return (
     <div className="space-y-8">
@@ -139,59 +148,85 @@ export function GuestFolderPage() {
             </h1>
             <p className="text-sm text-muted-foreground">{totalCount} 枚の写真</p>
           </div>
-          <Button onClick={openUpload}>
-            <ImageUp className="size-4" />
-            写真を追加
-          </Button>
+          <div className="flex items-center gap-2">
+            <PhotoViewToggle view={photoView} onChange={setPhotoView} />
+            <Button onClick={openUpload}>
+              <ImageUp className="size-4" />
+              写真を追加
+            </Button>
+          </div>
         </div>
       </header>
 
-      {hasChildren && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">サブフォルダ</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-            {view.folders.map((child) => (
-              <Link
-                key={child.sub}
-                to={`/g/${token}/${child.sub}`}
-                className="group flex flex-col gap-2 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <FolderCoverStack
-                  coverPhoto={
-                    child.coverUrl
-                      ? coverPhotoOf(child.sub, child.name, child.coverUrl)
-                      : undefined
-                  }
-                  name={child.name}
-                />
-                <div className="flex items-baseline justify-between px-1 text-sm">
-                  <span className="truncate font-medium">{child.name}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {child.photoCount}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {photoView === "list" ? (
+        (hasChildren || hasPhotos) && (
+          <section className="space-y-4">
+            <PhotoListView
+              folders={view.folders.map((child) => ({
+                name: child.name,
+                path: child.sub,
+                children: [],
+                photos: [],
+                descendantPhotoCount: child.photoCount,
+              }))}
+              onOpenFolder={(sub) => navigate(`/g/${token}/${sub}`)}
+              photos={displayPhotos}
+              onSelect={(_p, i) => setLightboxIndex(i)}
+              sort={photoSort}
+              onSortChange={setPhotoSort}
+            />
+          </section>
+        )
+      ) : (
+        <>
+          {hasChildren && (
+            <section className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">サブフォルダ</h2>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+                {view.folders.map((child) => (
+                  <Link
+                    key={child.sub}
+                    to={`/g/${token}/${child.sub}`}
+                    className="group flex flex-col gap-2 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <FolderCoverStack
+                      coverPhoto={
+                        child.coverUrl
+                          ? coverPhotoOf(child.sub, child.name, child.coverUrl)
+                          : undefined
+                      }
+                      name={child.name}
+                    />
+                    <div className="flex items-baseline justify-between px-1 text-sm">
+                      <span className="truncate font-medium">{child.name}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {child.photoCount}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
-      {hasChildren && hasPhotos && <Separator />}
+          {hasChildren && hasPhotos && <Separator />}
 
-      {hasPhotos && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
-          <PhotoGrid photos={view.photos} onSelect={(_p, i) => setLightboxIndex(i)} />
-        </section>
+          {hasPhotos && (
+            <section className="space-y-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">写真</h2>
+              <PhotoGrid photos={view.photos} onSelect={(_p, i) => setLightboxIndex(i)} />
+            </section>
+          )}
+        </>
       )}
 
       {!hasPhotos && !hasChildren && (
         <p className="text-sm text-muted-foreground">このフォルダにはまだ写真がありません。</p>
       )}
 
-      {lightboxIndex !== null && view.photos[lightboxIndex] && (
+      {lightboxIndex !== null && displayPhotos[lightboxIndex] && (
         <Lightbox
-          photos={view.photos}
+          photos={displayPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}
