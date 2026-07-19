@@ -14,10 +14,21 @@ export const PLACEHOLDER_IMAGE =
 
 export class ApiError extends Error {
   status: number
+  serverMessage?: string
 
-  constructor(status: number) {
-    super(`API error: ${status}`)
+  constructor(status: number, serverMessage?: string) {
+    super(serverMessage || `API error: ${status}`)
     this.status = status
+    this.serverMessage = serverMessage
+  }
+}
+
+// エラーレスポンス { error: "..." } からユーザ向けメッセージを取り出す
+async function serverError(res: Response): Promise<string | undefined> {
+  try {
+    return ((await res.json()) as { error?: string }).error
+  } catch {
+    return undefined
   }
 }
 
@@ -425,7 +436,7 @@ export const api = {
       credentials: "same-origin",
       body,
     })
-    if (!res.ok) throw new ApiError(res.status)
+    if (!res.ok) throw new ApiError(res.status, await serverError(res))
   },
 
   async uploadPhotos(input: {
@@ -442,7 +453,7 @@ export const api = {
       credentials: "same-origin",
       body,
     })
-    if (!res.ok) throw new ApiError(res.status)
+    if (!res.ok) throw new ApiError(res.status, await serverError(res))
     const raw = (await res.json()) as { photos: ApiPhoto[]; folders: string[] }
     return { photos: raw.photos.map(adaptPhoto), folders: raw.folders }
   },

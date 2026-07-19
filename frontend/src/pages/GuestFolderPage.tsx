@@ -24,7 +24,7 @@ import {
   UploadPreviewList,
   type PreviewItem,
 } from "@/components/upload/UploadPreviewList"
-import { api, PLACEHOLDER_IMAGE, type GuestFolderView } from "@/lib/api"
+import { api, ApiError, PLACEHOLDER_IMAGE, type GuestFolderView } from "@/lib/api"
 import type { Photo } from "@/types"
 
 export function GuestFolderPage() {
@@ -312,8 +312,10 @@ function GuestUploadDialog({
       toast.success(`${items.length} 枚をアップロードしました`)
       setItems([])
       onUploaded()
-    } catch {
-      toast.error("アップロードに失敗しました")
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError && e.serverMessage ? e.serverMessage : "アップロードに失敗しました",
+      )
     } finally {
       setUploading(false)
     }

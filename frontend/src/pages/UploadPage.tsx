@@ -18,7 +18,7 @@ import {
 import { FolderPicker } from "@/components/upload/FolderPicker"
 import { TagSuggestInput } from "@/components/tags/TagSuggestInput"
 import { StorageBar } from "@/components/storage/StorageBar"
-import { api } from "@/lib/api"
+import { api, ApiError } from "@/lib/api"
 import { normalizeFolderPath } from "@/lib/path"
 import { groupByAutoFolder } from "@/lib/upload"
 import type { FolderNode, StorageInfo } from "@/types"
@@ -96,8 +96,10 @@ export function UploadPage() {
         setSearchParams({}, { replace: true })
         navigate(`/folders${result.folders[0] ?? ""}`)
       }
-    } catch {
-      toast.error("アップロードに失敗しました")
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError && e.serverMessage ? e.serverMessage : "アップロードに失敗しました",
+      )
     } finally {
       setUploading(false)
     }

@@ -7,15 +7,22 @@ require "exifr/jpeg"
 class PhotoUploader
   Result = Struct.new(:photos, :folders, keyword_init: true)
 
+  # 受理する形式 (実バイトの magic sniffing で判定。宣言 content_type は信用しない)。
+  # HEIC は Safari が Web アップロード時に JPEG へ自動変換するため実需がなく、
+  # 生 HEIC (ファイルアプリ経由等) はサムネ生成が libvips のビルド依存になるので拒否
+  ALLOWED_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
+  HEIC_TYPES = %w[image/heic image/heif image/heic-sequence image/heif-sequence].freeze
+
   def self.upload!(files:, uploader:, folder_path: nil, tag_names: [], owner_for_new_paths: nil)
     files = Array(files)
     raise ArgumentError, "no files" if files.empty?
 
+    typed = files.map { |file| [ file, validate_file!(file) ] }
     tags = Array(tag_names).map(&:strip).reject(&:empty?).uniq
                            .map { |name| Tag.find_or_create_by!(name: name) }
 
     photos = ActiveRecord::Base.transaction do
-      files.map do |file|
+      typed.map do |file, content_type|
         shot_at = infer_shot_time(file)
         dest = folder_path.presence&.then { |p| normalize(p) } || auto_folder_path(shot_at)
         register_first_creator!(dest, owner_for_new_paths || uploader)
@@ -29,13 +36,38 @@ class PhotoUploader
           exif: nil
         )
         photo.image.attach(io: file.to_io, filename: photo.file_name,
-                           content_type: file.content_type.presence || "image/jpeg")
+                           content_type: content_type)
         tags.each { |t| photo.taggings.create!(tag: t) }
         photo
       end
     end
 
     Result.new(photos: photos, folders: photos.map(&:folder_path).uniq)
+  end
+
+  def self.max_file_size
+    ENV.fetch("MAX_UPLOAD_MB", "50").to_i.megabytes
+  end
+
+  # 実バイトの sniffing で形式とサイズを検証し、実体の content_type を返す。
+  # ArgumentError はコントローラ側で 422 + メッセージとしてそのまま返る
+  def self.validate_file!(file)
+    type = Marcel::MimeType.for(file.tempfile.tap(&:rewind))
+    file.tempfile.rewind
+    name = file.original_filename.to_s.presence || "ファイル"
+
+    if HEIC_TYPES.include?(type)
+      raise ArgumentError,
+            "#{name}: HEIC/HEIF は未対応です。写真アプリから選択すると自動で JPEG に変換されます"
+    end
+    unless ALLOWED_TYPES.include?(type)
+      raise ArgumentError, "#{name}: 対応形式は JPEG / PNG / WebP / GIF です"
+    end
+    if file.size > max_file_size
+      raise ArgumentError, "#{name}: サイズ上限 #{max_file_size / 1.megabyte}MB を超えています"
+    end
+
+    type
   end
 
   def self.infer_shot_time(file)

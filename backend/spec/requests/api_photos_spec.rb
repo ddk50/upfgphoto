@@ -26,6 +26,55 @@ RSpec.describe "写真 API" do
       expect(Photo.last.tags.map(&:name)).to eq([ "夏" ])
     end
 
+    describe "形式・サイズ検証 (実バイトの sniffing)" do
+      def fake_file(name, bytes, declared_type)
+        file = Tempfile.new([ "up", File.extname(name) ])
+        file.binmode
+        file.write(bytes)
+        file.rewind
+        Rack::Test::UploadedFile.new(file.path, declared_type, true).tap do |u|
+          u.instance_variable_set(:@original_filename, name)
+        end
+      end
+
+      before { login_as(a) }
+
+      it "PNG は受理される (content_type は実バイトから決まる)" do
+        png = fake_file("s.png", "\x89PNG\r\n\x1a\n".b + "0" * 32, "image/png")
+        post "/api/v1/photos", params: { files: [ png ], folder_path: "/x" }
+
+        expect(response).to have_http_status(:created)
+        expect(Photo.last.image.blob.content_type).to eq("image/png")
+      end
+
+      it "拡張子と content_type を偽装しても実バイトが画像でなければ 422" do
+        fake = fake_file("evil.jpg", "just a text file", "image/jpeg")
+        post "/api/v1/photos", params: { files: [ fake ], folder_path: "/x" }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.parsed_body["error"]).to include("対応形式は JPEG / PNG / WebP / GIF")
+        expect(Photo.count).to eq(0)
+      end
+
+      it "HEIC は変換案内つきの専用メッセージで 422" do
+        heic = fake_file("iphone.heic", "\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic".b, "image/heic")
+        post "/api/v1/photos", params: { files: [ heic ], folder_path: "/x" }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.parsed_body["error"]).to include("HEIC/HEIF は未対応")
+        expect(response.parsed_body["error"]).to include("自動で JPEG に変換")
+      end
+
+      it "サイズ上限を超えると 422、1枚でも不正があれば全体が保存されない" do
+        allow(PhotoUploader).to receive(:max_file_size).and_return(4)
+        post "/api/v1/photos", params: { files: [ fake_jpg("a.jpg"), fake_jpg("b.jpg") ], folder_path: "/x" }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.parsed_body["error"]).to include("サイズ上限")
+        expect(Photo.count).to eq(0)
+      end
+    end
+
     describe "タグ付きアップロード" do
       it "複数ファイル×複数タグで、全ファイルに全タグが付く" do
         login_as(a)
