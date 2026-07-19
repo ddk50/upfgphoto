@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import {
   Shield, User as UserIcon, ExternalLink, ChevronDown,
-  Images, Folder, LogOut,
+  Images, Folder, LogOut, Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -77,6 +77,11 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => navigate("/shared-folders")}>
           <Folder className="size-4 text-muted-foreground" />
           共有中のフォルダ
+          <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/trash")}>
+          <Trash2 className="size-4 text-muted-foreground" />
+          ゴミ箱
           <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
         </DropdownMenuItem>
         {isAdmin && (

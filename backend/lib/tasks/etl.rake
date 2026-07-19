@@ -11,4 +11,14 @@ namespace :etl do
     importer.run!
     importer.write_report(Rails.root.join("tmp/etl_report.txt"))
   end
+
+  desc "画像ファイルの取り込みのみ (DB は wipe しない。中断からの再開用)"
+  task attach: :environment do
+    importer = Etl::LegacyImporter.new(
+      legacy_db_path: ENV.fetch("LEGACY_DB", "/home/kazushi/repos/upfgphoto/db/production.sqlite3"),
+      data_dir: ENV.fetch("LEGACY_DATA", "/home/kazushi/repos/upfgphoto/data/prod")
+    )
+    importer.attach_only!
+    importer.write_report(Rails.root.join("tmp/etl_attach_report.txt"))
+  end
 end

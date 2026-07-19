@@ -9,6 +9,7 @@ import { MyPhotosPage } from "@/pages/MyPhotosPage"
 import { AdminUsersPage } from "@/pages/AdminUsersPage"
 import { PendingApprovalPage } from "@/pages/PendingApprovalPage"
 import { SharedFoldersPage } from "@/pages/SharedFoldersPage"
+import { TrashPage } from "@/pages/TrashPage"
 import { GuestFolderPage } from "@/pages/GuestFolderPage"
 
 export const router = createBrowserRouter([
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
           { path: "admin/users", Component: AdminUsersPage },
           { path: "pending", Component: PendingApprovalPage },
           { path: "shared-folders", Component: SharedFoldersPage },
+          { path: "trash", Component: TrashPage },
         ],
       },
       {

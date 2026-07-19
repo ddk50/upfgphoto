@@ -645,4 +645,37 @@ export const api = {
     })
     if (!res.ok) throw new ApiError(res.status)
   },
+
+  async trash(): Promise<{ retentionDays: number; photos: TrashPhoto[] }> {
+    const raw = await req<{
+      retention_days: number
+      photos: (ApiPhoto & { deleted_at: string; purge_deadline: string })[]
+    }>("/api/v1/trash")
+    return {
+      retentionDays: raw.retention_days,
+      photos: raw.photos.map((p) => ({
+        ...adaptPhoto(p),
+        deletedAt: p.deleted_at,
+        purgeDeadline: p.purge_deadline,
+      })),
+    }
+  },
+
+  async restoreFromTrash(id: string): Promise<void> {
+    const res = await fetch(`/api/v1/trash/${id}/restore`, {
+      method: "POST",
+      credentials: "same-origin",
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
+
+  async purgeFromTrash(id: string): Promise<void> {
+    const res = await fetch(`/api/v1/trash/${id}`, {
+      method: "DELETE",
+      credentials: "same-origin",
+    })
+    if (!res.ok) throw new ApiError(res.status)
+  },
 }
+
+export type TrashPhoto = AdaptedPhoto & { deletedAt: string; purgeDeadline: string }

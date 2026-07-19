@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_160000) do
   create_table "access_rule_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "access_rule_id", null: false
     t.datetime "created_at", null: false
@@ -79,6 +79,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_140000) do
 
   create_table "photos", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "deleted_at"
     t.json "exif"
     t.string "file_name", null: false
     t.string "folder_path", null: false, collation: "utf8mb4_bin"
@@ -86,6 +87,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_140000) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["deleted_at"], name: "index_photos_on_deleted_at"
     t.index ["folder_path"], name: "index_photos_on_folder_path"
     t.index ["taken_at"], name: "index_photos_on_taken_at"
     t.index ["user_id"], name: "index_photos_on_user_id"

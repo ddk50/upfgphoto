@@ -4,7 +4,7 @@ module Api
       before_action :require_approved
 
       def index
-        counts = Tagging.group(:tag_id).count
+        counts = Tagging.joins(:photo).merge(Photo.kept).group(:tag_id).count
         tags = Tag.order(:name).map do |t|
           { name: t.name, count: counts[t.id] || 0 }
         end

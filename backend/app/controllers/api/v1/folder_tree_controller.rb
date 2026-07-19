@@ -6,7 +6,7 @@ module Api
 
       def show
         fq = FolderQuery.new(current_user)
-        counts = Photo.group(:folder_path).count
+        counts = Photo.kept.group(:folder_path).count
         paths = counts.keys
                       .flat_map { |p| AccessPolicy.ancestor_chain(p) }
                       .uniq

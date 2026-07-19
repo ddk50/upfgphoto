@@ -5,7 +5,7 @@ module Api
       before_action :require_approved
 
       def show
-        photo = Photo.includes(:user, :tags).find(params[:id])
+        photo = Photo.kept.includes(:user, :tags).find(params[:id])
         fq = FolderQuery.new(current_user)
         return head :not_found unless photo.user_id == current_user.id ||
                                       fq.folder_visible?(photo.folder_path)
@@ -28,14 +28,15 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      # 自分の写真 or admin のみ (ADR: uploader distinction)
+      # 自分の写真 or admin のみ (ADR: uploader distinction)。
+      # 削除は論理削除 = ゴミ箱行き。実ファイルは保持期間経過後に trash:purge が消す (ADR-022)
       def destroy
-        photo = Photo.find(params[:id])
+        photo = Photo.kept.find(params[:id])
         unless current_user.admin_role? || photo.user_id == current_user.id
           return head :forbidden
         end
 
-        photo.destroy!
+        photo.trash!
         head :no_content
       end
     end

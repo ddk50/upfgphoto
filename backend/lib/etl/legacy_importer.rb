@@ -34,6 +34,14 @@ module Etl
       self
     end
 
+    # DB は wipe せず、未添付の画像ファイルだけを取り込む (中断からの再開用)
+    def attach_only!
+      started = Time.current
+      attach_files!
+      note :duration, "#{(Time.current - started).round(1)}s"
+      self
+    end
+
     def write_report(path)
       File.write(path, render_report)
       @io.puts render_report
@@ -194,6 +202,8 @@ module Etl
     # --- files -------------------------------------------------------------
 
     def attach_files!
+      # 長時間走るため、dev 環境のコードリロードで定数が壊れないよう先に eager load しておく
+      Rails.application.eager_load! if Rails.env.development?
       photo_dir = File.join(@data_dir, "photo")
       unless @attach_files && Dir.exist?(photo_dir) && !Dir.empty?(photo_dir)
         note :files_attached, 0
@@ -203,7 +213,13 @@ module Etl
       end
 
       attached = 0
+      skipped = 0
       Photo.find_each do |photo|
+        # 再実行時は添付済みをスキップ (中断からの再開を可能にする)
+        if photo.image.attached?
+          skipped += 1
+          next
+        end
         src = File.join(photo_dir, "#{photo.id}.jpg")
         if File.exist?(src)
           photo.image.attach(io: File.open(src), filename: photo.file_name, content_type: "image/jpeg")
@@ -212,6 +228,7 @@ module Etl
           @report[:missing_files] << photo.id
         end
       end
+      note :files_already_attached, skipped
       orphans = Dir.children(photo_dir).map { |f| f[/\A(\d+)\.jpg\z/, 1] }.compact.map(&:to_i) - Photo.ids
       @report[:orphan_files] = orphans
 

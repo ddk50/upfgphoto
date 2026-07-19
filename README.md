@@ -28,6 +28,12 @@ bin/check              # rubocop + rspec
 
 # ステージング (本番と同一構成) をローカルで動かす場合
 RAILS_ENV=staging SECRET_KEY_BASE=<任意> bin/rails db:prepare etl:import
+```
+
+本番/ステージングでは **ゴミ箱の日次パージ** を cron に登録する (ADR-022):
+
+```cron
+0 4 * * * cd /path/to/uprun/backend && RAILS_ENV=production bin/rails trash:purge >> log/trash_purge.log 2>&1
 
 # frontend (別ターミナル。/api 等は :3000 へプロキシ)
 cd frontend

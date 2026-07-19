@@ -14,15 +14,15 @@ class FolderQuery
     @resolver.visible_to?(path, @user)
   end
 
-  # path 直下の写真（新しい順）
+  # path 直下の写真（新しい順・ゴミ箱除外）
   def direct_photos(path)
-    Photo.includes(:user, :tags).where(folder_path: path).order(taken_at: :desc)
+    Photo.kept.includes(:user, :tags).where(folder_path: path).order(taken_at: :desc)
   end
 
   # path 直下の子フォルダ（名前・可視な配下の枚数・カバー）
   def children(path)
     prefix = path == "/" ? "/" : "#{path}/"
-    grouped = Photo.where("folder_path = ? OR folder_path LIKE ?", path, "#{escape_like(prefix)}%")
+    grouped = Photo.kept.where("folder_path = ? OR folder_path LIKE ?", path, "#{escape_like(prefix)}%")
                    .group(:folder_path).count
                    .reject { |p, _| p == path }
 
@@ -36,7 +36,7 @@ class FolderQuery
       next if visible_paths.empty?
 
       count = entries.sum { |p, c| visible_paths.include?(p) ? c : 0 }
-      cover = Photo.where(folder_path: visible_paths).order(taken_at: :desc).first
+      cover = Photo.kept.where(folder_path: visible_paths).order(taken_at: :desc).first
       Child.new(name: segment, path: child_path, photo_count: count, cover_photo: cover)
     end.sort_by(&:name)
   end

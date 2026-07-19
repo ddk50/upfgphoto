@@ -159,7 +159,9 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
     const ids = Array.from(selectedIds)
     try {
       await Promise.all(ids.map((id) => api.deletePhoto(id)))
-      toast.success(`${ids.length}枚を削除しました`)
+      toast.success(`${ids.length}枚をゴミ箱に移動しました`, {
+        description: "ゴミ箱から復元できます",
+      })
     } catch {
       toast.error("一部の削除に失敗しました")
     } finally {
@@ -291,7 +293,7 @@ function MyPhotosFolder({ folderPath }: { folderPath: string }) {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{selectedCount}枚の写真を削除しますか？</DialogTitle>
-            <DialogDescription>元に戻せません。</DialogDescription>
+            <DialogDescription>ゴミ箱に移動します。しばらくの間は復元できます。</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirmOpen(false)}>

@@ -43,18 +43,20 @@ RSpec.describe "写真 API" do
                     taken_at: Time.current)
     end
 
-    it "自分の写真は削除できる" do
+    it "自分の写真は削除できる (論理削除 = ゴミ箱行き, ADR-022)" do
       login_as(a)
-      expect { delete "/api/v1/photos/#{photo.id}" }.to change(Photo, :count).by(-1)
+      expect { delete "/api/v1/photos/#{photo.id}" }.not_to change(Photo, :count)
+      expect(photo.reload).to be_trashed
     end
 
-    it "他人の写真は 403、admin は削除できる" do
+    it "他人の写真は 403、admin はゴミ箱に送れる" do
       login_as(b)
       delete "/api/v1/photos/#{photo.id}"
       expect(response).to have_http_status(:forbidden)
 
       login_as(admin)
-      expect { delete "/api/v1/photos/#{photo.id}" }.to change(Photo, :count).by(-1)
+      delete "/api/v1/photos/#{photo.id}"
+      expect(photo.reload).to be_trashed
     end
   end
 

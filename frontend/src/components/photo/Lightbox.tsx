@@ -69,7 +69,9 @@ export function Lightbox({ photos, index, onClose, onIndexChange, onDeleted }: L
     setDeleting(true)
     try {
       await api.deletePhoto(photo.id)
-      toast.success(adminOverride ? "管理者として削除しました" : "削除しました")
+      toast.success(adminOverride ? "管理者としてゴミ箱に移動しました" : "ゴミ箱に移動しました", {
+        description: "ゴミ箱から復元できます",
+      })
       setConfirmDeleteOpen(false)
       if (photos.length <= 1) {
         onClose()
@@ -204,7 +206,9 @@ export function Lightbox({ photos, index, onClose, onIndexChange, onDeleted }: L
             <DialogTitle>
               {adminOverride ? "管理者として削除しますか？" : "写真を削除しますか？"}
             </DialogTitle>
-            <DialogDescription>「{photo.title}」を削除します。元に戻せません。</DialogDescription>
+            <DialogDescription>
+              「{photo.title}」をゴミ箱に移動します。しばらくの間は復元できます。
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirmDeleteOpen(false)}>

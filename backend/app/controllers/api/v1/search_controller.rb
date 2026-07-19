@@ -20,21 +20,21 @@ module Api
       private
 
       def matching_folders(q, fq)
-        all_paths = Photo.distinct.pluck(:folder_path)
+        all_paths = Photo.kept.distinct.pluck(:folder_path)
                          .flat_map { |p| AccessPolicy.ancestor_chain(p) }
                          .uniq - [ "/" ]
         all_paths.select { |p| FolderPath.name(p).downcase.include?(q) }
                  .select { |p| fq.folder_visible?(p) }
                  .sort.first(50)
                  .map do |p|
-          count = Photo.where("folder_path = ? OR folder_path LIKE ?",
+          count = Photo.kept.where("folder_path = ? OR folder_path LIKE ?",
                               p, "#{escape_like(p)}/%").count
           { name: FolderPath.name(p), path: p, photo_count: count }
         end
       end
 
       def matching_photos(q, tag_names, owned, fq)
-        scope = Photo.includes(:user, :tags).order(taken_at: :desc)
+        scope = Photo.kept.includes(:user, :tags).order(taken_at: :desc)
         scope = scope.where(user: current_user) if owned
 
         if tag_names.any?

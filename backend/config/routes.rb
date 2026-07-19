@@ -19,6 +19,11 @@ Rails.application.routes.draw do
       get "access_rules", to: "access_rules#show"
       put "access_rules", to: "access_rules#update"
       resources :share_links, only: :index
+      resources :trash, only: %i[index destroy] do
+        member do
+          post :restore
+        end
+      end
       resources :users, only: :index
       get "storage", to: "storage#show"
       get "folder_tree", to: "folder_tree#show"
