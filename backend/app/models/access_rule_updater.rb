@@ -48,7 +48,7 @@ class AccessRuleUpdater
 
   def self.descendant_rules(folder_path)
     prefix = folder_path == "/" ? "/" : "#{folder_path}/"
-    AccessRule.where("folder_path LIKE ? ESCAPE '\\'", "#{sanitize_like(prefix)}%")
+    AccessRule.where("folder_path LIKE ?", "#{sanitize_like(prefix)}%")
               .where.not(folder_path: folder_path)
               .order(:folder_path)
   end

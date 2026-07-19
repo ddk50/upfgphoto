@@ -354,6 +354,8 @@ GEM
     thruster (0.1.23-x86_64-darwin)
     thruster (0.1.23-x86_64-linux)
     timeout (0.6.1)
+    trilogy (2.12.6)
+      bigdecimal
     tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -402,6 +404,7 @@ DEPENDENCIES
   rubocop-rails-omakase
   sqlite3 (>= 2.1)
   thruster
+  trilogy (~> 2.12)
   tzinfo-data
   web-console
 
@@ -539,6 +542,7 @@ CHECKSUMS
   thruster (0.1.23-x86_64-darwin) sha256=2b22a951f6ac1218c9f461bfc6004b61854147308649475a07bc05fae2e69869
   thruster (0.1.23-x86_64-linux) sha256=9cd7265bf54e954575c8442e42d050ed8eb55df4f9d7da8fd6f94fcc0339baa5
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
+  trilogy (2.12.6) sha256=2e0f97092150c92fec41acc304c382ad52f5ea98e1eb11073e4f501f80159cf7
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42

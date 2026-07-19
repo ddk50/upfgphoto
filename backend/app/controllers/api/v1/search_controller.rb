@@ -27,7 +27,7 @@ module Api
                  .select { |p| fq.folder_visible?(p) }
                  .sort.first(50)
                  .map do |p|
-          count = Photo.where("folder_path = ? OR folder_path LIKE ? ESCAPE '\\'",
+          count = Photo.where("folder_path = ? OR folder_path LIKE ?",
                               p, "#{escape_like(p)}/%").count
           { name: FolderPath.name(p), path: p, photo_count: count }
         end
@@ -48,10 +48,10 @@ module Api
         unless q.empty?
           like = "%#{escape_like(q)}%"
           tagged = Tagging.joins(:tag)
-                          .where("LOWER(tags.name) LIKE ? ESCAPE '\\'", like)
+                          .where("LOWER(tags.name) LIKE ?", like)
                           .select(:photo_id)
           scope = scope.where(
-            "LOWER(title) LIKE :q ESCAPE '\\' OR LOWER(file_name) LIKE :q ESCAPE '\\' OR photos.id IN (:tagged)",
+            "LOWER(title) LIKE :q OR LOWER(file_name) LIKE :q OR photos.id IN (:tagged)",
             q: like, tagged: tagged
           )
         end

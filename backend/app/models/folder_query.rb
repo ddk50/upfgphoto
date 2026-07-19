@@ -22,7 +22,7 @@ class FolderQuery
   # path 直下の子フォルダ（名前・可視な配下の枚数・カバー）
   def children(path)
     prefix = path == "/" ? "/" : "#{path}/"
-    grouped = Photo.where("folder_path = ? OR folder_path LIKE ? ESCAPE '\\'", path, "#{escape_like(prefix)}%")
+    grouped = Photo.where("folder_path = ? OR folder_path LIKE ?", path, "#{escape_like(prefix)}%")
                    .group(:folder_path).count
                    .reject { |p, _| p == path }
 

@@ -1,0 +1,17 @@
+# ローカル開発・テスト用 MySQL (本番と同一メジャーバージョン)
+# 起動: docker compose up -d
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: uprun-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_USER: uprun
+      MYSQL_PASSWORD: uprunpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/mysql-init:/docker-entrypoint-initdb.d:ro
+volumes:
+  mysql-data:

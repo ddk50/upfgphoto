@@ -69,7 +69,7 @@ class PhotoUploader
 
   def self.path_materialized?(path)
     prefix = path.gsub(/[\\%_]/) { |c| "\\#{c}" } + "/"
-    Photo.where("folder_path = ? OR folder_path LIKE ? ESCAPE '\\'", path, "#{prefix}%").exists?
+    Photo.where("folder_path = ? OR folder_path LIKE ?", path, "#{prefix}%").exists?
   end
 
   def self.normalize(path)
