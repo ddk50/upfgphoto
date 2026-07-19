@@ -2,6 +2,18 @@
 
 写真共有サービス upfgphoto のフルリプレイス（モノレポ）。旧システムは `legacy` ブランチに凍結済み。
 
+## 現在地（2026-07-19 時点）
+
+**完了**: モック(仕様確定, ADR-001〜022) → モノレポ化 → backend(Rails 8.1/Ruby 4.0) → ETL → Google認証+紐付けフロー → /api/v1 全実装 → フロント全画面API接続(mock層削除済み) → 全環境MySQL 8統一(trilogy, ADR-021) → ゴミ箱=論理削除+日次trash:purge(ADR-022) → **実データ完全取り込み済み(写真26,684枚/121GB/欠損0)**
+
+**本番切替前の残タスク**:
+1. Google OAuth 資格情報 (Cloud Console) — ユーザ作業
+2. 本番配信構成 (React ビルドを Rails から配信) + Api::V1::BaseController の CSRF TODO
+3. ETL レポートの nickname 不整合5件 (46malonu, celeron1ghz, c5vecco, MooncraftShiden, Akiba_univ) の expires_at 手動判断
+4. ステージングのサーバ設置場所は未定 (構成コードは staging 環境として準備済み)
+
+**ローカル開発の起動**: README.md 参照。dev ログインは画面の「開発用ログイン」に user id (1=admin tatarou1986)。MySQL は `backend/compose.yaml` (docker)。旧DB/写真原本は `~/repos/upfgphoto` (legacy ブランチ・凍結)。
+
 ## 最重要ドキュメント
 
 - **`docs/ADR.md`** — 全設計判断（ADR-001〜020）。仕様の疑問はまずここを見る。新しい設計判断も必ずここに追記する
