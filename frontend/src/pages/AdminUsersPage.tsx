@@ -49,6 +49,16 @@ export function AdminUsersPage() {
     if (isAdmin) void load()
   }, [isAdmin, load])
 
+  const changeExpiration = async (u: AdminUser, value: string | null) => {
+    await api.updateAdminUser(u.id, { expiresAt: value })
+    toast.success(
+      value === null
+        ? "ログイン期限を解除しました（無期限）"
+        : `ログイン期限を ${formatDate(value)} に設定しました`,
+    )
+    void load()
+  }
+
   const filtered = useMemo(() => {
     if (!users) return []
     const f = filter.trim().toLowerCase()
@@ -106,23 +116,60 @@ export function AdminUsersPage() {
         <TabsContent value="active" className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-medium">アクティブユーザ（{users.length}人）</h2>
-            <div className="relative">
+            <div className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="名前・ID・メールで絞り込み"
-                className="pl-9 h-9 w-64"
+                className="pl-9 h-9 w-full"
               />
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border bg-card">
+          {/* モバイル: カード型リスト */}
+          <div className="space-y-3 md:hidden">
+            {filtered.map((u) => {
+              const inactive = u.banned || u.expired
+              return (
+                <div
+                  key={u.id}
+                  className={cn("space-y-3 rounded-2xl border bg-card p-4", inactive && "bg-muted/30")}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <UserIdentity user={u} showId />
+                    <BanButton user={u} onDone={load} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <StatusCell banned={u.banned} expired={u.expired} />
+                    <ProviderChips providers={u.providers} />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 border-t pt-3">
+                    <span className="text-xs text-muted-foreground">ログイン期限</span>
+                    <ExpirationCell
+                      user={u}
+                      disabled={u.isSelf}
+                      onChange={(value) => changeExpiration(u, value)}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+            {filtered.length === 0 && (
+              <p className="rounded-2xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+                該当するユーザがいません。
+              </p>
+            )}
+          </div>
+
+          {/* md 以上: テーブル */}
+          <div className="hidden overflow-x-auto rounded-2xl border bg-card md:block">
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
+                  <th className="px-4 py-3 text-right font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">ユーザ</th>
-                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">認証</th>
+                  <th className="px-4 py-3 text-left font-medium">認証</th>
                   <th className="px-4 py-3 text-left font-medium">ログイン期限</th>
                   <th className="px-4 py-3 text-left font-medium">状態</th>
                   <th className="px-4 py-3 text-right font-medium">操作</th>
@@ -133,99 +180,34 @@ export function AdminUsersPage() {
                   const inactive = u.banned || u.expired
                   return (
                     <tr key={u.id} className={cn(inactive && "bg-muted/30")}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          {u.avatarUrl ? (
-                            <img
-                              src={u.avatarUrl}
-                              alt={u.name}
-                              className="size-9 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex size-9 items-center justify-center rounded-full bg-muted">
-                              <UserIcon className="size-4 text-muted-foreground" />
-                            </span>
-                          )}
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{u.name}</span>
-                              {u.role === "admin" && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800">
-                                  <Shield className="size-3" />
-                                  admin
-                                </span>
-                              )}
-                              {u.isSelf && (
-                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                                  自分
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              @{u.nickname}
-                              {u.email && ` ・ ${u.email}`}
-                            </div>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground tabular-nums">
+                        {u.id}
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <div className="flex flex-wrap gap-1">
-                          {u.providers.map((p) => (
-                            <span
-                              key={p}
-                              className={cn(
-                                "rounded px-1.5 py-0.5 text-[10px]",
-                                p === "google_oauth2"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-muted text-muted-foreground",
-                              )}
-                            >
-                              {p === "google_oauth2" ? "Google" : "Twitter (未移行)"}
-                            </span>
-                          ))}
-                        </div>
+                      <td className="px-4 py-3">
+                        <UserIdentity user={u} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <ProviderChips providers={u.providers} />
                       </td>
                       <td className="px-4 py-3">
                         <ExpirationCell
                           user={u}
                           disabled={u.isSelf}
-                          onChange={async (value) => {
-                            await api.updateAdminUser(u.id, { expiresAt: value })
-                            toast.success(
-                              value === null
-                                ? "ログイン期限を解除しました（無期限）"
-                                : `ログイン期限を ${formatDate(value)} に設定しました`,
-                            )
-                            void load()
-                          }}
+                          onChange={(value) => changeExpiration(u, value)}
                         />
                       </td>
                       <td className="px-4 py-3">
                         <StatusCell banned={u.banned} expired={u.expired} />
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Button
-                          variant={u.banned ? "outline" : "ghost"}
-                          size="sm"
-                          disabled={u.isSelf}
-                          onClick={async () => {
-                            await api.updateAdminUser(u.id, { banned: !u.banned })
-                            toast.success(u.banned ? "Banを解除しました" : "ユーザをBanしました")
-                            void load()
-                          }}
-                          className={cn(
-                            !u.banned && !u.isSelf && "text-red-700 hover:bg-red-50 hover:text-red-800",
-                          )}
-                        >
-                          {u.banned ? "Unban" : "Ban"}
-                        </Button>
+                        <BanButton user={u} onDone={load} />
                       </td>
                     </tr>
                   )
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
                       該当するユーザがいません。
                     </td>
                   </tr>
@@ -242,12 +224,31 @@ export function AdminUsersPage() {
               Google でサインインした新規ユーザです。旧 Twitter アカウントの人は「紐付け」で資産を引き継ぎ、新規メンバーは「承認」してください。
             </p>
           </div>
-          <div className="overflow-x-auto rounded-2xl border bg-card">
+          {/* モバイル: カード型リスト */}
+          <div className="space-y-3 md:hidden">
+            {pending.map((u) => (
+              <div key={u.id} className="space-y-3 rounded-2xl border bg-card p-4">
+                <PendingIdentity user={u} />
+                <p className="text-xs text-muted-foreground">申請日: {formatDate(u.requestedAt)}</p>
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">
+                  <PendingActions pendingUser={u} candidates={candidates} onDone={load} />
+                </div>
+              </div>
+            ))}
+            {pending.length === 0 && (
+              <p className="rounded-2xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+                承認待ちのユーザはいません。
+              </p>
+            )}
+          </div>
+
+          {/* md 以上: テーブル */}
+          <div className="hidden overflow-x-auto rounded-2xl border bg-card md:block">
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium">ユーザ</th>
-                  <th className="px-4 py-3 text-left font-medium hidden md:table-cell">申請日</th>
+                  <th className="px-4 py-3 text-left font-medium">申請日</th>
                   <th className="px-4 py-3 text-right font-medium">操作</th>
                 </tr>
               </thead>
@@ -255,53 +256,14 @@ export function AdminUsersPage() {
                 {pending.map((u) => (
                   <tr key={u.id}>
                     <td className="px-4 py-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{u.name}</span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-800">
-                            <Clock className="size-3" />
-                            承認待ち
-                          </span>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {u.googleEmail ?? u.email ?? `@${u.nickname}`}
-                        </div>
-                      </div>
+                      <PendingIdentity user={u} />
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {formatDate(u.requestedAt)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={async () => {
-                            await api.rejectPendingUser(u.id)
-                            toast.success(`却下しました: ${u.name}`)
-                            void load()
-                          }}
-                          className="text-muted-foreground"
-                        >
-                          <XIcon className="size-4" />
-                          却下
-                        </Button>
-                        <LinkButton
-                          pendingUser={u}
-                          candidates={candidates}
-                          onLinked={() => void load()}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={async () => {
-                            await api.approvePendingUser(u.id)
-                            toast.success(`新規ユーザとして承認しました: ${u.name}`)
-                            void load()
-                          }}
-                        >
-                          <Check className="size-4" />
-                          新規承認
-                        </Button>
+                        <PendingActions pendingUser={u} candidates={candidates} onDone={load} />
                       </div>
                     </td>
                   </tr>
@@ -323,6 +285,140 @@ export function AdminUsersPage() {
         <Link to="/" className="underline">ホームに戻る</Link>
       </p>
     </div>
+  )
+}
+
+// アバター + 名前 + バッジ + サブ情報。テーブル行とモバイルカードで共用
+function UserIdentity({ user, showId }: { user: AdminUser; showId?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      {user.avatarUrl ? (
+        <img src={user.avatarUrl} alt={user.name} className="size-9 shrink-0 rounded-full object-cover" />
+      ) : (
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+          <UserIcon className="size-4 text-muted-foreground" />
+        </span>
+      )}
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">{user.name}</span>
+          {user.role === "admin" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800">
+              <Shield className="size-3" />
+              admin
+            </span>
+          )}
+          {user.isSelf && (
+            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              自分
+            </span>
+          )}
+        </div>
+        <div className="truncate text-xs text-muted-foreground">
+          {showId && <span className="font-mono tabular-nums">#{user.id} ・ </span>}
+          @{user.nickname}
+          {user.email && ` ・ ${user.email}`}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProviderChips({ providers }: { providers: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {providers.map((p) => (
+        <span
+          key={p}
+          className={cn(
+            "rounded px-1.5 py-0.5 text-[10px]",
+            p === "google_oauth2"
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
+          {p === "google_oauth2" ? "Google" : "Twitter (未移行)"}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function BanButton({ user, onDone }: { user: AdminUser; onDone: () => void }) {
+  return (
+    <Button
+      variant={user.banned ? "outline" : "ghost"}
+      size="sm"
+      disabled={user.isSelf}
+      onClick={async () => {
+        await api.updateAdminUser(user.id, { banned: !user.banned })
+        toast.success(user.banned ? "Banを解除しました" : "ユーザをBanしました")
+        onDone()
+      }}
+      className={cn(
+        !user.banned && !user.isSelf && "text-red-700 hover:bg-red-50 hover:text-red-800",
+      )}
+    >
+      {user.banned ? "Unban" : "Ban"}
+    </Button>
+  )
+}
+
+// 承認待ちユーザの名前 + バッジ + メール。テーブル行とモバイルカードで共用
+function PendingIdentity({ user }: { user: PendingUser }) {
+  return (
+    <div className="min-w-0">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">{user.name}</span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-800">
+          <Clock className="size-3" />
+          承認待ち
+        </span>
+      </div>
+      <div className="truncate text-xs text-muted-foreground">
+        {user.googleEmail ?? user.email ?? `@${user.nickname}`}
+      </div>
+    </div>
+  )
+}
+
+function PendingActions({
+  pendingUser,
+  candidates,
+  onDone,
+}: {
+  pendingUser: PendingUser
+  candidates: ApiUser[]
+  onDone: () => void
+}) {
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={async () => {
+          await api.rejectPendingUser(pendingUser.id)
+          toast.success(`却下しました: ${pendingUser.name}`)
+          onDone()
+        }}
+        className="text-muted-foreground"
+      >
+        <XIcon className="size-4" />
+        却下
+      </Button>
+      <LinkButton pendingUser={pendingUser} candidates={candidates} onLinked={onDone} />
+      <Button
+        size="sm"
+        onClick={async () => {
+          await api.approvePendingUser(pendingUser.id)
+          toast.success(`新規ユーザとして承認しました: ${pendingUser.name}`)
+          onDone()
+        }}
+      >
+        <Check className="size-4" />
+        新規承認
+      </Button>
+    </>
   )
 }
 
