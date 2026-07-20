@@ -125,26 +125,27 @@ export function UploadPage() {
           <FolderPlus className="mt-0.5 size-3.5 shrink-0" />
           <span>
             {/* プリセット (?to=) ではなく現在の選択を表示する。ピッカーで選び直したらそれが実際の保存先 */}
-            フォルダ <span className="font-mono font-semibold">{normalizeFolderPath(folderPath)}</span> に保存します。
+            フォルダ <span className="break-all font-mono font-semibold">{normalizeFolderPath(folderPath)}</span> に保存します。
             まだ存在しないフォルダの場合は、写真をアップロードした時点で作成されます。
           </span>
         </div>
       )}
 
+      {/* grid 子の min-width:auto による横はみ出しを min-w-0 で封じる (モバイル) */}
       <div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
-        <section className="space-y-4">
+        <section className="min-w-0 space-y-4">
           <Dropzone onDrop={handleDrop} />
           <UploadPreviewList items={items} onRemove={handleRemove} />
         </section>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <div className="space-y-2">
             <h2 className="inline-flex items-center gap-1.5 text-sm font-medium">
               <FolderTree className="size-4 text-muted-foreground" />
               保存先
             </h2>
             {useManualPath ? (
-              <div className="rounded-xl bg-muted/40 px-3 py-2 text-xs font-mono">
+              <div className="break-all rounded-xl bg-muted/40 px-3 py-2 font-mono text-xs">
                 {folderPath || "/"}
               </div>
             ) : (
