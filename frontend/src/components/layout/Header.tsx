@@ -3,6 +3,7 @@ import { useUploadTarget } from "@/hooks/useUploadTarget"
 import { ChartPie, ImageUp, Images, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { UserMenu } from "@/components/layout/UserMenu"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 import { useSession } from "@/contexts/SessionContext"
 
 type NavItem = { to: string; label: string; icon: typeof Images; end: boolean; adminOnly?: boolean }
@@ -37,9 +38,8 @@ export function Header() {
     >
       <div className="mx-auto flex h-14 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-8 lg:px-16">
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight">Uprun</span>
-            <span className="text-xs text-muted-foreground hidden sm:inline">Photos</span>
+          <Link to="/" className="flex items-center" aria-label="uprunです ホーム">
+            <BrandLogo className="h-5 w-auto sm:h-6" />
           </Link>
           {isAdmin && (
             <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800 ring-1 ring-red-200">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSession } from "@/contexts/SessionContext"
 import { api } from "@/lib/api"
+import { BrandLogo } from "@/components/layout/BrandLogo"
 
 export function LoginPage() {
   const { devLogin } = useSession()
@@ -44,8 +45,10 @@ export function LoginPage() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Uprun Photos</h1>
+        <div className="text-center space-y-3">
+          <h1 className="flex justify-center">
+            <BrandLogo className="h-10 w-auto" />
+          </h1>
           <p className="text-sm text-muted-foreground">メンバー向けの写真共有サービスです</p>
         </div>
 
