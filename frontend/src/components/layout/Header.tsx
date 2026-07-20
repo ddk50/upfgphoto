@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link, NavLink, useLocation } from "react-router-dom"
 import { ChartPie, Menu, ImageUp, Images, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,9 @@ const NAV: NavItem[] = [
 export function Header() {
   const { isAdmin } = useSession()
   const location = useLocation()
+  // モバイルメニュー (Sheet)。リンクタップで明示的に閉じる — 閉じないと
+  // 遷移がぼかしの背後で起きて「押しても無反応」に見える
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // フォルダ閲覧中は「アップロード」を今いるフォルダ宛 (?to=) にする
   let uploadTo = "/upload"
@@ -87,7 +91,7 @@ export function Header() {
 
           <UserMenu />
 
-          <Sheet>
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden" aria-label="メニューを開く">
                 <Menu className="size-5" />
@@ -103,6 +107,7 @@ export function Header() {
                     key={item.to}
                     to={item.to}
                     end={item.end}
+                    onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       cn(
                         "inline-flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors",
