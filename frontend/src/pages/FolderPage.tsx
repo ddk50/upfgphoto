@@ -9,6 +9,7 @@ import { PhotoGrid } from "@/components/photo/PhotoGrid"
 import { PhotoListView } from "@/components/photo/PhotoListView"
 import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
 import { usePhotoView } from "@/hooks/usePhotoView"
+import { useScrollMemory } from "@/hooks/useScrollMemory"
 import { sortPhotos, type PhotoSort } from "@/lib/photoSort"
 import { Lightbox } from "@/components/photo/Lightbox"
 import { Separator } from "@/components/ui/separator"
@@ -31,6 +32,8 @@ export function FolderPage({ path }: { path?: string } = {}) {
   const { isAdmin } = useSession()
   const [view, setView] = useState<FolderView | null>(null)
   const [status, setStatus] = useState<"loading" | "ok" | "not-found">("loading")
+  // いま表示中の view がどのパスのものか。遷移直後の stale な "ok" を除外するため
+  const [loadedPath, setLoadedPath] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const ownedFilter = searchParams.get("owned") === "me"
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -45,6 +48,7 @@ export function FolderPage({ path }: { path?: string } = {}) {
     setStatus("loading")
     try {
       setView(await api.folder(folderPath))
+      setLoadedPath(folderPath)
       setStatus("ok")
     } catch (e) {
       setView(null)
@@ -55,6 +59,11 @@ export function FolderPage({ path }: { path?: string } = {}) {
   useEffect(() => {
     void load()
   }, [load])
+
+  // フォルダごとにスクロール位置を記憶し、内容描画後に復元する。
+  // パンくずで戻ったときに先頭へリセットされないようにするため (モバイル UX)。
+  // ready は「この folderPath の view が実際に描画済み」= 遷移中の stale ok を除外。
+  useScrollMemory(folderPath, status === "ok" && loadedPath === folderPath)
 
   const allPhotos = view?.photos ?? []
   const mineCount = useMemo(() => allPhotos.filter((p) => p.isMine).length, [allPhotos])
