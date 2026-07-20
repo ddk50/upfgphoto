@@ -54,14 +54,27 @@ module Api
 
       def child_json(child, fq)
         owner = FolderOwner.find_by(folder_path: child.path)&.user
+        grandchildren = fq.children(child.path)
+        # 孫カードに使う写真と親カードのカバーが同じにならないよう選び直す
+        sub_cover_ids = grandchildren.first(4).filter_map { |g| g.cover_photo&.id }
+        cover = child.cover_photo
+        if cover && sub_cover_ids.include?(cover.id)
+          cover = fq.cover_photo_for(child.path, exclude_ids: sub_cover_ids)
+        end
         {
           name: child.name,
           path: child.path,
           photo_count: child.photo_count,
-          cover_url: cover_url(child.cover_photo),
+          cover_url: cover_url(cover),
           mode: fq.resolver.effective_mode(child.path),
           owner: owner && { id: owner.id, name: owner.name, avatar_url: owner.avatar_url },
-          is_mine_owner: owner&.id == current_user.id
+          is_mine_owner: owner&.id == current_user.id,
+          # モバイルの階層モザイク用: 孫フォルダのサマリ (先頭のみ) と総数
+          subfolder_count: grandchildren.size,
+          subfolders: grandchildren.first(4).map do |g|
+            { name: g.name, path: g.path, photo_count: g.photo_count,
+              cover_url: cover_url(g.cover_photo) }
+          end
         }
       end
 

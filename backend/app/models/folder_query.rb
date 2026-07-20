@@ -45,6 +45,19 @@ class FolderQuery
     AccessPolicy.ancestor_chain(path)
   end
 
+  # path 配下 (直下含む・可視のみ) の最新写真をカバーとして返す。
+  # exclude_ids を避けて選ぶ (モザイク表示で親と孫のカバーが同じ写真になるのを防ぐ)。
+  # 避けきれない (それしか写真がない) 場合は重複を許容する
+  def cover_photo_for(path, exclude_ids: [])
+    prefix = path == "/" ? "/" : "#{path}/"
+    visible_paths = Photo.kept
+                         .where("folder_path = ? OR folder_path LIKE ?", path, "#{escape_like(prefix)}%")
+                         .distinct.pluck(:folder_path)
+                         .select { |p| folder_visible?(p) }
+    scope = Photo.kept.where(folder_path: visible_paths).order(taken_at: :desc)
+    scope.where.not(id: exclude_ids).first || scope.first
+  end
+
   private
 
   def child_segment(prefix, descendant_path)

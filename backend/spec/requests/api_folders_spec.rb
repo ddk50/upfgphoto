@@ -25,11 +25,49 @@ RSpec.describe "GET /api/v1/folders" do
     expect(body["folders"].map { |f| f["name"] }).to contain_exactly("2023", "秘密")
     expect(body["folders"].find { |f| f["name"] == "秘密" }["mode"]).to eq("restricted")
 
+    # 階層モザイク用の孫サマリ
+    child = body["folders"].find { |f| f["name"] == "2023" }
+    expect(child["subfolder_count"]).to eq(1)
+    expect(child["subfolders"].map { |s| s["name"] }).to eq([ "風景" ])
+
     get "/api/v1/folders", params: { path: "/2023/風景" }
     body = response.parsed_body
     expect(body["photos"].map { |p| p["title"] }).to eq([ "山" ])
     expect(body["photos"].first["description"]).to eq("夜明けの山") # 旧DBから移行した説明文
     expect(body["breadcrumb"]).to eq([ "/", "/2023", "/2023/風景" ])
+  end
+
+  describe "モザイク用カバーの重複回避" do
+    def photo_with_image!(path, file, taken_at)
+      p = Photo.create!(user: a, folder_path: path, file_name: file, title: file,
+                        taken_at: taken_at)
+      p.image.attach(io: StringIO.new("img-#{file}"), filename: file, content_type: "image/jpeg")
+      p
+    end
+
+    it "親カードのカバーは表示中の孫カバーと別の写真を選ぶ" do
+      photo_with_image!("/イベント/花火", "new.jpg", Time.current)          # 最新 = 孫のカバー
+      photo_with_image!("/イベント", "direct.jpg", 1.day.ago)              # 重複回避で親はこちらに
+
+      login_as(a)
+      get "/api/v1/folders", params: { path: "/" }
+      child = response.parsed_body["folders"].find { |f| f["name"] == "イベント" }
+
+      expect(child["subfolders"].first["cover_url"]).to be_present
+      expect(child["cover_url"]).to be_present
+      expect(child["cover_url"]).not_to eq(child["subfolders"].first["cover_url"])
+    end
+
+    it "他に写真がなければ重複を許容する (カバー無しにはしない)" do
+      photo_with_image!("/イベント/花火", "only.jpg", Time.current)
+
+      login_as(a)
+      get "/api/v1/folders", params: { path: "/" }
+      child = response.parsed_body["folders"].find { |f| f["name"] == "イベント" }
+
+      expect(child["cover_url"]).to be_present
+      expect(child["cover_url"]).to eq(child["subfolders"].first["cover_url"])
+    end
   end
 
   it "restricted はメンバー以外に存在ごと見せない（一覧から消え、直アクセスは404）" do

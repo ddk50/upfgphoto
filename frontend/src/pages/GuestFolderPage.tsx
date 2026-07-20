@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FolderCoverStack } from "@/components/folder/FolderCoverStack"
+import { FolderMosaic } from "@/components/folder/FolderMosaic"
 import { Dropzone } from "@/components/upload/Dropzone"
 import {
   UploadPreviewList,
@@ -182,7 +183,29 @@ export function GuestFolderPage() {
           {hasChildren && (
             <section className="space-y-4">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">サブフォルダ</h2>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+              {/* モバイルは iPhone 写真風モザイク、md 以上は従来カード */}
+              <div className="md:hidden">
+                <FolderMosaic
+                  groups={view.folders.map((child) => ({
+                    folder: {
+                      key: child.sub,
+                      name: child.name,
+                      photoCount: child.photoCount,
+                      coverUrl: child.coverUrl,
+                      to: `/g/${token}/${child.sub}`,
+                    },
+                    subfolders: child.subfolders.map((g) => ({
+                      key: g.sub,
+                      name: g.name,
+                      photoCount: g.photoCount,
+                      coverUrl: g.coverUrl,
+                      to: `/g/${token}/${g.sub}`,
+                    })),
+                    subfolderCount: child.subfolderCount,
+                  }))}
+                />
+              </div>
+              <div className="hidden md:grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
                 {view.folders.map((child) => (
                   <Link
                     key={child.sub}

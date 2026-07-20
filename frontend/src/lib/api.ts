@@ -101,6 +101,8 @@ type ApiGuestPhoto = {
   urls: { small: string; large: string; original: string } | null
 }
 
+type ApiSubfolder = { name: string; path: string; photo_count: number; cover_url: string | null }
+
 type ApiChild = {
   name: string
   path: string
@@ -109,6 +111,8 @@ type ApiChild = {
   mode: "everyone" | "restricted" | "guest"
   owner: { id: number; name: string; avatar_url: string | null } | null
   is_mine_owner: boolean
+  subfolder_count: number
+  subfolders: ApiSubfolder[]
 }
 
 type ApiFolderView = {
@@ -128,11 +132,20 @@ type ApiFolderView = {
 
 export type AdaptedPhoto = Photo & { isMine: boolean; canDelete: boolean }
 
+export type SubfolderSummary = {
+  name: string
+  path: string
+  photoCount: number
+  coverUrl: string | null
+}
+
 export type ChildInfo = {
   mode: "everyone" | "restricted" | "guest"
   ownerName: string | null
   ownerAvatarUrl: string | null
   isMineOwner: boolean
+  subfolderCount: number
+  subfolders: SubfolderSummary[]
 }
 
 export type FolderView = {
@@ -160,7 +173,14 @@ export type GuestFolderView = {
   rootName: string
   sub: string
   name: string
-  folders: { name: string; sub: string; photoCount: number; coverUrl: string | null }[]
+  folders: {
+    name: string
+    sub: string
+    photoCount: number
+    coverUrl: string | null
+    subfolderCount: number
+    subfolders: { name: string; sub: string; photoCount: number; coverUrl: string | null }[]
+  }[]
   photos: AdaptedPhoto[]
 }
 
@@ -250,6 +270,13 @@ function adaptFolderView(v: ApiFolderView): FolderView {
       ownerName: c.owner?.name ?? null,
       ownerAvatarUrl: c.owner?.avatar_url ?? null,
       isMineOwner: c.is_mine_owner,
+      subfolderCount: c.subfolder_count,
+      subfolders: c.subfolders.map((g) => ({
+        name: g.name,
+        path: g.path,
+        photoCount: g.photo_count,
+        coverUrl: g.cover_url,
+      })),
     }
   }
   return {
@@ -439,7 +466,11 @@ export const api = {
       root_name: string
       sub: string
       name: string
-      folders: { name: string; sub: string; photo_count: number; cover_url: string | null }[]
+      folders: {
+        name: string; sub: string; photo_count: number; cover_url: string | null
+        subfolder_count: number
+        subfolders: { name: string; sub: string; photo_count: number; cover_url: string | null }[]
+      }[]
       photos: ApiGuestPhoto[]
     }>(`/api/v1/g/${token}${qs}`)
     return {
@@ -452,6 +483,13 @@ export const api = {
         sub: f.sub,
         photoCount: f.photo_count,
         coverUrl: f.cover_url,
+        subfolderCount: f.subfolder_count,
+        subfolders: f.subfolders.map((g) => ({
+          name: g.name,
+          sub: g.sub,
+          photoCount: g.photo_count,
+          coverUrl: g.cover_url,
+        })),
       })),
       photos: raw.photos.map(adaptGuestPhoto),
     }

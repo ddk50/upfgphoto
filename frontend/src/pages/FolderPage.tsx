@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { Check, Copy, Link2, Loader2, Pencil, Settings2, User as UserIcon } from "lucide-react"
 import { FolderBreadcrumb } from "@/components/folder/FolderBreadcrumb"
 import { FolderGrid } from "@/components/folder/FolderGrid"
+import { FolderMosaic, type MosaicGroup } from "@/components/folder/FolderMosaic"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
 import { PhotoListView } from "@/components/photo/PhotoListView"
 import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
@@ -217,7 +218,37 @@ export function FolderPage({ path }: { path?: string } = {}) {
           {hasChildren && (
             <section className="space-y-4">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">フォルダ</h2>
-              <FolderGrid folders={view.folders} info={view.childInfo} />
+              {/* モバイルは iPhone 写真風モザイク、md 以上は従来カード */}
+              <div className="md:hidden">
+                <FolderMosaic
+                  groups={view.folders.map((f): MosaicGroup => {
+                    const info = view.childInfo[f.path]
+                    return {
+                      folder: {
+                        key: f.path,
+                        name: f.name,
+                        photoCount: f.descendantPhotoCount,
+                        coverUrl: f.coverPhoto?.thumbnailUrl ?? null,
+                        to: `/folders${f.path}`,
+                        mode: info?.mode,
+                        ownerAvatarUrl: info && !info.isMineOwner ? info.ownerAvatarUrl : null,
+                        ownerName: info?.ownerName,
+                      },
+                      subfolders: (info?.subfolders ?? []).map((g) => ({
+                        key: g.path,
+                        name: g.name,
+                        photoCount: g.photoCount,
+                        coverUrl: g.coverUrl,
+                        to: `/folders${g.path}`,
+                      })),
+                      subfolderCount: info?.subfolderCount ?? 0,
+                    }
+                  })}
+                />
+              </div>
+              <div className="hidden md:block">
+                <FolderGrid folders={view.folders} info={view.childInfo} />
+              </div>
             </section>
           )}
 
