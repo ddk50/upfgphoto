@@ -15,8 +15,9 @@ export function HomePage() {
   }, [])
 
   return (
-    <div className="space-y-10">
-      <section className="space-y-4">
+    <div>
+      {/* モバイルはボトムバーの検索ボタンがあるため、ヒーロー検索は md 以上のみ */}
+      <section className="hidden md:mb-10 md:block">
         <div className="mx-auto max-w-2xl space-y-4">
           <SearchBar size="lg" />
           <SuggestedTagChips tags={tags} max={10} />

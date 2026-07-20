@@ -60,7 +60,8 @@ function BarLink({
       className={({ isActive }) =>
         cn(
           "flex size-10 items-center justify-center rounded-full transition-colors",
-          isActive ? "bg-background/60 text-foreground" : "text-foreground/70 active:bg-background/40",
+          // 現在地は明確な反転表示 (強透過バーの上でも視認できる濃度にする)
+          isActive ? "bg-foreground/80 text-background" : "text-foreground/70 active:bg-background/40",
         )
       }
     >

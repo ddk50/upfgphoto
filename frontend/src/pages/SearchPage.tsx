@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { PhotoGrid } from "@/components/photo/PhotoGrid"
+import { SearchBar } from "@/components/search/SearchBar"
 import { PhotoListView } from "@/components/photo/PhotoListView"
 import { PhotoViewToggle } from "@/components/photo/PhotoViewToggle"
 import { usePhotoView } from "@/hooks/usePhotoView"
@@ -22,7 +23,6 @@ export function SearchPage() {
   const selected = parseTagsParam(searchParams.get("tags"))
   const ownedFilter = searchParams.get("owned") === "me"
 
-  const [queryDraft, setQueryDraft] = useState(query)
   const [tagFilter, setTagFilter] = useState("")
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [photoView, setPhotoView] = usePhotoView()
@@ -30,10 +30,6 @@ export function SearchPage() {
   const [allTags, setAllTags] = useState<TagSummary[]>([])
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    setQueryDraft(query)
-  }, [query])
 
   useEffect(() => {
     void api.tags().then(setAllTags).catch(() => setAllTags([]))
@@ -97,14 +93,12 @@ export function SearchPage() {
     setLightboxIndex(null)
   }
 
-  const submitQuery = () => updateParams({ q: queryDraft.trim() })
   const toggleOwned = () => updateParams({ owned: !ownedFilter })
   const toggleTag = (tag: string) => {
     if (selected.includes(tag)) updateParams({ tags: selected.filter((t) => t !== tag) })
     else updateParams({ tags: [...selected, tag] })
   }
   const clearAll = () => {
-    setQueryDraft("")
     updateParams({ q: "", tags: [], owned: false })
   }
 
@@ -118,22 +112,15 @@ export function SearchPage() {
       </header>
 
       <section className="space-y-4">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            submitQuery()
-          }}
-        >
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={queryDraft}
-              onChange={(e) => setQueryDraft(e.target.value)}
-              placeholder="写真を検索..."
-              className="pl-9 h-11 text-base"
-            />
-          </div>
-        </form>
+        {/* ホームのヒーローと同じ共通 SearchBar (サジェスト付き)。実装を二重に持たない。
+            key で送信済みクエリの変化時に入力値を同期する */}
+        <SearchBar
+          key={query}
+          size="md"
+          initialValue={query}
+          autoFocus={!query && selected.length === 0}
+          onSubmit={(q) => updateParams({ q })}
+        />
 
         {(query || selected.length > 0) && (
           <div className="flex flex-wrap items-center gap-2">
@@ -143,10 +130,7 @@ export function SearchPage() {
                 <Search className="size-3" />「{query}」
                 <button
                   type="button"
-                  onClick={() => {
-                    setQueryDraft("")
-                    updateParams({ q: "" })
-                  }}
+                  onClick={() => updateParams({ q: "" })}
                   className="ml-0.5"
                   aria-label="クエリを解除"
                 >
