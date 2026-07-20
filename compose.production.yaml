@@ -1,0 +1,32 @@
+# 本番用 compose (ADR-025 / docs/MIGRATION.md)
+# Rails アプリサーバのみ。TLS 終端と外部公開は手前の既設 nginx リバプロが担当し、
+# 共有の external ネットワーク経由で http://uprun_app:80 へプロキシする。
+# フロント JS も Rails が public/ から配信するため nginx コンテナは不要 (旧構成と違う点)。
+# MySQL はコンテナ外 (ホスト or 別サーバ)。接続情報は prod.envs で渡す。
+#
+# 起動:   docker compose -f compose.production.yaml up -d --build
+# ETL:    docker compose -f compose.production.yaml run --rm app bin/rails etl:import ...
+#         (docs/MIGRATION.md §3。LEGACY_DB / LEGACY_DATA は /data 配下に置いて指定)
+# パージ: ホスト cron から docker compose -f compose.production.yaml exec app bin/rails trash:purge
+services:
+  app:
+    build: .
+    container_name: uprun_app
+    env_file: prod.envs            # gitignore 済み。prod.envs.example を参照
+    environment:
+      STORAGE_ROOT: /data/storage  # 写真実体 (ボリューム側)
+    volumes:
+      - ./data:/data               # 大容量ディスクに置くこと (写真 121GB+ と ETL 入力物)
+      - ./log:/app/log
+    networks:
+      - web_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  web_network:
+    external: true                 # 手前のリバースプロキシと共有する既存ネットワーク

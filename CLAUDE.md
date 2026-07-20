@@ -10,7 +10,7 @@
 
 **本番切替前の残タスク**:
 1. Google OAuth 資格情報 (Cloud Console) — ユーザ作業
-2. 本番配信構成 (React ビルドを Rails から配信) + Api::V1::BaseController の CSRF TODO。共有リンク `/g/*` は OGP 焼き込み配信を実装済み (`share_pages_controller.rb`)。**React ビルドは backend/public/ に配置する前提**（同コントローラが public/index.html に OGP を注入する）
+2. ~~本番配信構成~~ **実装済み (ADR-025)**: Rails 単一コンテナ (`Dockerfile` + `compose.production.yaml`、React ビルドは public/ へ焼き込み、SPA catch-all = `spa_controller.rb`、OGP = `share_pages_controller.rb`)。**残りは Api::V1::BaseController の CSRF TODO のみ**
 3. ETL レポートの nickname 不整合5件 (46malonu, celeron1ghz, c5vecco, MooncraftShiden, Akiba_univ) の expires_at 手動判断
 4. ステージングのサーバ設置場所は未定 (構成コードは staging 環境として準備済み)
 

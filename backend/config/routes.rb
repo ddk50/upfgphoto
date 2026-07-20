@@ -51,4 +51,14 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  # SPA のクライアントルート直リンクを index.html にフォールバック (本番配信構成)。
+  # 必ず最下部に置くこと (上の全ルートが優先)。HTML 要求 (Accept: */* 含む —
+  # curl やクローラの既定) のみ対象で、/api 等は除外して JSON 404 を維持する
+  root to: "spa#show"
+  get "*path", to: "spa#show", format: false, constraints: ->(req) {
+    format = req.format
+    (format.nil? || format.html? || format.to_s == "*/*") &&
+      !req.path.start_with?("/api/", "/auth/", "/rails/", "/dev/")
+  }
 end

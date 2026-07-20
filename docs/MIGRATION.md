@@ -47,15 +47,22 @@ ADR-021: MySQL 統一、ADR-022: ゴミ箱）。
 | `TRASH_RETENTION_DAYS` | ゴミ箱保持日数 | 30 |
 | ETL 用: `LEGACY_DB` / `LEGACY_DATA` / `SKIP_FILES` / `FORCE` | §3 参照 | — |
 
-### 1.4 アプリ配置
+### 1.4 アプリ配置（Docker、ADR-025）
 
-- [ ] backend をデプロイし `bundle install --deployment`、`bin/rails db:prepare`（migrations から構築）
-- [ ] frontend をビルドし **`backend/public/` に配置**（`cd frontend && npm run build` → `dist/*` を `backend/public/` へ）。
-  共有リンク `/g/*` の OGP 焼き込み（`share_pages_controller.rb`）はこの配置が前提
-- [ ] **[未実装] 本番配信構成の残り**（CLAUDE.md 残タスク2）:
-  - SPA のクライアントルート（`/folders/...` 等への直リンク）を `public/index.html` にフォールバックさせる catch-all
-  - `Api::V1::BaseController` の CSRF TODO（X-CSRF-Token ヘッダ検証への置き換え）
-  - 実装したらこの項を更新すること
+配信構成は **Rails 単一コンテナ**（React ビルドはイメージに焼き込み、Thruster :80 で配信。
+静的配信用 nginx は不要 — TLS 終端は手前の既設リバースプロキシ）。
+
+- [ ] リポジトリを本番サーバへ clone
+- [ ] `prod.envs.example` をコピーして `prod.envs` を作成し、§1.3 の値を埋める
+- [ ] 手前のリバプロと共有する docker ネットワークを確認（なければ `docker network create web_network`）
+- [ ] ビルドと起動:
+  ```bash
+  docker compose -f compose.production.yaml up -d --build
+  ```
+  起動時に `db:prepare` が自動実行される（べき等）。ヘルスチェックは `/up`
+- [ ] リバプロ側に `http://uprun_app:80` へのプロキシ設定を追加（TBD: server_name 等）
+- [ ] SPA 直リンク（`/folders/...`）・`/g/*` の OGP・`/api/v1/me` が返ることを確認
+- [ ] **[未実装] 残り**: `Api::V1::BaseController` の CSRF TODO（X-CSRF-Token ヘッダ検証への置き換え）。実装したらこの項を更新すること
 
 ### 1.5 切替前の判断事項
 
@@ -74,14 +81,15 @@ ADR-021: MySQL 統一、ADR-022: ゴミ箱）。
 
 ## 3. ETL 実行
 
-```bash
-cd /path/to/uprun/backend
+入力物はコンテナから見えるボリューム（`./data` → `/data`）配下に置く（例 `./data/legacy/`）。
 
+```bash
 # 本番実行は FORCE=1 が必須 (誤爆ガード)
-RAILS_ENV=production FORCE=1 \
-  LEGACY_DB=/srv/legacy/production.sqlite3 \
-  LEGACY_DATA=/srv/legacy/data/prod \
-  bin/rails etl:import
+docker compose -f compose.production.yaml run --rm \
+  -e FORCE=1 \
+  -e LEGACY_DB=/data/legacy/production.sqlite3 \
+  -e LEGACY_DATA=/data/legacy/data/prod \
+  app bin/rails etl:import
 ```
 
 - べき等（wipe → 再構築）なので失敗したらやり直してよい
@@ -93,11 +101,11 @@ RAILS_ENV=production FORCE=1 \
 
 ## 4. 稼働設定
 
-- [ ] ゴミ箱の日次パージを cron 登録（ADR-022）:
+- [ ] ゴミ箱の日次パージをホストの cron に登録（ADR-022）:
   ```cron
-  0 4 * * * cd /path/to/uprun/backend && RAILS_ENV=production bin/rails trash:purge >> log/trash_purge.log 2>&1
+  0 4 * * * cd /path/to/uprun && docker compose -f compose.production.yaml exec -T app bin/rails trash:purge >> log/trash_purge.log 2>&1
   ```
-- [ ] アプリ起動（TBD: systemd / コンテナ等のプロセス管理）
+- [ ] コンテナは `restart: always`（compose）でプロセス管理
 - [ ] `RAILS_ENV=production` が確実に効いていることを確認
   （dev ログインのバックドアは development 以外でルートごと 404 — spec で固定済みだが env 誤設定だけが破る）
 

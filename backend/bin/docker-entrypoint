@@ -1,0 +1,7 @@
+#!/bin/bash -e
+# サーバ起動時のみ DB を最新化 (db:prepare はべき等。ETL は手動 — docs/MIGRATION.md §3)
+if echo "${*}" | grep -q "rails server"; then
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"
