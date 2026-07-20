@@ -43,6 +43,11 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Ruby 型検査の試行導入 (コアロジック限定, ADR-024)。
+  # 注釈はコメント (rbs-inline) → sig/generated に生成 → Steep で検査
+  gem "rbs-inline", require: false
+  gem "steep", require: false
 end
 
 gem "rspec-rails", "~> 8.0", groups: [ :development, :test ]

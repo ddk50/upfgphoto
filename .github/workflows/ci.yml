@@ -46,9 +46,12 @@ jobs:
           working-directory: backend
           bundler-cache: true
 
-      # 静的検査 (DB 不要・数秒)。スタイル違反は早い段階で落とす
+      # 静的検査 (DB 不要・数秒)。スタイル違反・型エラーは早い段階で落とす
       - name: RuboCop
         run: bundle exec rubocop
+
+      - name: Type check (rbs-inline + Steep, ADR-024)
+        run: bin/typecheck
 
       - name: Load schema
         run: bin/rails db:test:prepare

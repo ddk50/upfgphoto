@@ -1,0 +1,10 @@
+# Generated from app/models/folder_path.rb with RBS::Inline
+
+# フォルダパス文字列のユーティリティ (ADR-003)
+module FolderPath
+  # : (untyped path) -> String
+  def self?.normalize: (untyped path) -> String
+
+  # : (untyped path) -> String
+  def self?.name: (untyped path) -> String
+end

@@ -1,0 +1,34 @@
+# Generated from app/models/folder_renamer.rb with RBS::Inline
+
+# フォルダのリネーム。フォルダは仮想概念 (ADR-003) なので、実体は配下全写真
+# (ゴミ箱内含む) の folder_path と folder_owners / access_rules / share_links の
+# folder_path の前置換。編集権は公開設定と同一 (AccessPolicy.can_edit_access?, ADR-019)。
+class FolderRenamer
+  class Forbidden < StandardError
+  end
+
+  class Conflict < StandardError
+  end
+
+  class InvalidName < StandardError
+  end
+
+  PATH_TABLES: Array[untyped]
+
+  # : (folder_path: String, new_name: String, actor: User) -> String
+  def self.rename!: (folder_path: String, new_name: String, actor: User) -> String
+
+  # ゴミ箱内の写真も含めて存在判定する (photo_uploader と同一基準)。
+  # 復元時にリネーム先へ合流してしまう事故を防ぐ
+  # : (String path) -> bool
+  def self.folder_exists?: (String path) -> bool
+
+  # : (untyped model, String old_path, String new_path) -> void
+  private def self.rewrite_prefix!: (untyped model, String old_path, String new_path) -> void
+
+  # : (untyped model, String path) -> void
+  private def self.purge_orphans!: (untyped model, String path) -> void
+
+  # : (String str) -> String
+  private def self.sanitize_like: (String str) -> String
+end

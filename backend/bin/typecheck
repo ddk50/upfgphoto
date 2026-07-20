@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Ruby 型検査 (ADR-024)。rbs-inline で注釈から RBS を生成し、Steep で検査する。
+# 対象はコアロジック限定 (Steepfile 参照)。DB 不要・数秒で終わる
+set -e
+cd "$(dirname "$0")/.."
+bundle exec rbs-inline --output=sig/generated \
+  app/models/folder_path.rb \
+  app/models/access_policy.rb \
+  app/models/folder_renamer.rb
+bundle exec steep check

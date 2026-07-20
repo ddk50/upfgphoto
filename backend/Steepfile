@@ -1,0 +1,9 @@
+# Ruby 型検査 (ADR-024)。対象はコアロジック3ファイルに限定。
+# 実行: bin/typecheck (rbs-inline で sig/generated を生成 → steep check)
+target :core do
+  signature "sig"
+
+  check "app/models/folder_path.rb"
+  check "app/models/access_policy.rb"
+  check "app/models/folder_renamer.rb"
+end

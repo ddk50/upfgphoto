@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# rubocop + rspec を一括実行する CI 相当チェック
+# rubocop + 型検査 + rspec を一括実行する CI 相当チェック
 set -e
 cd "$(dirname "$0")/.."
 bundle exec rubocop
+bin/typecheck
 bundle exec rspec

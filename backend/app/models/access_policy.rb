@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 # 公開設定の編集権 (ADR-019)。frontend/src/lib/access.ts の canEditAccess と同一仕様。
 # 実行可能な仕様書: spec/models/access_policy_spec.rb (frontend の access.test.ts と同じケース表)
 #
@@ -10,18 +12,21 @@
 #   （オーナー未登録の中間フォルダは admin のみ）
 class AccessPolicy
   class << self
+    #: (String folder_path) -> Array[String]
     def ancestor_chain(folder_path)
       segments = folder_path.to_s.split("/").reject(&:empty?)
-      [ "/" ] + segments.each_index.map { |i| "/" + segments[0..i].join("/") }
+      [ "/" ] + segments.each_index.map { |i| "/" + segments.take(i + 1).join("/") }
     end
 
     # folder_path 自身を含む祖先のうち restricted ルールが乗っているパス（根から順）
+    #: (String folder_path) -> Array[String]
     def restricted_ancestor_sources(folder_path)
       chain = ancestor_chain(folder_path)
       rules = AccessRule.where(folder_path: chain, mode: "restricted").pluck(:folder_path)
       chain & rules
     end
 
+    #: (String folder_path, User? user) -> bool
     def can_edit_access?(folder_path, user)
       return false if user.nil?
       return true if user.admin_role?
@@ -36,6 +41,7 @@ class AccessPolicy
     end
 
     # 隷属でロックされている場合、その源泉（根に最も近い他人の restricted）を返す。UI の理由表示用
+    #: (String folder_path, User? user) -> { folder_path: String, owner: User? }?
     def edit_blocker(folder_path, user)
       return nil if user&.admin_role?
 

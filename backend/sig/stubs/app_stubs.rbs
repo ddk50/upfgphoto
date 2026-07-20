@@ -1,0 +1,32 @@
+# ActiveRecord 境界の最小スタブ (ADR-024)。
+# 型検査の対象は AccessPolicy / FolderRenamer / FolderPath のコアロジックのみで、
+# AR のクエリ面は untyped で受ける (Rails 全体の RBS 化はスコープ外)
+
+class User
+  def id: () -> Integer
+  def admin_role?: () -> bool
+  def self.find_by: (?untyped) -> User?
+  def self.ids: () -> untyped
+end
+
+class AccessRule
+  def self.where: (*untyped) -> untyped
+end
+
+class FolderOwner
+  def self.where: (*untyped) -> untyped
+  def self.find_by: (?untyped) -> untyped
+end
+
+class Photo
+  def self.where: (*untyped) -> untyped
+end
+
+class ShareLink
+end
+
+module ActiveRecord
+  class Base
+    def self.transaction: [T] () { () -> T } -> T
+  end
+end

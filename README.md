@@ -24,7 +24,7 @@ bundle install
 bin/rails db:migrate
 bin/rails etl:import   # 旧DBから開発データ投入 (upfgphoto/db/production.sqlite3)
 bin/rails server       # :3000
-bin/check              # rubocop + rspec
+bin/check              # rubocop + 型検査 (rbs-inline + Steep, ADR-024) + rspec
 
 # ステージング (本番と同一構成) をローカルで動かす場合
 RAILS_ENV=staging SECRET_KEY_BASE=<任意> bin/rails db:prepare etl:import
