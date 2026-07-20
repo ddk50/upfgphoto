@@ -32,6 +32,28 @@ async function serverError(res: Response): Promise<string | undefined> {
   }
 }
 
+// CSRF トークン。/api/v1/me が返す値をキャッシュし (me() が更新)、
+// 書き込み API は mutate() 経由で X-CSRF-Token として自動付与する。
+// セッションが変わる操作 (login/logout) 後は SessionContext が me() を叩き直すので追随する
+let csrfToken = ""
+
+async function currentCsrf(): Promise<string> {
+  if (!csrfToken) {
+    const me = await req<Me>("/api/v1/me")
+    csrfToken = me.csrf
+  }
+  return csrfToken
+}
+
+// 書き込みリクエスト共通 (CSRF ヘッダ + Cookie)。Content-Type 等は init.headers で上書き可
+async function mutate(path: string, init: RequestInit): Promise<Response> {
+  return fetch(path, {
+    credentials: "same-origin",
+    ...init,
+    headers: { "X-CSRF-Token": await currentCsrf(), ...(init.headers ?? {}) },
+  })
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { credentials: "same-origin", ...init })
   if (!res.ok) throw new ApiError(res.status)
@@ -349,8 +371,10 @@ export function buildFolderTree(
 // ---- endpoints ------------------------------------------------------------
 
 export const api = {
-  me(): Promise<Me> {
-    return req<Me>("/api/v1/me")
+  async me(): Promise<Me> {
+    const me = await req<Me>("/api/v1/me")
+    csrfToken = me.csrf
+    return me
   },
 
   async devLogin(userId: number): Promise<void> {
@@ -379,9 +403,8 @@ export const api = {
   },
 
   async renameFolder(path: string, newName: string): Promise<{ path: string; name: string }> {
-    const res = await fetch("/api/v1/folders", {
+    const res = await mutate("/api/v1/folders", {
       method: "PATCH",
-      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path, new_name: newName }),
     })
@@ -438,9 +461,8 @@ export const api = {
     const body = new FormData()
     files.forEach((f) => body.append("files[]", f))
     if (sub) body.append("sub", sub)
-    const res = await fetch(`/api/v1/g/${token}/photos`, {
+    const res = await mutate(`/api/v1/g/${token}/photos`, {
       method: "POST",
-      credentials: "same-origin",
       body,
     })
     if (!res.ok) throw new ApiError(res.status, await serverError(res))
@@ -455,9 +477,8 @@ export const api = {
     input.files.forEach((f) => body.append("files[]", f))
     if (input.folderPath) body.append("folder_path", input.folderPath)
     input.tags?.forEach((t) => body.append("tags[]", t))
-    const res = await fetch("/api/v1/photos", {
+    const res = await mutate("/api/v1/photos", {
       method: "POST",
-      credentials: "same-origin",
       body,
     })
     if (!res.ok) throw new ApiError(res.status, await serverError(res))
@@ -466,9 +487,8 @@ export const api = {
   },
 
   async deletePhoto(id: string): Promise<void> {
-    const res = await fetch(`/api/v1/photos/${id}`, {
+    const res = await mutate(`/api/v1/photos/${id}`, {
       method: "DELETE",
-      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },
@@ -605,9 +625,8 @@ export const api = {
     memberIds?: number[]
     clearDescendants?: boolean
   }): Promise<{ shareToken: string | null }> {
-    const res = await fetch("/api/v1/access_rules", {
+    const res = await mutate("/api/v1/access_rules", {
       method: "PUT",
-      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         path: input.path,
@@ -644,9 +663,8 @@ export const api = {
     const body: Record<string, unknown> = {}
     if ("expiresAt" in attrs) body.expires_at = attrs.expiresAt
     if ("banned" in attrs) body.banned = attrs.banned
-    const res = await fetch(`/api/v1/admin/users/${id}`, {
+    const res = await mutate(`/api/v1/admin/users/${id}`, {
       method: "PATCH",
-      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
@@ -673,17 +691,15 @@ export const api = {
   },
 
   async approvePendingUser(id: number): Promise<void> {
-    const res = await fetch(`/api/v1/admin/pending_users/${id}/approve`, {
+    const res = await mutate(`/api/v1/admin/pending_users/${id}/approve`, {
       method: "POST",
-      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },
 
   async linkPendingUser(id: number, targetUserId: number): Promise<void> {
-    const res = await fetch(`/api/v1/admin/pending_users/${id}/link`, {
+    const res = await mutate(`/api/v1/admin/pending_users/${id}/link`, {
       method: "POST",
-      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_user_id: targetUserId }),
     })
@@ -691,9 +707,8 @@ export const api = {
   },
 
   async rejectPendingUser(id: number): Promise<void> {
-    const res = await fetch(`/api/v1/admin/pending_users/${id}`, {
+    const res = await mutate(`/api/v1/admin/pending_users/${id}`, {
       method: "DELETE",
-      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },
@@ -714,17 +729,15 @@ export const api = {
   },
 
   async restoreFromTrash(id: string): Promise<void> {
-    const res = await fetch(`/api/v1/trash/${id}/restore`, {
+    const res = await mutate(`/api/v1/trash/${id}/restore`, {
       method: "POST",
-      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },
 
   async purgeFromTrash(id: string): Promise<void> {
-    const res = await fetch(`/api/v1/trash/${id}`, {
+    const res = await mutate(`/api/v1/trash/${id}`, {
       method: "DELETE",
-      credentials: "same-origin",
     })
     if (!res.ok) throw new ApiError(res.status)
   },

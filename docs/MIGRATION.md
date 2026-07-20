@@ -62,7 +62,7 @@ ADR-021: MySQL 統一、ADR-022: ゴミ箱）。
   起動時に `db:prepare` が自動実行される（べき等）。ヘルスチェックは `/up`
 - [ ] リバプロ側に `http://uprun_app:80` へのプロキシ設定を追加（TBD: server_name 等）
 - [ ] SPA 直リンク（`/folders/...`）・`/g/*` の OGP・`/api/v1/me` が返ることを確認
-- [ ] **[未実装] 残り**: `Api::V1::BaseController` の CSRF TODO（X-CSRF-Token ヘッダ検証への置き換え）。実装したらこの項を更新すること
+- [x] CSRF: `/api/v1` の書き込みは X-CSRF-Token ヘッダ検証（実装済み。フロントは api.ts の mutate() が自動付与）
 
 ### 1.5 切替前の判断事項
 
