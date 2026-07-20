@@ -10,14 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_160001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_20_061651) do
   create_table "access_rule_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "access_rule_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["access_rule_id", "user_id"], name: "index_access_rule_members_on_access_rule_id_and_user_id", unique: true
-    t.index ["access_rule_id"], name: "index_access_rule_members_on_access_rule_id"
     t.index ["user_id"], name: "index_access_rule_members_on_user_id"
   end
 
@@ -88,10 +87,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160001) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["deleted_at"], name: "index_photos_on_deleted_at"
-    t.index ["folder_path"], name: "index_photos_on_folder_path"
+    t.index ["deleted_at", "folder_path"], name: "index_photos_on_deleted_at_and_folder_path"
+    t.index ["folder_path", "deleted_at"], name: "index_photos_on_folder_path_and_deleted_at"
     t.index ["taken_at"], name: "index_photos_on_taken_at"
-    t.index ["user_id"], name: "index_photos_on_user_id"
+    t.index ["user_id", "deleted_at"], name: "index_photos_on_user_id_and_deleted_at"
   end
 
   create_table "share_links", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -116,7 +115,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_160001) do
     t.bigint "tag_id", null: false
     t.datetime "updated_at", null: false
     t.index ["photo_id", "tag_id"], name: "index_taggings_on_photo_id_and_tag_id", unique: true
-    t.index ["photo_id"], name: "index_taggings_on_photo_id"
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
   end
 
