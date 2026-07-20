@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { Header } from "@/components/layout/Header"
+import { MobileActionBar } from "@/components/layout/MobileActionBar"
 import { SessionProvider, useSession } from "@/contexts/SessionContext"
 import { LoginPage } from "@/pages/LoginPage"
 import { PendingApprovalPage } from "@/pages/PendingApprovalPage"
@@ -35,9 +36,11 @@ function App() {
   return (
     <div className="min-h-svh bg-background text-foreground antialiased">
       <Header />
-      <main className="mx-auto max-w-[1600px] px-4 sm:px-8 lg:px-16 py-6 sm:py-10">
+      {/* pb はモバイルの下部アクションバーと被らないための余白 */}
+      <main className="mx-auto max-w-[1600px] px-4 sm:px-8 lg:px-16 py-6 pb-28 sm:py-10 md:pb-10">
         <Outlet />
       </main>
+      <MobileActionBar />
     </div>
   )
 }

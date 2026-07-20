@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import {
   Shield, User as UserIcon, ExternalLink, ChevronDown,
-  Images, Folder, LogOut, Trash2,
+  ChartPie, Images, Folder, LogOut, Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -82,6 +82,11 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => navigate("/trash")}>
           <Trash2 className="size-4 text-muted-foreground" />
           ゴミ箱
+          <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/stats")}>
+          <ChartPie className="size-4 text-muted-foreground" />
+          統計
           <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
         </DropdownMenuItem>
         {isAdmin && (
