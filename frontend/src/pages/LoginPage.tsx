@@ -46,9 +46,12 @@ export function LoginPage() {
     <div className="flex min-h-svh items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-3">
-          <h1 className="flex justify-center">
-            <BrandLogo className="h-10 w-auto" />
-          </h1>
+          <div className="space-y-1.5">
+            <h1 className="flex justify-center">
+              <BrandLogo className="h-10 w-auto" />
+            </h1>
+            <p className="text-[11px] tracking-wide text-muted-foreground/70">powered by UPFG</p>
+          </div>
           <p className="text-sm text-muted-foreground">メンバー向けの写真共有サービスです</p>
         </div>
 
