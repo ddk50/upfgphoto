@@ -34,15 +34,22 @@ module RendersPhotos
     return nil unless photo.image.attached?
 
     {
-      small: rails_representation_path(photo.image.variant(:small), only_path: true),
-      large: rails_representation_path(photo.image.variant(:large), only_path: true),
-      original: rails_blob_path(photo.image, disposition: "inline", only_path: true)
+      small: photo_image_path(photo, "small"),
+      large: photo_image_path(photo, "large"),
+      original: photo_image_path(photo, "original")
     }
   end
 
   def cover_url(photo)
     return nil unless photo&.image&.attached?
 
-    rails_representation_path(photo.image.variant(:small), only_path: true)
+    photo_image_path(photo, "small")
+  end
+
+  # 認可付き配信エンドポイントの URL。既定は認証ユーザ経路。
+  # ゲスト/OGP コンテキスト (Guest::FoldersController / SharePagesController) は
+  # トークンスコープ URL を返すよう override する。
+  def photo_image_path(photo, variant)
+    image_api_v1_photo_path(photo.id, variant: variant)
   end
 end

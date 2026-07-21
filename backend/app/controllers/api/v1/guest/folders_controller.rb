@@ -47,6 +47,11 @@ module Api
           segments
         end
 
+        # 画像 URL はトークンスコープの配信口にする (認証不要・サブツリー内のみ)
+        def photo_image_path(photo, variant)
+          api_v1_guest_photo_image_path(token: params[:token], id: photo.id, variant: variant)
+        end
+
         # ゲストには内部ユーザ情報 (uploader) を出さない
         def guest_photo_json(photo)
           {

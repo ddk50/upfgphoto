@@ -48,6 +48,11 @@ class SharePagesController < ActionController::Base
     tags.join("\n    ")
   end
 
+  # OGP の og:image はトークンスコープの配信口を使う (クローラは認証できない)
+  def photo_image_path(photo, variant)
+    api_v1_guest_photo_image_path(token: params[:token], id: photo.id, variant: variant)
+  end
+
   def spa_index_html
     path = Rails.public_path.join("index.html")
     File.read(path) if File.exist?(path)

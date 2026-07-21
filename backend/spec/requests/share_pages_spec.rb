@@ -25,7 +25,10 @@ RSpec.describe "GET /g/:token (共有リンクの OGP 付き HTML 配信)" do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('property="og:title" content="共有"')
     expect(response.body).to include("共有フォルダ ・ 2 枚の写真")
-    expect(response.body).to include('property="og:image" content="http://www.example.com/rails/')
+    # OGP のカバーはトークンスコープの配信口を指す (認可付き・クローラ取得可)
+    expect(response.body).to include(
+      %(property="og:image" content="http://www.example.com/api/v1/g/#{link.token}/photos/)
+    )
     expect(response.body).to include('name="twitter:card" content="summary_large_image"')
   end
 

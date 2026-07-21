@@ -16,7 +16,9 @@ Rails.application.routes.draw do
 
       get "folders", to: "folders#show"
       patch "folders", to: "folders#rename"
-      resources :photos, only: %i[show create destroy]
+      resources :photos, only: %i[show create destroy] do
+        member { get :image, to: "photo_images#show" } # 認可付き実体配信 /api/v1/photos/:id/image
+      end
       get "search", to: "search#show"
       resources :tags, only: :index
       get "my_photos", to: "my_photos#index"
@@ -37,6 +39,8 @@ Rails.application.routes.draw do
       scope "g/:token", module: :guest, as: :guest do
         get "", to: "folders#show"
         post "photos", to: "photos#create"
+        # トークンスコープの実体配信 (OGP og:image もこれ)
+        get "photos/:id/image", to: "photo_images#show", as: "photo_image"
       end
 
       namespace :admin do
