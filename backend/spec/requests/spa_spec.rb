@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "SPA フォールバック配信 (本番配信構成)" do
+RSpec.describe "SPA フォールバック配信 (本番配信構成, ADR-025)" do
   let(:spa_html) { "<html><head><title>SPA</title></head><body>app</body></html>" }
 
   before do

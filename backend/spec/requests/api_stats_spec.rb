@@ -9,7 +9,7 @@ RSpec.describe "GET /api/v1/stats (アップロード統計)" do
                   taken_at: Time.current, deleted_at: deleted_at)
   end
 
-  it "ユーザ別の枚数を多い順に返す (ゴミ箱内は数えない)" do
+  it "ユーザ別の枚数を多い順に返す (ゴミ箱内は数えない, ADR-022)" do
     3.times { |i| photo!(a, "a#{i}.jpg") }
     photo!(b, "b1.jpg")
     photo!(b, "b2.jpg", deleted_at: Time.current) # trashed は除外

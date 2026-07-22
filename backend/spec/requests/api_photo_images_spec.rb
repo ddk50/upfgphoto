@@ -2,7 +2,7 @@ require "rails_helper"
 
 # 写真「実体 (バイト列)」の認可。JSON 一覧で見えないものは実体も取れないこと。
 # 素の ActiveStorage capability URL に代わる /photos/:id/image の可視性強制を固定する。
-RSpec.describe "写真実体の配信 API (認可)" do
+RSpec.describe "写真実体の配信 API (認可, ADR-026)" do
   # 1x1 の実在 PNG (variant 生成に vips が実デコードできる必要がある)
   PNG_1X1 = Base64.decode64(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
@@ -141,7 +141,7 @@ RSpec.describe "写真実体の配信 API (認可)" do
       expect(response).to have_http_status(:ok)
     end
 
-    it "★サブツリー外の写真は有効トークンでも 404 (ルート外に出られない)" do
+    it "★サブツリー外の写真は有効トークンでも 404 (ルート外に出られない, ADR-009)" do
       get "/api/v1/g/#{link.token}/photos/#{outside_photo.id}/image", params: { variant: "original" }
       expect(response).to have_http_status(:not_found)
     end

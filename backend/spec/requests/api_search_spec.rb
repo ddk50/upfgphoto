@@ -27,7 +27,7 @@ RSpec.describe "GET /api/v1/search (ADR-016)" do
     expect(body["photos"].map { |p| p["title"] }).to contain_exactly("猫", "2023隠し")
   end
 
-  it "restricted はフォルダも写真も非メンバーには出ない" do
+  it "restricted はフォルダも写真も非メンバーには出ない (ADR-005/006)" do
     login_as(outsider)
     get "/api/v1/search", params: { q: "2023" }
 

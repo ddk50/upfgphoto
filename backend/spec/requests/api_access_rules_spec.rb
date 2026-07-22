@@ -21,7 +21,7 @@ RSpec.describe "PUT /api/v1/access_rules (台帳連動, ADR-013/018/019)" do
     expect(ShareLink.count).to eq(0)
   end
 
-  it "guest 化で share_link が発行され、解除で manual 停止が台帳に残る" do
+  it "guest 化で share_link が発行され、解除で manual 停止が台帳に残る (ADR-008/018)" do
     login_as(a)
     put "/api/v1/access_rules", params: { path: "/album", mode: "guest" }
     expect(response).to have_http_status(:ok)

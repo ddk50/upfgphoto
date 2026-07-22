@@ -52,7 +52,7 @@ RSpec.describe AccessRuleUpdater do
     end
   end
 
-  describe "パス途中への clear_descendants" do
+  describe "パス途中への clear_descendants (ADR-013)" do
     it "/a/b/c 配下の子孫ルールだけ消え、並走サブツリー・接頭辞兄弟は全カラム無変更" do
       before_state = snapshot
       described_class.apply!(folder_path: "/a/b/c", mode: "everyone", actor: a,
@@ -103,7 +103,7 @@ RSpec.describe AccessRuleUpdater do
     end
   end
 
-  describe "深い階層での guest 解除" do
+  describe "深い階層での guest 解除 (ADR-008/018: 台帳へ manual 停止)" do
     it "/a/b/c/d の解除 (inherit) はそのフォルダのリンクだけ manual 停止し、並走サブツリーのリンクは無傷" do
       described_class.apply!(folder_path: "/a/b/c/d", mode: "inherit", actor: a)
 

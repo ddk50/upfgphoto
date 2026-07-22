@@ -1,5 +1,6 @@
 require "rails_helper"
 
+# ADR-023「フォルダリネーム」の実行可能な仕様書
 RSpec.describe FolderRenamer do
   let!(:a) { User.create!(name: "A", nickname: "a", role: "user", status: "approved") }
   let!(:b) { User.create!(name: "B", nickname: "b", role: "user", status: "approved") }

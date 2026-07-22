@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Google 認証フロー" do
+RSpec.describe "Google 認証フロー (ADR-011: admin 承認制 / ADR-020: identities)" do
   before do
     OmniAuth.config.test_mode = true
   end

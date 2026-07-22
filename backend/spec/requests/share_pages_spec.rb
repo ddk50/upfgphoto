@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "GET /g/:token (共有リンクの OGP 付き HTML 配信)" do
+RSpec.describe "GET /g/:token (共有リンクの OGP 付き HTML 配信, ADR-008/025)" do
   let!(:a) { User.create!(name: "A", nickname: "a", role: "user", status: "approved") }
   let!(:link) do
     ShareLink.create!(token: ShareLink.generate_token, folder_path: "/共有",

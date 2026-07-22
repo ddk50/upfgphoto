@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "GET /api/v1/folders" do
+RSpec.describe "GET /api/v1/folders (ADR-003: 仮想フォルダ)" do
   let!(:a) { User.create!(name: "A", nickname: "a", role: "user", status: "approved") }
   let!(:b) { User.create!(name: "B", nickname: "b", role: "user", status: "approved") }
   let!(:outsider) { User.create!(name: "外", nickname: "out", role: "user", status: "approved") }
@@ -115,7 +115,7 @@ RSpec.describe "GET /api/v1/folders" do
     end
   end
 
-  it "restricted はメンバー以外に存在ごと見せない（一覧から消え、直アクセスは404）" do
+  it "restricted はメンバー以外に存在ごと見せない（一覧から消え、直アクセスは404）(ADR-005/006)" do
     login_as(outsider)
     get "/api/v1/folders", params: { path: "/" }
     expect(response.parsed_body["folders"].map { |f| f["name"] }).to eq([ "2023" ])
@@ -124,7 +124,7 @@ RSpec.describe "GET /api/v1/folders" do
     expect(response).to have_http_status(:not_found)
   end
 
-  it "メンバーと admin には見える" do
+  it "メンバーと admin には見える (ADR-006)" do
     login_as(b)
     get "/api/v1/folders", params: { path: "/秘密" }
     expect(response).to have_http_status(:ok)
@@ -155,7 +155,7 @@ RSpec.describe "GET /api/v1/folders" do
   end
 end
 
-RSpec.describe "PATCH /api/v1/folders (リネーム)" do
+RSpec.describe "PATCH /api/v1/folders (リネーム, ADR-023)" do
   let!(:a) { User.create!(name: "A", nickname: "a", role: "user", status: "approved") }
   let!(:b) { User.create!(name: "B", nickname: "b", role: "user", status: "approved") }
 

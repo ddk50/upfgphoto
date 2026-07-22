@@ -113,7 +113,7 @@ RSpec.describe "写真 API" do
         expect(Photo.last.taggings.count).to eq(2)
       end
 
-      it "アップロードしたタグは GET /api/v1/tags の件数に反映される (サジェストの源泉)" do
+      it "アップロードしたタグは GET /api/v1/tags の件数に反映される (サジェストの源泉, ADR-004)" do
         login_as(a)
         post "/api/v1/photos",
              params: { files: [ fake_jpg("1.jpg"), fake_jpg("2.jpg") ],
@@ -124,7 +124,7 @@ RSpec.describe "写真 API" do
       end
     end
 
-    it "既存パス（他人が実体化済み）の所有権は主張しない" do
+    it "既存パス（他人が実体化済み）の所有権は主張しない (ADR-019)" do
       Photo.create!(user: b, folder_path: "/既存", file_name: "0.jpg", title: "0",
                     taken_at: Time.current)
       FolderOwner.create!(folder_path: "/既存", user: b)
@@ -147,7 +147,7 @@ RSpec.describe "写真 API" do
       expect(photo.reload).to be_trashed
     end
 
-    it "他人の写真は 403、admin はゴミ箱に送れる" do
+    it "他人の写真は 403、admin はゴミ箱に送れる (ADR-006)" do
       login_as(b)
       delete "/api/v1/photos/#{photo.id}"
       expect(response).to have_http_status(:forbidden)
