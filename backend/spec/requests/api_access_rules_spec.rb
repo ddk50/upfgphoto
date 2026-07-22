@@ -69,6 +69,32 @@ RSpec.describe "PUT /api/v1/access_rules (台帳連動, ADR-013/018/019)" do
     expect(response).to have_http_status(:ok)
   end
 
+  it "間に everyone の上書きが挟まっても隷属は解除されない (ADR-019 無条件隷属の肝)" do
+    # /album (A の restricted) → /album/open (A が everyone で上書き) → /album/open/b-deep (B 所有)
+    login_as(a)
+    put "/api/v1/access_rules", params: { path: "/album", mode: "restricted", member_ids: [ a.id, b.id ] }
+    Photo.create!(user: a, folder_path: "/album/open", file_name: "4.jpg", title: "4",
+                  taken_at: Time.current)
+    FolderOwner.create!(folder_path: "/album/open", user: a)
+    put "/api/v1/access_rules", params: { path: "/album/open", mode: "everyone" }
+    expect(response).to have_http_status(:ok)
+
+    Photo.create!(user: b, folder_path: "/album/open/b-deep", file_name: "5.jpg", title: "5",
+                  taken_at: Time.current)
+    FolderOwner.create!(folder_path: "/album/open/b-deep", user: b)
+
+    # B は自分のフォルダでも、A の restricted が根側にある限り everyone 越しでも 403
+    login_as(b)
+    put "/api/v1/access_rules", params: { path: "/album/open/b-deep", mode: "guest" }
+    expect(response).to have_http_status(:forbidden)
+    expect(ShareLink.count).to eq(0)
+
+    # ゾーンの主 A は同じ場所を編集できる
+    login_as(a)
+    put "/api/v1/access_rules", params: { path: "/album/open/b-deep", mode: "guest" }
+    expect(response).to have_http_status(:ok)
+  end
+
   it "restricted のオーナーは許可リストから外れない (ADR-007)" do
     login_as(a)
     put "/api/v1/access_rules", params: { path: "/album", mode: "restricted", member_ids: [ b.id ] }
