@@ -14,7 +14,7 @@ module Api
                                         within_subtree?(photo.folder_path, link.folder_path) &&
                                         photo.image.attached?
 
-          stream_photo_image(photo, params[:variant], public_cache: true)
+          send_photo_image(photo, params[:variant], public_cache: true)
         end
 
         private

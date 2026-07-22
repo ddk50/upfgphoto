@@ -12,7 +12,7 @@ module Api
         # 不可視・不存在はどちらも 404 (存在を漏らさない)
         return head :not_found unless photo && viewable?(photo) && photo.image.attached?
 
-        stream_photo_image(photo, params[:variant], public_cache: false)
+        send_photo_image(photo, params[:variant], public_cache: false)
       end
 
       private
