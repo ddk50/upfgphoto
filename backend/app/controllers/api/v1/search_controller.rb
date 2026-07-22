@@ -34,7 +34,7 @@ module Api
       end
 
       def matching_photos(q, tag_names, owned, fq)
-        scope = Photo.kept.includes(:user, :tags).order(taken_at: :desc)
+        scope = Photo.kept.includes(:user, :tags).with_attached_image.order(taken_at: :desc)
         scope = scope.where(user: current_user) if owned
 
         if tag_names.any?

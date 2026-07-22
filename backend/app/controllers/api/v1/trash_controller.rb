@@ -7,7 +7,7 @@ module Api
       before_action :require_approved
 
       def index
-        photos = scoped_trash.includes(:user, :tags).order(deleted_at: :desc)
+        photos = scoped_trash.includes(:user, :tags).with_attached_image.order(deleted_at: :desc)
         render json: {
           retention_days: Photo::TRASH_RETENTION / 1.day,
           photos: photos.map { |p| trash_json(p) }

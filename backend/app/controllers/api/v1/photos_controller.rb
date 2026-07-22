@@ -5,7 +5,7 @@ module Api
       before_action :require_approved
 
       def show
-        photo = Photo.kept.includes(:user, :tags).find(params[:id])
+        photo = Photo.kept.includes(:user, :tags).with_attached_image.find(params[:id])
         fq = FolderQuery.new(current_user)
         return head :not_found unless photo.user_id == current_user.id ||
                                       fq.folder_visible?(photo.folder_path)

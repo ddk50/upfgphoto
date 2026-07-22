@@ -14,9 +14,12 @@ class FolderQuery
     @resolver.visible_to?(path, @user)
   end
 
-  # path 直下の写真（新しい順・ゴミ箱除外）
+  # path 直下の写真（新しい順・ゴミ箱除外）。
+  # with_attached_image がないと photo_json の attached? 判定が写真ごとに 1 クエリになる
+  # (実測: 1081枚のフォルダで 1085 クエリ → 10 クエリ)
   def direct_photos(path)
-    Photo.kept.includes(:user, :tags).where(folder_path: path).order(taken_at: :desc)
+    Photo.kept.includes(:user, :tags).with_attached_image
+         .where(folder_path: path).order(taken_at: :desc)
   end
 
   # path 直下の子フォルダ（名前・可視な配下の枚数・カバー）
