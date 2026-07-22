@@ -3,45 +3,34 @@
 写真共有サービス upfgphoto のフルリプレイス。モノレポ構成。
 
 - 旧システム（jQuery + Rails, 2013〜）は **`legacy` ブランチ / タグ `legacy-final`** に凍結
-- 設計判断はすべて [docs/ADR.md](docs/ADR.md) に記録（ADR-001〜020）
+- 設計判断は [docs/ADR.md](docs/ADR.md)、本番切替手順は [docs/MIGRATION.md](docs/MIGRATION.md)、API 仕様は [docs/API.md](docs/API.md) に記録
 
 ## 構成
 
-| ディレクトリ | 内容 |
-|---|---|
-| `frontend/` | React 19 + TypeScript + Vite + Tailwind v4 + shadcn/ui。UIモックとして開発され、API 接続版へ発展中 |
-| `backend/` | Rails（最新）+ SQLite + ActiveStorage。API サーバ（構築中） |
-| `docs/` | ADR（アーキテクチャ決定記録）ほか |
+| ディレクトリ | 内容 | 詳細 |
+|---|---|---|
+| `backend/` | Rails 8.1 + MySQL 8 + ActiveStorage。API サーバ（SPA・OGP も配信） | [backend/README.md](backend/README.md) |
+| `frontend/` | React 19 + TypeScript + Vite + Tailwind v4 + shadcn/ui。SPA | 下記 |
+| `docs/` | ADR（設計判断）・移行手順・API 仕様 | — |
 
 ## 開発
 
+### backend
+
+Rails API サーバ。起動・環境変数・rake タスク（ETL 等）・テストはすべて **[backend/README.md](backend/README.md)** を参照。
+
+### frontend
+
 ```bash
-# backend (Rails 8.1 / Ruby 4.0, rbenv)
-# DB は全環境 MySQL 8 (ADR-021)。ローカルは Docker で起動する
-cd backend
-docker compose up -d   # MySQL 8.4 (uprun_development/test/staging を自動作成)
-bundle install
-bin/rails db:migrate
-bin/rails etl:import   # 旧DBから開発データ投入 (upfgphoto/db/production.sqlite3)
-bin/rails server       # :3000
-bin/check              # rubocop + 型検査 (rbs-inline + Steep, ADR-024) + rspec
-
-# ステージング (本番と同一構成) をローカルで動かす場合
-RAILS_ENV=staging SECRET_KEY_BASE=<任意> bin/rails db:prepare etl:import
-```
-
-本番/ステージングでは **ゴミ箱の日次パージ** を cron に登録する (ADR-022):
-
-```cron
-0 4 * * * cd /path/to/uprun/backend && RAILS_ENV=production bin/rails trash:purge >> log/trash_purge.log 2>&1
-
-# frontend (別ターミナル。/api 等は :3000 へプロキシ)
 cd frontend
 npm install
-npm run dev      # http://localhost:5173/
+npm run dev      # http://localhost:5173/ （/api 等は :3000 へプロキシ）
 npm test         # vitest（アクセス制御の仕様表テスト等）
 npm run build    # tsc + vite build
 ```
 
-ログイン: 開発環境ではログイン画面の「開発用ログイン」に user id（例: 1 = admin）。
-本番は Google OAuth（`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` が必要）。
+ログイン: 開発は画面の「開発用ログイン」に user id（例: 1 = admin）。本番は Google OAuth（詳細は [backend/README.md](backend/README.md)）。
+
+## デプロイ / 本番切替
+
+本番は Rails 単一コンテナ（ADR-025）。手順・残タスクは [docs/MIGRATION.md](docs/MIGRATION.md) を参照。
