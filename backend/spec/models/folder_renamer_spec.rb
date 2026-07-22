@@ -195,6 +195,39 @@ RSpec.describe FolderRenamer do
     end
   end
 
+  describe "同名セグメントがパス中に重複するケース (/hello/world/hello/...)" do
+    # 前置換の実装が「位置ベース」でなく「文字列置換」に退行すると、
+    # リネーム対象と同名の別セグメントを巻き込んで破壊する。その急所を固定する
+    before do
+      photo!(a, "/hello", "root.jpg")                      # 1つ目の hello 直下
+      photo!(a, "/hello/world/hello/good/bye", "deep.jpg") # 3つ目の hello 配下
+      FolderOwner.create!(folder_path: "/hello", user: a)
+      FolderOwner.create!(folder_path: "/hello/world/hello", user: a)
+    end
+
+    it "3つ目の hello をリネームしても、1つ目の hello は不変" do
+      expect_only_prefix_rewrite(from: "/hello/world/hello", to: "/hello/world/fuck") do
+        described_class.rename!(folder_path: "/hello/world/hello", new_name: "fuck", actor: a)
+      end
+
+      expect(Photo.where("folder_path LIKE ?", "/hello%").pluck(:folder_path)).to contain_exactly(
+        "/hello", "/hello/world/fuck/good/bye"
+      )
+      expect(FolderOwner.pluck(:folder_path)).to include("/hello", "/hello/world/fuck")
+    end
+
+    it "1つ目の hello をリネームしても、3つ目の hello は不変 (REPLACE 系全置換への退行ガード)" do
+      expect_only_prefix_rewrite(from: "/hello", to: "/fuck") do
+        described_class.rename!(folder_path: "/hello", new_name: "fuck", actor: a)
+      end
+
+      # REPLACE(folder_path, '/hello', '/fuck') だと /fuck/world/fuck/good/bye に化ける
+      expect(Photo.where("folder_path LIKE ?", "/fuck%").pluck(:folder_path)).to contain_exactly(
+        "/fuck", "/fuck/world/hello/good/bye"
+      )
+    end
+  end
+
   describe "LIKE メタ文字を含むフォルダ名" do
     before do
       photo!(a, "/割引_50%", "m1.jpg")
