@@ -70,6 +70,51 @@ RSpec.describe "GET /api/v1/folders" do
     end
   end
 
+  describe "カバー写真の選択 (一括ロード化後のセマンティクス)" do
+    def photo_with_image!(path, file, taken_at, user: a)
+      p = Photo.create!(user: user, folder_path: path, file_name: file, title: file,
+                        taken_at: taken_at)
+      p.image.attach(io: StringIO.new("img-#{file}"), filename: file, content_type: "image/jpeg")
+      p
+    end
+
+    it "子フォルダのカバーは直下で最新の写真 (cover_url の photo id で検証)" do
+      photo_with_image!("/旅行", "old.jpg", 2.days.ago)
+      newest = photo_with_image!("/旅行", "new.jpg", 1.hour.ago)
+
+      login_as(a)
+      get "/api/v1/folders", params: { path: "/" }
+      child = response.parsed_body["folders"].find { |f| f["name"] == "旅行" }
+
+      expect(child["cover_url"]).to include("/photos/#{newest.id}/image")
+    end
+
+    it "restricted な配下の写真は非メンバーへのカバーに使われない (漏洩ガード)" do
+      visible = photo_with_image!("/町", "pub.jpg", 2.days.ago)
+      secret = photo_with_image!("/町/秘蔵", "sec.jpg", Time.current) # サブツリー最新だが restricted
+      FolderOwner.create!(folder_path: "/町/秘蔵", user: a)
+      rule = AccessRule.create!(folder_path: "/町/秘蔵", mode: "restricted")
+      rule.access_rule_members.create!(user: a)
+
+      login_as(outsider)
+      get "/api/v1/folders", params: { path: "/" }
+      child = response.parsed_body["folders"].find { |f| f["name"] == "町" }
+
+      # 最新でも restricted 配下の写真はカバー・枚数・孫サマリのどこにも出ない
+      expect(child["photo_count"]).to eq(1)
+      expect(child["cover_url"]).to include("/photos/#{visible.id}/image")
+      expect(child["subfolders"]).to be_empty
+
+      # メンバーには秘蔵サブフォルダとそのカバーが見える
+      login_as(a)
+      get "/api/v1/folders", params: { path: "/" }
+      child = response.parsed_body["folders"].find { |f| f["name"] == "町" }
+      expect(child["photo_count"]).to eq(2)
+      expect(child["subfolders"].map { |s| s["name"] }).to eq([ "秘蔵" ])
+      expect(child["subfolders"].first["cover_url"]).to include("/photos/#{secret.id}/image")
+    end
+  end
+
   it "restricted はメンバー以外に存在ごと見せない（一覧から消え、直アクセスは404）" do
     login_as(outsider)
     get "/api/v1/folders", params: { path: "/" }

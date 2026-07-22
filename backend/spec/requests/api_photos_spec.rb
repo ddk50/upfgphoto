@@ -173,5 +173,28 @@ RSpec.describe "写真 API" do
       get "/api/v1/my_photos", params: { path: "/mix" }
       expect(response.parsed_body["photos"].map { |p| p["title"] }).to eq([ "a" ])
     end
+
+    it "フォルダ一覧のカバーは各フォルダの最新写真で、並びは最新順 (窓関数一括化のセマンティクス)" do
+      attach = lambda do |photo|
+        photo.image.attach(io: StringIO.new("img"), filename: photo.file_name,
+                           content_type: "image/jpeg")
+        photo
+      end
+      attach.call(Photo.create!(user: a, folder_path: "/album", file_name: "old.jpg",
+                                title: "old", taken_at: 3.days.ago))
+      newest = attach.call(Photo.create!(user: a, folder_path: "/album", file_name: "new.jpg",
+                                         title: "new", taken_at: 1.hour.ago))
+      attach.call(Photo.create!(user: a, folder_path: "/zoo", file_name: "z.jpg", title: "z",
+                                taken_at: 2.days.ago))
+
+      login_as(a)
+      get "/api/v1/my_photos"
+      folders = response.parsed_body["folders"]
+
+      album = folders.find { |f| f["path"] == "/album" }
+      expect(album["cover_url"]).to include("/photos/#{newest.id}/image")
+      expect(album["latest_taken_at"].to_time).to be_within(1.second).of(newest.taken_at)
+      expect(folders.map { |f| f["path"] }).to eq([ "/album", "/zoo" ]) # 最新順
+    end
   end
 end
